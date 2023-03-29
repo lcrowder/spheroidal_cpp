@@ -19,7 +19,9 @@ int main()
     // for (int i=0; i< 3; i++) {cout << h[i] << endl;}
 
     
-    legendre_otc(p,u,1,0,0);
+    vector<vector<vector<double> > > PQ;
+    PQ=legendre_otc(p,u,1,0,0);
+    // legendre_otc(p,u,1,0,0);
 
 
     return 0;
