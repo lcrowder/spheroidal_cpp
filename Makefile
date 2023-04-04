@@ -16,15 +16,13 @@ DRIVER=
 SRC_FILES=$(wildcard src/*.cpp)
 OBJ_FILES=$(SRC_FILES:.cpp=.o)
 
-# Driver file needs all of the object files in src/, plus it's own
+# Driver file needs all of the object files in src/, plus it's own.
+# Immediately remove the driver's object file too
 $(DRIVER): $(OBJ_FILES) $(DRIVER:%=%.o)
 	$(CXX) $(OBJ_FILES) $(DRIVER:%=%.o) $(LDFLAGS) -o $(DRIVER:%=%.out)
+	rm $(DRIVER:%=%.o)
 
-# Get object files for driver
-$(DRIVER:%=%.o): $(DRIVER:%=%.cpp)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -c $(DRIVER:%=%.cpp) -o $@
-
-# Get object files for the rest of the source files
+# Get object files for the source file and relevant driver file
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -c $< -o $@ 
 
