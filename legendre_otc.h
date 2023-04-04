@@ -1,3 +1,6 @@
+#ifndef LEGENDRE_OTC_H
+#define LEGENDRE_OTC_H
+
 #include <iostream>
 #include <vector>
 #include <stdio.h>  
@@ -398,3 +401,4 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
     
 }
 
+#endif
