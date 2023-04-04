@@ -20,11 +20,9 @@ int main(int argc, char *argv[])
     // for (double ui = ua; ui <= ub; ui+=h)
     //     {u.push_back(ui);}
 
-    double uj=ua;
     for (int j=0; j<N; ++j)
     {
         u.push_back(ua+j*h);
-        // cout << "u[" << j << "]=" << uj << endl;
     }
 
     cout << "length of u is " << u.size() << endl;
@@ -75,6 +73,11 @@ int main(int argc, char *argv[])
         cerr << "Unable to open dQ file" << std::endl;
         return 1;
     }
+
+    Pfile << "# p=" << argv[1] << ", ua=" << argv[2]  << ", ub=" << argv[3]  << ", N=" << argv[4] <<endl;
+    Qfile << "# p=" << argv[1] << ", ua=" << argv[2]  << ", ub=" << argv[3]  << ", N=" << argv[4] <<endl;
+    dPfile << "# p=" << argv[1] << ", ua=" << argv[2]  << ", ub=" << argv[3]  << ", N=" << argv[4] <<endl;
+    dQfile << "# p=" << argv[1] << ", ua=" << argv[2]  << ", ub=" << argv[3]  << ", N=" << argv[4] <<endl;
 
     // Write the vector to the files
     for (int i=0; i<sp; ++i) {
