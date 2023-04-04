@@ -1,4 +1,4 @@
-#include "legendre_otc.h"
+#include "src/legendre_otc.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>

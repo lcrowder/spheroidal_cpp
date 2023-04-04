@@ -1,8 +1,8 @@
+#include "src/grid_functions.h"
 #include <iostream>
 #include <gsl/gsl_matrix.h>
-#include "grid_functions.h"
 
-int test_gsl()
+int main()
 {
     const int N = 15;
     gsl_vector* x = gsl_vector_alloc(N);
