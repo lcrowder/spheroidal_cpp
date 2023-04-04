@@ -8,7 +8,7 @@ using namespace std;
 // Lorentz's Algorithm to compute continued fraction
 vector<double> cont_frac(int n, int m, vector<double> u)
 {
-    double tol=1.e-10;
+    double tol=1.e-15;
     int max_iters=100000;
     double tiny=1.e-300;
     double a;
@@ -24,7 +24,7 @@ vector<double> cont_frac(int n, int m, vector<double> u)
     int N=u.size();
     vector<double> H(N);
 
-    cout << "Length of u array is " << N << endl;
+    // cout << "Length of u array is " << N << endl;
     
     // Loop over each u value, since each may need different number of iterations to converge
     for(int i=0 ; i<N; ++i)
@@ -39,7 +39,7 @@ vector<double> cont_frac(int n, int m, vector<double> u)
 
         for(int k=1 ; k<=max_iters; ++k)
         {
-            a=-(n+k-1+m)/(n+k-m);
+            a=-(1.*(n+k-1+m))/(n+k-m);
             b=-(2*(n+k-1)+1)*ui/(n+k-m);
             d1=b+a*d0;
             if (d1==0.) {d1=tiny;}
@@ -49,9 +49,9 @@ vector<double> cont_frac(int n, int m, vector<double> u)
             delta=c1*d1;
             f1=delta*f0;
 
-            if (fabs(delta-1)<tol)
+            if (fabs(delta-1.)<tol)
             {
-                cout << "continued fraction algorithm converged in " << k << " iterations" <<endl;
+                // cout << "continued fraction algorithm converged in " << k << " iterations" <<endl;
                 break;
             }
             
@@ -98,7 +98,6 @@ int factorial(int n)
 }
 
 vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qoption = 1, int dPoption = 0, int dQoption = 0)
-// void legendre_otc(int p, vector<double> u, int Qoption = 1, int dPoption = 0, int dQoption = 0)
 {
     // Initialize some stuff
     int mm_index;
@@ -272,9 +271,9 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
         neg_pp_coef=1./factorial(2*pmax);
         Qpp1p_coef=factorial(2*pmax)*pow(-1,pmax);
         
-        for (int j=1; j<N; ++j)
+        for (int j=0; j<N; ++j)
         {
-            Q[pp_index][j]= Qpp1p_coef/ (((2*pmax+1)* u[j]-H[j])*P[pp_index][j]);     //Q_p^p
+            Q[pp_index][j]= Qpp1p_coef/ (((2*pmax+1)*u[j]-H[j])*P[pp_index][j]);     //Q_p^p
             Q[neg_pp_index][j]=neg_pp_coef * Q[pp_index][j];                           //Q_p^{-p}
         }
 
@@ -301,21 +300,24 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
                     Q[pm1m_index][j]=Qpm1m_coef / (P[pm_index][j]-H[j]*P[pm1m_index][j]);
                     Q[pm_index][j]=H[j]*Q[pm1m_index][j];
 
-                    Q[neg_pm1m_index][j]=neg_pm1m_coef*Q[pm1m_index][j];
-                    Q[neg_pm_coef][j]=neg_pm_coef*Q[pm_index][j];
+                    if (m>0)
+                    {
+                        Q[neg_pm1m_index][j]=neg_pm1m_coef*Q[pm1m_index][j];
+                        Q[neg_pm_coef][j]=neg_pm_coef*Q[pm_index][j];
+                    }
                 }
 
-                cout << "Q_{" << p << "}^{" <<  m << "} computed." << endl;
-                cout << "Q_{" << p-1 << "}^{" <<  m << "} computed." << endl;
-                cout << "Q_{" << p << "}^{" <<  -m << "} computed." << endl;
-                cout << "Q_{" << p-1 << "}^{" <<  -m << "} computed." << endl;
+                cout << "Q_{" << pmax << "}^{" <<  m << "} computed." << endl;
+                cout << "Q_{" << pmax-1 << "}^{" <<  m << "} computed." << endl;
+                cout << "Q_{" << pmax << "}^{" <<  -m << "} computed." << endl;
+                cout << "Q_{" << pmax-1 << "}^{" <<  -m << "} computed." << endl;
 
                 // Use recursion to compute remaining Qnm's
                 if (pmax > 1)
                 {
 
                     //Use backward recursion to compute Q_n^m for n=p-2:m
-                    for (int n=pmax-2; n<=m; --n)
+                    for (int n=pmax-2; n>=m; --n)
                     {
                         nm_index=geti(n,m);
                         np1m_index=geti(n+1,m);
@@ -326,7 +328,11 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
                         for (int j=0; j<N; ++j)
                         {
                             Q[nm_index][j]=((2*n+3)*u[j]*Q[np1m_index][j]-(n-m+2)*Q[np2m_index][j])/(n+m+1);
-                            Q[neg_nm_index][j]=neg_nm_coef * Q[nm_index][j];
+                            
+                            if (m>0)
+                            {
+                                Q[neg_nm_index][j]=neg_nm_coef * Q[nm_index][j];
+                            }
                         }
                         cout << "Q_{" << n << "}^{" <<  m << "} computed." << endl;
                         cout << "Q_{" << n << "}^{" << -m << "} computed." << endl;
@@ -368,14 +374,14 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
     // Store all arrays into 3D matrix
     int num_matrices=1+Qoption+dPoption+dQoption;
 
-    cout << "num matrices = " << num_matrices << endl;
+    // cout << "num matrices = " << num_matrices << endl;
 
     vector<vector<vector<double> > > PQdPdQ(num_matrices, vector<vector<double> >(dsp, vector<double>(N)));
 
     
-    cout << "PQdPdQ dim 1 size =" << PQdPdQ.size() << endl;
-    cout << "PQdPdQ dim 2 size =" << PQdPdQ[0].size() << endl;
-    cout << "PQdPdQ dim 3 size =" << PQdPdQ[0][0].size() << endl;
+    // cout << "PQdPdQ dim 1 size =" << PQdPdQ.size() << endl;
+    // cout << "PQdPdQ dim 2 size =" << PQdPdQ[0].size() << endl;
+    // cout << "PQdPdQ dim 3 size =" << PQdPdQ[0][0].size() << endl;
 
     for (int i=0; i<dsp; ++i )
     {

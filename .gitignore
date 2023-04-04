@@ -1,3 +1,4 @@
 test_gsl
 test_legendre_otc
+test_cont_frac
 .vscode/*
