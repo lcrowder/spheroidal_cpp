@@ -1,12 +1,17 @@
 #include <iostream>
-#include "g_grid.h"
+#include <gsl/gsl_matrix.h>
+#include "grid_functions.h"
 
-int main()
+int test_gsl()
 {
     const int N = 15;
     gsl_vector* x = gsl_vector_alloc(N);
     gsl_vector* w = gsl_vector_alloc(N);
 
+    gsl_matrix *u, *v;
+
+    gl_grid( 5, u, v );
+    
     g_grid(N, x, w);
 
     for( int i = 0; i < N; ++i )
