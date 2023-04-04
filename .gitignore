@@ -3,3 +3,4 @@ test_legendre_otc
 test_cont_frac
 .vscode/*
 *.o
+*.out
