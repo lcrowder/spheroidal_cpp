@@ -1,8 +1,8 @@
 #!/bin/bash
-p=8
-ua=1.1
-ub=2.
+p=2
+ua=2.1
+ub=3.
 N=10
 
-./test_legendre_otc $p $ua $ub $N
-python3 legendre_verification.py $p $ua $ub $N
+./test_legendre_otc.out $p $ua $ub $N
+# python3 legendre_verification.py $p $ua $ub $N

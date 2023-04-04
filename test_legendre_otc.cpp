@@ -64,15 +64,15 @@ int main(int argc, char *argv[])
         return 1;
     }
     if (!Qfile.is_open()) {
-        cerr << "Unable to open P file" << std::endl;
+        cerr << "Unable to open Q file" << std::endl;
         return 1;
     }
     if (!dPfile.is_open()) {
-        cerr << "Unable to open P file" << std::endl;
+        cerr << "Unable to open dP file" << std::endl;
         return 1;
     }
     if (!dQfile.is_open()) {
-        cerr << "Unable to open P file" << std::endl;
+        cerr << "Unable to open dQ file" << std::endl;
         return 1;
     }
 
