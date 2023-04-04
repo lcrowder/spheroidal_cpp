@@ -1,5 +1,6 @@
 #include "legendre_otc.h"
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <vector>
 #include <stdio.h>  
