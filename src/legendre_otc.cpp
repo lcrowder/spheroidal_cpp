@@ -1,6 +1,3 @@
-#ifndef LEGENDRE_OTC_HPP_
-#define LEGENDRE_OTC_HPP_
-
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -408,5 +405,3 @@ vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qopti
     return PQdPdQ;
     
 }
-
-#endif // _LEGENDGRE_OTC_HPP_

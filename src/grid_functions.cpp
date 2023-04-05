@@ -1,6 +1,3 @@
-#ifndef GRID_FUNCTIONS_HPP_
-#define GRID_FUNCTIONS_HPP_
-
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
@@ -52,7 +49,4 @@ void gl_grid( int p, gsl_matrix * u, gsl_matrix * v )
     for( int i = 0; i < nv; ++i )
         gsl_vector_set( lambda, i, M_2_PI * i / nv );
 
-
 }
-
-#endif // GRID_FUNCTIONS_HPP_
