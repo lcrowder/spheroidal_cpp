@@ -1,4 +1,4 @@
-#include "src/grid_functions.h"
+#include <spheroidal/grid_functions.hpp>
 #include <iostream>
 #include <gsl/gsl_matrix.h>
 
@@ -8,10 +8,6 @@ int main()
     gsl_vector* x = gsl_vector_alloc(N);
     gsl_vector* w = gsl_vector_alloc(N);
 
-    gsl_matrix *u, *v;
-
-    gl_grid( 5, u, v );
-    
     g_grid(N, x, w);
 
     for( int i = 0; i < N; ++i )
