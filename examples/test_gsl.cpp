@@ -1,4 +1,4 @@
-#include <spheroidal/grid_functions.hpp>
+#include <spheroidal/grid_functions.h>
 #include <iostream>
 #include <gsl/gsl_matrix.h>
 
