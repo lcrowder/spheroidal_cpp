@@ -23,14 +23,14 @@ add_executable( all_spheroidal_tests ${spheroidal_test_list} )
 target_link_libraries(all_spheroidal_tests spheroidal Catch2::Catch2WithMain fmt::fmt )
                           
 # Add the executable and `add_test` for each test
-#foreach( test ${spheroidal_test_list} )
-#    get_filename_component( test_name ${test} NAME_WE )
+foreach( test ${spheroidal_test_list} )
+    get_filename_component( test_name ${test} NAME_WE )
 
-#    add_executable( ${test_name} ${test} )
-#    target_link_libraries( ${test_name} spheroidal Catch2::Catch2WithMain fmt::fmt )
+    add_executable( ${test_name} ${test} )
+    target_link_libraries( ${test_name} spheroidal Catch2::Catch2WithMain fmt::fmt )
     
-#    add_test( NAME ${test_name} COMMAND all_spheroidal_tests ${test_name} )
-#endforeach()
+    add_test( NAME ${test_name} COMMAND all_spheroidal_tests ${test_name} )
+endforeach()
 
 # If you want to run a specific test from a set, build the file/set it's in, then
 #  execute spheroidal_cpp/build/tests/<set name> <test name>.
