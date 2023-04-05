@@ -1,7 +1,18 @@
-#include "grid_functions.h"
+#ifndef GRID_FUNCTIONS_HPP_
+#define GRID_FUNCTIONS_HPP_
 
-// The version of this function in the repo was confusing, so I expanded
-// it to make it into two different functions for clarity.
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+
+/*!
+ * \fn \brief Computes the number of points in each direction of a spheroidal harmonics grid
+ * \param p Order of the spheroidal harmonics
+ * \param nu Number of points in the theta direction
+ * \param nv Number of points in the lambda direction
+ *
+ * \return The order of the spheroidal harmonics (legacy usage)
+ */
 int spharm_grid_size_ord( int p, int& nu, int& nv )
 {
     nu = p+1;
@@ -43,3 +54,5 @@ void gl_grid( int p, gsl_matrix * u, gsl_matrix * v )
 
 
 }
+
+#endif // GRID_FUNCTIONS_HPP_
