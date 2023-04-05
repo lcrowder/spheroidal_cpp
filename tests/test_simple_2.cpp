@@ -1,4 +1,5 @@
-#include <spheroidal/grid_functions.hpp>
+#define CATCH_CONFIG_MAIN
+#include <spheroidal/grid_functions.h>
 #include <catch2/catch_test_macros.hpp>
 
 TEST_CASE( "Another Test", "[Will Pass]" )
