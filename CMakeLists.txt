@@ -13,7 +13,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
     set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
     include(CTest)
-    #enable_testing()
+    enable_testing()
    
     # Lets IDEs support folders
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -32,7 +32,7 @@ include(FetchContent)
 # Necessary to link
 find_package(GSL REQUIRED)
 
-# Add nice formatting library
+# Add nice formatting library (use this instead of iostream/stdio)
 FetchContent_Declare(
   fmtlib
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
@@ -45,7 +45,7 @@ add_subdirectory(include/spheroidal)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
-#if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
-#   AND BUILD_TESTING)
-#  add_subdirectory(tests)
-#endif()
+if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR MODERN_CMAKE_BUILD_TESTING)
+    AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()
