@@ -1,4 +1,4 @@
-#include "src/legendre_otc.h"
+#include <spheroidal/legendre_otc.hpp>
 #include <iostream>
 #include <fstream>
 #include <vector>
