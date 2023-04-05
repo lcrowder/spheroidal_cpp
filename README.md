@@ -13,6 +13,8 @@ This is going to be the description. Fill it out later.
 Requires the following prerequisitres
 * GNU Scientific Library
 * CMake
+* fmt
+* Doxygen (optional)
 * Some other things. Think about them later.
 
 ### Installing
