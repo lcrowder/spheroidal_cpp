@@ -17,4 +17,8 @@ set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
 
 set( DOXYGEN_USE_MDFILE_AS_MAINPAGE "README.md" )
 doxygen_add_docs( docs ${PROJECT_SOURCE_DIR}/include
+                       ${PROJECT_SOURCE_DIR}/src
+                       ${PROJECT_SOURCE_DIR}/tests
     WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/include/spheroidal" )
+
+# TODO: Make doxygen work lol
