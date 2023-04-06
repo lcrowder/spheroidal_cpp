@@ -1,11 +1,13 @@
 # If you want to add a new file to include, you need to list it here
 set( source_list grid_functions.cpp
                  legendre_otc.cpp 
-                 gsl_utils.cpp)
+                 gsl_utils.cpp
+                 gsl_wrapper.cpp)
 
 set( header_list ../include/spheroidal/grid_functions.h
                  ../include/spheroidal/legendre_otc.h 
-                 ../include/spheroidal/gsl_utils.h )
+                 ../include/spheroidal/gsl_utils.h 
+                 ../include/spheroidal/gsl_wrapper.h )
 
 add_library(spheroidal ${source_list} ${header_list})
 

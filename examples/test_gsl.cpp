@@ -1,19 +1,34 @@
 #include <spheroidal/grid_functions.h>
 #include <spheroidal/gsl_utils.h>
-#include <iostream>
-#include <gsl/gsl_matrix.h>
+#include <spheroidal/gsl_wrapper.h>
+#include <fmt/core.h>
 
 int main()
 {
-    const int N = 15;
-    gsl_vector* x = gsl_vector_alloc(N);
-    gsl_vector* w = gsl_vector_alloc(N);
+    gsl::vector vec(5);
+    
+    vec.print( );
 
-    g_grid(N, x, w);
+    for( int i = 0; i < 5; ++i )
+        vec(i) = i;
 
-    gsl_vector_print( x );
-    gsl_vector_print( w );
+    vec.print( );
 
+    gsl::vector vec2( vec );
+    vec2.print( );
+
+    const int p = 5;
+
+    gsl::matrix U, V; 
+    gl_grid( p, U, V );
+
+    fmt::print("U =\n");
+    U.print( );
+
+    fmt::print("V =\n");
+    V.print( );
+
+    /*
     // Get the size of the grid
     int order = 5, nu, nv;
     spharm_grid_size_ord( order, nu, nv );
@@ -29,7 +44,7 @@ int main()
 
     gsl_vector_free(x);
     gsl_vector_free(w);
-    
+    */
     return 0;
     
 }
