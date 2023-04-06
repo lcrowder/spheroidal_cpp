@@ -1,3 +1,11 @@
+### To build from the command line, do the following:
+# mkdir build
+# cd build
+# cmake .. 
+# make (<specific target>)
+#
+### The executable will be in the build directory
+
 cmake_minimum_required(VERSION 3.7...3.26)
 
 if(${CMAKE_VERSION} VERSION_LESS 3.12)
@@ -45,4 +53,5 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif()
 
     add_subdirectory(tests)
+    enable_testing()
 endif()
