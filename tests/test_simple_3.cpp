@@ -10,6 +10,6 @@ TEST_CASE( "DING", "[Will Pass]" )
 
 TEST_CASE( "DONG", "[Will Fail]" )
 {
-    REQUIRE( 6 / 2 == 2 );
+    REQUIRE( 6 / 3 == 2 );
 
 }

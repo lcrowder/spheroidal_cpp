@@ -10,6 +10,6 @@ TEST_CASE( "Another Test", "[Will Pass]" )
 
 TEST_CASE( "Another Test 2", "[Will Fail]" )
 {
-    REQUIRE( 6 / 2 == 2 );
+    REQUIRE( 6 / 3 == 2 );
 
 }
