@@ -15,7 +15,7 @@ set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 include(CTest)
 
 # Put all testing files here
-set( spheroidal_test_list test_simple.cpp
+set( spheroidal_test_list test_gsl_wrapper.cpp
                           test_simple_2.cpp
                           test_simple_3.cpp )
 
