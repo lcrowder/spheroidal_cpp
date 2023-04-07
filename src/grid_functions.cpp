@@ -1,10 +1,9 @@
-#include <spheroidal/gsl_utils.h>
 #include <spheroidal/grid_functions.h>
+#include <spheroidal/gsl_utils.h>
 #include <gsl/gsl_math.h>
 
 /*!
- * \fn \brief Computes the number of points in each direction of a spheroidal harmonics grid, 
- *            given the order of the spheroidal harmonics.
+ * \brief Computes grid size of spheroidal harmonics grid given the order.
  * \param p Order of the spheroidal harmonics
  * \param nu Number of points in the theta direction
  * \param nv Number of points in the lambda direction
@@ -19,9 +18,8 @@ int spharm_grid_size_ord( int p, int& nu, int& nv )
 }
 
 /*!
- * \fn \brief Computes the number of points in each direction of a spheroidal harmonics grid,
- *            given the total number of points in the grid.
- * \param p The total number of points in the grid
+ * \brief Computes grid size of spheroidal harmonics grid given the total number of points. 
+ * \param ntot The total number of points in the grid
  * \param nu Number of points in the theta direction
  * \param nv Number of points in the lambda direction
  *
@@ -40,7 +38,7 @@ int spharm_grid_size_tot( int ntot, int& nu, int& nv )
 
 
 /*!
- * \fn \brief Populates the matrices \p u and \p v with a meshgrid of order \p p Gauss-Uniform points on the spheroid.
+ * \brief Populates the matrices \p U and \p V with a spheroidal harmonics grid of order \p
  * \param p Order of the spheroidal harmonics
  * \param U Reference to gsl::matrix of Gaussian spaced rows
  * \param V Reference to gsl::matrix of Uniform spaced columns

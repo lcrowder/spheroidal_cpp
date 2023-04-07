@@ -1,4 +1,4 @@
-# Spheroidal Library
+# Spheroidal Library {#mainpage}
 
 This repository contains a library for working with spheroidal harmonics, as well as example files and test files.
 

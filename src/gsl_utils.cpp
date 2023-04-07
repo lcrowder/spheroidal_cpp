@@ -2,7 +2,7 @@
 #include <gsl/gsl_integration.h>
 
 /*!
- * \fn \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
+ * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
  * \param n Number of nodes
  * \param x Reference to a gsl::vector of nodes
  * \param w Reference to a gsl::vector of weights
@@ -25,7 +25,7 @@ void leggauss( size_t n, gsl::vector& x, gsl::vector& w, double a, double b )
 }
 
 /*!
- * \fn \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
+ * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
  * \param n Number of nodes
  * \param a Lower bound of the interval (Default -1)
  * \param b Upper bound of the interval (Default +1)
@@ -47,7 +47,7 @@ gsl::vector leggauss( size_t n, double a, double b )
 }
 
 /*!
- * \fn \brief Computes \p n evenly spaced points on the interval [\p a, \p b] (inclusive)
+ * \brief Computes \p n evenly spaced points on the interval [\p a, \p b] (inclusive)
  * \param a Lower bound of the interval
  * \param b Upper bound of the interval
  * \param n Number of points
@@ -77,7 +77,7 @@ void meshgrid( const gsl::vector& x, const gsl::vector& y, gsl::matrix& X, gsl::
         }
 }
 
-/*! Compute arccos of each element in array */
+/*! \brief Compute arccos of each element in array */
 gsl::vector acos( const gsl::vector& x )
 {
     gsl::vector y(x.size());
