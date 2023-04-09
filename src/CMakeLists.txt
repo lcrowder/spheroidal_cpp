@@ -6,7 +6,7 @@ set( source_list grid_functions.cpp
 
 set( header_list ../include/spheroidal/grid_functions.h
                  ../include/spheroidal/legendre_otc.h 
-                 ../include/spheroidal/gsl_utils.h 
+                 ../include/spheroidal/gsl_utils.hpp
                  ../include/spheroidal/gsl_wrapper.h )
 
 add_library(spheroidal ${source_list} ${header_list})
