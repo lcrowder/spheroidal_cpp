@@ -4,16 +4,16 @@
 #include <fmt/core.h>
 
 /*------ Public Methods for gsl::vector ------*/
-
 //! \brief Default constructor
 gsl::vector::vector() : gvec(nullptr) {}
 
 //! \brief Constructor with size
-gsl::vector::vector(size_t n) { this->calloc(n); }
+gsl::vector::vector(size_t n) : gvec(nullptr) { if ( n != 0 ) this->calloc(n); }
 
 //! \brief Build a gsl::vector from a gsl_vector
 gsl::vector::vector(gsl_vector *gvec_other)
 {
+    if( gvec_other == nullptr ) return;
     this->calloc(gvec_other->size);
     gsl_vector_memcpy(gvec, gvec_other);
 }
@@ -23,6 +23,33 @@ gsl::vector::vector(const gsl::vector &gvec_other)
 {
     this->calloc(gvec_other.size());
     gsl_vector_memcpy(gvec, gvec_other.gvec);
+}
+
+//! \brief Move constructor
+gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
+{
+    gvec_other.gvec = nullptr;
+}
+
+//! \brief Assignment operator
+gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
+{
+    if (this == &gvec_other)
+        return *this;
+    this->resize(gvec_other.size());
+    gsl_vector_memcpy(gvec, gvec_other.gvec);
+    return *this;
+}
+
+//! \brief Move assignment operator
+gsl::vector &gsl::vector::operator=(gsl::vector &&gvec_other)
+{
+    if (this == &gvec_other)
+        return *this;
+    this->free();
+    gvec = gvec_other.gvec;
+    gvec_other.gvec = nullptr;
+    return *this;
 }
 
 //! \brief Destructor
@@ -38,16 +65,6 @@ const double &gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(g
 
 //! \brief Element setter
 double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
-
-//! \brief Assignment operator
-gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
-{
-    if (this == &gvec_other)
-        return *this;
-    this->resize(gvec_other.size());
-    gsl_vector_memcpy(gvec, gvec_other.gvec);
-    return *this;
-}
 
 //! \brief Size accessor
 size_t gsl::vector::size() const
@@ -113,7 +130,11 @@ void gsl::vector::calloc(size_t n) { gvec = gsl_vector_calloc(n); }
 gsl::matrix::matrix() : gmat(nullptr) {}
 
 //! \brief Constructor with size
-gsl::matrix::matrix(size_t n, size_t m) { this->calloc(n, m); }
+gsl::matrix::matrix(size_t n, size_t m) : gmat(nullptr)
+{ 
+    if ( n == 0 && m == 0 ) return;
+    this->calloc(n, m); 
+}
 
 //! \brief Build a gsl::matrix from a gsl_matrix
 gsl::matrix::matrix(gsl_matrix *gmat_other)
@@ -129,6 +150,33 @@ gsl::matrix::matrix(const gsl::matrix &gmat_other)
     gsl_matrix_memcpy(gmat, gmat_other.gmat);
 }
 
+//! \brief Move constructor
+gsl::matrix::matrix(gsl::matrix &&gmat_other) : gmat(gmat_other.gmat)
+{
+    gmat_other.gmat = nullptr;
+}
+
+//! \brief Assignment operator
+gsl::matrix &gsl::matrix::operator=(const gsl::matrix &gmat_other)
+{
+    if (this == &gmat_other)
+        return *this;
+    this->resize(gmat_other.nrows(), gmat_other.ncols());
+    gsl_matrix_memcpy(gmat, gmat_other.gmat);
+    return *this;
+}
+
+//! \brief Move assignment operator
+gsl::matrix &gsl::matrix::operator=(gsl::matrix &&gmat_other)
+{
+    if (this == &gmat_other)
+        return *this;
+    this->free();
+    gmat = gmat_other.gmat;
+    gmat_other.gmat = nullptr;
+    return *this;
+}
+
 //! \brief Destructor
 gsl::matrix::~matrix()
 {
@@ -142,16 +190,6 @@ double &gsl::matrix::operator()(size_t i, size_t j) { return *gsl_matrix_ptr(gma
 
 //! \brief Element getter
 const double &gsl::matrix::operator()(size_t i, size_t j) const { return *gsl_matrix_ptr(gmat, i, j); }
-
-//! \brief Assignment operator
-gsl::matrix &gsl::matrix::operator=(const gsl::matrix &gmat_other)
-{
-    if (this == &gmat_other)
-        return *this;
-    this->resize(gmat_other.nrows(), gmat_other.ncols());
-    gsl_matrix_memcpy(gmat, gmat_other.gmat);
-    return *this;
-}
 
 //! \brief Size accessor
 size_t gsl::matrix::size() const
@@ -180,7 +218,7 @@ size_t gsl::matrix::ncols() const
 //! \brief Resize the gsl::matrix
 void gsl::matrix::resize(size_t n, size_t m)
 {
-    if ( (n == 0) || (m == 0) )
+    if ((n == 0) || (m == 0))
     {
         this->clear();
         return;
