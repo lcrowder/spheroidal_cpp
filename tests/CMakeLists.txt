@@ -16,13 +16,12 @@ include(CTest)
 
 # Put all testing files here
 set( spheroidal_test_list test_gsl_wrapper.cpp
-                          test_simple_2.cpp
+                          test_gsl_utils.cpp
                           test_simple_3.cpp )
 
-# Add an executable to run all tests
+# Add an executable (but not a ctest) to run all tests
 add_executable( all_spheroidal_tests ${spheroidal_test_list} )
 target_link_libraries(all_spheroidal_tests spheroidal Catch2::Catch2WithMain fmt::fmt )
-add_test( NAME all_spheroidal_tests COMMAND all_spheroidal_tests )
                           
 # Add the executable and `add_test` for each individual test file
 foreach( test ${spheroidal_test_list} )
@@ -31,7 +30,7 @@ foreach( test ${spheroidal_test_list} )
     add_executable( ${test_name} ${test} )
     target_link_libraries( ${test_name} spheroidal Catch2::Catch2WithMain fmt::fmt )
     
-    add_test( NAME ${test_name} COMMAND all_spheroidal_tests ${test_name} )
+    add_test( NAME ${test_name} COMMAND ${test_name} )
 endforeach()
 
 # If you want to run a specific test from a set, build the file/set it's in, then

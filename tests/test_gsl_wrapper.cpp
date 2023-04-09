@@ -10,6 +10,12 @@ TEST_CASE("gsl::vector constructors", "[gsl::vector]")
     REQUIRE(v1.size() == 0);
     REQUIRE(v1.get_gsl_ptr() == nullptr);
 
+    // This behavior overlaps with vector( gsl_vector* ),
+    //  but the behavior from each call should be identical
+    gsl::vector vn(0);
+    REQUIRE(vn.size() == 0);
+    REQUIRE(vn.get_gsl_ptr() == nullptr);
+
     // Constructor with size
     gsl::vector v2(10);
     REQUIRE(v2.size() == 10);
@@ -21,15 +27,37 @@ TEST_CASE("gsl::vector constructors", "[gsl::vector]")
     REQUIRE(v3.get_gsl_ptr() != nullptr);
     REQUIRE(v3.get_gsl_ptr() != v2.get_gsl_ptr());
 
+    // Move constructor
+    gsl::vector v4(std::move(v3));
+    REQUIRE(v4.size() == 10);
+    REQUIRE(v4.get_gsl_ptr() != nullptr);
+    REQUIRE(v3.size() == 0);
+    REQUIRE(v3.get_gsl_ptr() == nullptr);
+}
+
+TEST_CASE("gsl::vector assignment operators", "[gsl::vector]")   
+{
+    gsl::vector v1(3), v2(3), v3(5);
+
     // Copy assignment
+    v1 = v2;
+    REQUIRE(v1.size() == 3);
+    REQUIRE(v1.get_gsl_ptr() != nullptr);
+    REQUIRE(v1.get_gsl_ptr() != v2.get_gsl_ptr());
+
     v2 = v3;
-    REQUIRE(v2.size() == 10);
+    REQUIRE(v2.size() == 5);
     REQUIRE(v2.get_gsl_ptr() != nullptr);
     REQUIRE(v2.get_gsl_ptr() != v3.get_gsl_ptr());
 
     // Test self-assignment
     v2 = v2;
-    REQUIRE(v2.size() == 10);
+    REQUIRE(v2.size() == 5);
+    REQUIRE(v2.get_gsl_ptr() != nullptr);
+
+    // Test Move self-assignment
+    v2 = std::move(v2);
+    REQUIRE(v2.size() == 5);
     REQUIRE(v2.get_gsl_ptr() != nullptr);
 }
 
@@ -84,6 +112,12 @@ TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
     REQUIRE(m1.ncols() == 0);
     REQUIRE(m1.get_gsl_ptr() == nullptr);
 
+    // Default constructor
+    gsl::matrix m1(0, 0);
+    REQUIRE(m1.nrows() == 0);
+    REQUIRE(m1.ncols() == 0);
+    REQUIRE(m1.get_gsl_ptr() == nullptr);
+
     // Constructor with size
     gsl::matrix m2(10, 5);
     REQUIRE(m2.nrows() == 10);
@@ -97,18 +131,59 @@ TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
     REQUIRE(m3.get_gsl_ptr() != nullptr);
     REQUIRE(m3.get_gsl_ptr() != m2.get_gsl_ptr());
 
-    // Copy assignment
-    m2 = m3;
-    REQUIRE(m2.nrows() == 10);
-    REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
-    REQUIRE(m2.get_gsl_ptr() != m3.get_gsl_ptr());
+    // Move constructor
+    gsl::matrix m4(11, 6);
+    gsl::matrix m5(std::move(m4));
+    REQUIRE(m5.nrows() == 11);
+    REQUIRE(m5.ncols() == 6);
+    REQUIRE(m5.get_gsl_ptr() != nullptr);
+    REQUIRE(m4.nrows() == 0);
+    REQUIRE(m4.ncols() == 0);
+    REQUIRE(m4.get_gsl_ptr() == nullptr);
 
-    // Test self-assignment
-    m2 = m2;
-    REQUIRE(m2.nrows() == 10);
-    REQUIRE(m2.ncols() == 5);
+    // Conversion constructor
+    gsl::matrix m6(12, 7);
+    gsl::matrix m7(m6.get_gsl_ptr());
+    REQUIRE(m7.nrows() == 12);
+    REQUIRE(m7.ncols() == 7);
+    REQUIRE(m7.get_gsl_ptr() != nullptr);
+    REQUIRE(m7.get_gsl_ptr() != m6.get_gsl_ptr());
+}
+
+// Use Catch2 to test the assignment and move assignment of gsl::matrix
+TEST_CASE("gsl::matrix assignment", "[gsl::matrix]")
+{
+    gsl::matrix m1(10, 5);
+    gsl::matrix m2(11, 6);
+    gsl::matrix m3(12, 7);
+
+    // Copy assignment
+    m1 = m2;
+    REQUIRE(m1.nrows() == 11);
+    REQUIRE(m1.ncols() == 6);
+    REQUIRE(m1.get_gsl_ptr() != nullptr);
+    REQUIRE(m1.get_gsl_ptr() != m2.get_gsl_ptr());
+
+    // Move assignment
+    m2 = std::move(m3);
+    REQUIRE(m2.nrows() == 12);
+    REQUIRE(m2.ncols() == 7);
     REQUIRE(m2.get_gsl_ptr() != nullptr);
+    REQUIRE(m3.nrows() == 0);
+    REQUIRE(m3.ncols() == 0);
+    REQUIRE(m3.get_gsl_ptr() == nullptr);
+
+    // Test self assignment
+    m1 = m1;
+    REQUIRE(m1.nrows() == 11);
+    REQUIRE(m1.ncols() == 6);
+    REQUIRE(m1.get_gsl_ptr() != nullptr);
+
+    // Test self move assignment
+    m1 = std::move(m1);
+    REQUIRE(m1.nrows() == 11);
+    REQUIRE(m1.ncols() == 6);
+    REQUIRE(m1.get_gsl_ptr() != nullptr);
 }
 
 // Use Catch2 to test the element accessors of gsl::matrix
