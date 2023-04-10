@@ -42,14 +42,14 @@ Ew=abs(P[geti(n,m),:]*Q[geti(n-1,m),:]-P[geti(n-1,m),:]*Q[geti(n,m),:]-math.fact
 plt.figure()
 plt.semilogy(u,EQ)
 plt.xlabel('u')
-plt.ylabel('Error')
+plt.ylabel('log10 abs. Error')
 plt.title('Q forward recurrence relation (n='+str(n)+', m='+str(m)+')')
 plt.savefig('figures/EQ'+str(n)+str(m)+'.png')
 
 plt.figure()
 plt.semilogy(u,Ew)
 plt.xlabel('u')
-plt.ylabel('Error')
+plt.ylabel('log10 abs. Error')
 plt.title('Wronskian relation (n='+str(n)+', m='+str(m)+')')
 plt.savefig('figures/Ew'+str(n)+str(m)+'.png')
 
@@ -60,14 +60,14 @@ for k in range(sp):
     n = math.floor(np.sqrt(k))
     m=k-n**2-n
     # fprintf('%d, %d\n',n,m)
-    print(geti(n,m))
-    Wrsnk[k,:]=abs(P[k,:]*dQ[k,:]-dP[k,:]*Q[k,:]-math.factorial(n+m)*(-1)**m /(math.factorial(n-m)*(1-u**2)) )
+    # print(geti(n,m))
+    Wrsnk[k,:]=abs(P[k,:]*dQ[k,:]-dP[k,:]*Q[k,:]-math.factorial(n+m)*(-1)**m /(math.factorial(n-m)*(1-u**2)) )/abs(math.factorial(n+m)*(-1)**m /(math.factorial(n-m)*(1-u**2)))
 
 
 plt.figure()
-plt.imshow(Wrsnk)
+plt.imshow(np.log10(Wrsnk))
 plt.colorbar()
 plt.xlabel('u values')
 plt.ylabel('(n,m) index')
-plt.title('Error of Wronskian Relationship with derivatives')
+plt.title('log10 rel. error of Wronskian Relationship with derivatives')
 plt.savefig('figures/Ew2.png')

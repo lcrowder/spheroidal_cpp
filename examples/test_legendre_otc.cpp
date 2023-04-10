@@ -79,10 +79,10 @@ int main(int argc, char *argv[])
     // Write the vector to the files
     for (int i=0; i<sp; ++i) {
         for (int j=0; j<N; ++j) {
-            Pfile << P[i][j] << " ";
-            Qfile << Q[i][j] << " ";
-            dPfile << dP[i][j] << " ";
-            dQfile << dQ[i][j] << " ";
+            Pfile << scientific << P[i][j] << " ";
+            Qfile << scientific << Q[i][j] << " ";
+            dPfile << scientific << dP[i][j] << " ";
+            dQfile << scientific << dQ[i][j] << " ";
         }
         Pfile << endl;
         Qfile << endl;
