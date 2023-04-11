@@ -29,6 +29,17 @@ gsl::vector::vector(const gsl::vector &gvec_other)
     gsl_vector_memcpy(gvec, gvec_other.gvec);
 }
 
+//! \brief Conversion constructor from gsl::cvector
+//! \note Move constructor isn't useful,
+//   since contiguous memory can't be reclaimed
+gsl::vector::vector(const gsl::cvector &gvec_other)
+{
+    fmt::print( stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part" );
+    this->calloc(gvec_other.size());
+    for (size_t i = 0; i < gvec_other.size(); i++)
+        this->set(i, gvec_other.get(i).real());
+}
+
 //! \brief Move constructor
 gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
 {

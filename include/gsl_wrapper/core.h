@@ -21,6 +21,7 @@ namespace gsl
 
         // Conversion constructors
         explicit vector(gsl_vector *gvec_other);
+        vector( const cvector& gvec_other);
         // vector( const std::vector<double>& svec );
 
         //! \brief Assignment operators
@@ -62,6 +63,7 @@ namespace gsl
 
         // Conversion constructors
         explicit matrix(gsl_matrix *gmat_other);
+        matrix( const cmatrix& gmat_other);
         // matrix( const std::vector<std::vector<double>>& smat );
 
         // Copy and move constructors
@@ -160,6 +162,7 @@ namespace gsl
 
         // Conversion constructors
         explicit cvector(gsl_vector_complex *gvec_other);
+        cvector(const vector &vec);
         // vector( const std::vector<double>& svec );
 
         //! \brief Assignment operators
@@ -203,6 +206,7 @@ namespace gsl
 
         // Conversion constructors
         explicit cmatrix(gsl_matrix_complex *gvec_other);
+        cmatrix(const matrix &mat);
         // vector( const std::vector<double>& svec );
 
         //! \brief Assignment operators

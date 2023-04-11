@@ -31,6 +31,16 @@ gsl::cvector::cvector(const gsl::cvector &gvec_other)
     gsl_vector_complex_memcpy(gvec, gvec_other.gvec);
 }
 
+//! \brief Conversion constructor from gsl::vector
+//! \note Move constructor isn't useful, 
+//   since contiguous memory can't be reclaimed
+gsl::cvector::cvector(const gsl::vector& gvec_other)
+{
+    this->calloc(gvec_other.size());
+    for (size_t i = 0; i < gvec_other.size(); i++)
+        this->set(i, gsl::complex(gvec_other.get(i), 0.0));
+}
+
 //! \brief Move constructor
 gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
 {

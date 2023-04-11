@@ -22,6 +22,14 @@ gsl::cmatrix::cmatrix(gsl_matrix_complex *gmat_other)
     gsl_matrix_complex_memcpy(gmat, gmat_other);
 }
 
+gsl::cmatrix::cmatrix( const gsl::matrix& gmat_other )
+{
+    this->calloc(gmat_other.nrows(), gmat_other.ncols());
+    for (size_t i = 0; i < gmat_other.nrows(); i++)
+        for (size_t j = 0; j < gmat_other.ncols(); j++)
+            this->set( i, j, gsl::complex( gmat_other.get(i, j), 0.0 ) );
+}
+
 //! \brief Copy constructor
 gsl::cmatrix::cmatrix(const gsl::cmatrix &gmat_other)
 {
