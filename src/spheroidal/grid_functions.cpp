@@ -1,6 +1,6 @@
 #include <spheroidal/grid_functions.h>
-#include <spheroidal/gsl_utils.hpp>
-#include <spheroidal/gsl_wrapper.h>
+#include <gsl_wrapper/utils.hpp>
+#include <gsl_wrapper/core.h>
 #include <gsl/gsl_math.h>
 #include <fmt/core.h>
 
@@ -52,6 +52,6 @@ void gl_grid(size_t p, gsl::matrix &U, gsl::matrix &V)
     spharm_grid_size_ord(p, nu, nv);
 
     gsl::vector lambda = gsl::linspace(0, 2 * M_PI, nv);
-    gsl::vector theta = gsl::acos( gsl::leggauss(nu) );
+    gsl::vector theta = gsl::arrayfun([](double x) { return acos(x); }, gsl::leggauss(nu));
     gsl::meshgrid(theta, lambda, U, V);
 }
