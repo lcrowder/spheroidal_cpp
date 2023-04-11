@@ -31,8 +31,12 @@ namespace gsl
         ~vector();
 
         // Element access
-        double &operator()(size_t i);             // Getter
-        const double &operator()(size_t i) const; // Setter
+        double &operator()(size_t i);      // Setter
+        void set(size_t i, double val);
+
+        double operator()(size_t i) const; // Getter
+        double get(size_t i) const;
+
 
         size_t size() const;
 
@@ -72,9 +76,13 @@ namespace gsl
         ~matrix();
 
         //! \brief Element access
-        double &operator()(size_t i, size_t j);             // Getter
-        const double &operator()(size_t i, size_t j) const; // Setter
+        double &operator()(size_t i, size_t j);      // Setters
+        void set(size_t i, size_t j, double val);
+        
+        double operator()(size_t i, size_t j) const; // Getters
+        double get(size_t i, size_t j) const;
 
+        
         size_t size() const;
         size_t nrows() const;
         size_t ncols() const;

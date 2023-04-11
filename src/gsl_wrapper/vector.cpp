@@ -65,10 +65,12 @@ gsl::vector::~vector()
 }
 
 //! \brief Element getter
-const double &gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i); }
+double gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i); }
+double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
 
 //! \brief Element setter
-double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
+double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); } 
+void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
 
 //! \brief Size accessor
 size_t gsl::vector::size() const
