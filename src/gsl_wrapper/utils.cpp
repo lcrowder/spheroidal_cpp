@@ -1,9 +1,9 @@
-#include <spheroidal/gsl_wrapper.h>
-#include <spheroidal/gsl_utils.hpp>
+#include <gsl_wrapper/core.h>
+#include <gsl_wrapper/utils.hpp>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
+#include <gsl/gsl_complex_math.h>
 #include <iostream>
-
 
 /*!
  * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
@@ -81,6 +81,25 @@ gsl::vector gsl::linspace(double a, double b, size_t n)
     return x;
 }
 
+//! \brief Complex version of linspace
+gsl::cvector gsl::linspace(gsl::complex a, gsl::complex b, size_t n)
+{
+    if (n == 0)
+        return gsl::cvector();
+    if (n == 1)
+    {
+        gsl::cvector x(1);
+        x.set(0, b);
+        return x;
+    }
+
+    gsl::cvector x(n);
+    gsl::complex dx = (b - a).abs() / (n - 1);
+    for (int i = 0; i < n; ++i)
+        x.set( i, a + dx * i );
+    return x;
+}
+
 /*! Do matlab thing */
 void gsl::meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, gsl::matrix &Y)
 {
@@ -95,6 +114,22 @@ void gsl::meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, g
         }
 }
 
+/*! Complex version of gsl::meshgrid */
+void gsl::meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X, gsl::cmatrix &Y)
+{
+    X.resize(x.size(), y.size());
+    Y.resize(x.size(), y.size());
+
+    for (int i = 0; i < x.size(); ++i)
+        for (int j = 0; j < y.size(); ++j)
+        {
+            //X(i, j) = x(i);
+            //Y(i, j) = y(j);
+            X.set( i, j, x.get(i) );
+            Y.set( i, j, y.get(j) );
+        }
+}
+
 /*! Return the nxn identity matrix */
 gsl::matrix gsl::eye(size_t n)
 {
@@ -104,19 +139,5 @@ gsl::matrix gsl::eye(size_t n)
     return I;
 }
 
-/*! \brief Compute arccos of each element in array */
-gsl::vector gsl::acos(const gsl::vector &x)
-{
-    gsl::vector y(x.size());
-    for (int i = 0; i < x.size(); ++i)
-        y(i) = std::acos(x(i));
-    return y;
-}
+//! \brief Compute FFT for each column of a gsl::matrix
 
-//! \brief Move version of gsl::acos
-gsl::vector gsl::acos(gsl::vector &&x)
-{
-    for (int i = 0; i < x.size(); ++i)
-        x(i) = std::acos(x(i));
-    return std::move(x);
-}

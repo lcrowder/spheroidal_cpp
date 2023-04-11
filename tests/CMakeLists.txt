@@ -15,20 +15,22 @@ set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 include(CTest)
 
 # Put all testing files here
-set( spheroidal_test_list test_gsl_wrapper.cpp
-                          test_gsl_utils.cpp
-                          test_simple_3.cpp )
+set( gsl_wrapper_test_list gsl_wrapper/test_wrapper.cpp
+                          gsl_wrapper/test_wrapper_complex.cpp
+                          gsl_wrapper/test_utils.cpp
+                          gsl_wrapper/test_utils_complex.cpp )
 
 # Add an executable (but not a ctest) to run all tests
-add_executable( all_spheroidal_tests ${spheroidal_test_list} )
-target_link_libraries(all_spheroidal_tests spheroidal Catch2::Catch2WithMain fmt::fmt )
+add_executable( all_gsl_wrapper_tests ${gsl_wrapper_test_list} )
+target_link_libraries(all_gsl_wrapper_tests gsl_wrapper Catch2::Catch2WithMain fmt::fmt )
                           
 # Add the executable and `add_test` for each individual test file
-foreach( test ${spheroidal_test_list} )
+set( all_tests ${gsl_wrapper_test_list} )
+foreach( test ${all_tests} )
     get_filename_component( test_name ${test} NAME_WE )
 
     add_executable( ${test_name} ${test} )
-    target_link_libraries( ${test_name} spheroidal Catch2::Catch2WithMain fmt::fmt )
+    target_link_libraries( ${test_name} spheroidal gsl_wrapper Catch2::Catch2WithMain fmt::fmt )
     
     add_test( NAME ${test_name} COMMAND ${test_name} )
 endforeach()

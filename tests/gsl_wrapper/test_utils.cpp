@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
-#include <spheroidal/gsl_wrapper.h>
-#include <spheroidal/gsl_utils.hpp>
+#include <gsl_wrapper/core.h>
+#include <gsl_wrapper/utils.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <gsl/gsl_math.h>
 #include <cmath>

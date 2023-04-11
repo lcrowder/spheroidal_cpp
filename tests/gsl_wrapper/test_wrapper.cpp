@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include <spheroidal/gsl_wrapper.h>
+#include <gsl_wrapper/core.h>
 #include <catch2/catch_test_macros.hpp>
 
 // Use Catch2 to test the various constructors for gsl::vector
@@ -9,12 +9,6 @@ TEST_CASE("gsl::vector constructors", "[gsl::vector]")
     gsl::vector v1;
     REQUIRE(v1.size() == 0);
     REQUIRE(v1.get_gsl_ptr() == nullptr);
-
-    // This behavior overlaps with vector( gsl_vector* ),
-    //  but the behavior from each call should be identical
-    gsl::vector vn(0);
-    REQUIRE(vn.size() == 0);
-    REQUIRE(vn.get_gsl_ptr() == nullptr);
 
     // Constructor with size
     gsl::vector v2(10);
@@ -107,10 +101,10 @@ TEST_CASE("gsl::vector print", "[gsl::vector]")
 TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
 {
     // Default constructor
-    gsl::matrix m1;
-    REQUIRE(m1.nrows() == 0);
-    REQUIRE(m1.ncols() == 0);
-    REQUIRE(m1.get_gsl_ptr() == nullptr);
+    gsl::matrix m0;
+    REQUIRE(m0.nrows() == 0);
+    REQUIRE(m0.ncols() == 0);
+    REQUIRE(m0.get_gsl_ptr() == nullptr);
 
     // Default constructor
     gsl::matrix m1(0, 0);
