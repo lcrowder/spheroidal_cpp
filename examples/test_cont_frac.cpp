@@ -12,7 +12,7 @@ int main()
 {
     int n=1;
     int m=0;
-    gsl::vector u;
+    gsl::vector u(1);
     u(0)=(1.5);
 
     gsl::vector cf = cont_frac(n,m,u);
