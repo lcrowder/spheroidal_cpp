@@ -94,9 +94,9 @@ gsl::cvector gsl::linspace(gsl::complex a, gsl::complex b, size_t n)
     }
 
     gsl::cvector x(n);
-    gsl::complex dx = (b - a).abs() / (n - 1);
+    double dx = (b - a).abs() / (n - 1);
     for (int i = 0; i < n; ++i)
-        x.set( i, a + dx * i );
+        x.set( i, a );//+ dx * i );
     return x;
 }
 

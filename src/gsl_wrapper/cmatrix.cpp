@@ -3,7 +3,6 @@
 #include <gsl/gsl_complex.h>
 #include <fmt/core.h>
 
-
 //! \brief Default constructor
 gsl::cmatrix::cmatrix() : gmat(nullptr) {}
 
@@ -22,12 +21,12 @@ gsl::cmatrix::cmatrix(gsl_matrix_complex *gmat_other)
     gsl_matrix_complex_memcpy(gmat, gmat_other);
 }
 
-gsl::cmatrix::cmatrix( const gsl::matrix& gmat_other )
+gsl::cmatrix::cmatrix(const gsl::matrix &gmat_other)
 {
     this->calloc(gmat_other.nrows(), gmat_other.ncols());
     for (size_t i = 0; i < gmat_other.nrows(); i++)
         for (size_t j = 0; j < gmat_other.ncols(); j++)
-            this->set( i, j, gsl::complex( gmat_other.get(i, j), 0.0 ) );
+            GSL_SET_COMPLEX( gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(gmat_other.gmat, i, j), 0.0 );
 }
 
 //! \brief Copy constructor
@@ -75,16 +74,16 @@ gsl::cmatrix::~cmatrix()
 //! \brief Element setter
 void gsl::cmatrix::set(size_t i, size_t j, const gsl::complex &val)
 {
-    GSL_SET_COMPLEX( gsl_matrix_complex_ptr(gmat, i, j), val.real(), val.imag() );
+    GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), val.real(), val.imag());
 }
-//gsl_complex &gsl::cmatrix::operator()(size_t i, size_t j) { return *gsl_matrix_complex_ptr(gmat, i, j); }
+// gsl_complex &gsl::cmatrix::operator()(size_t i, size_t j) { return *gsl_matrix_complex_ptr(gmat, i, j); }
 
 //! \brief Element getter
 gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
 {
-    return gsl::complex( gsl_matrix_complex_get(gmat, i, j) );
+    return gsl::complex(gsl_matrix_complex_get(gmat, i, j));
 }
-//const gsl::complex &gsl::cmatrix::operator()(size_t i, size_t j) const { return *gsl_matrix_complex_ptr(gmat, i, j); }
+// const gsl::complex &gsl::cmatrix::operator()(size_t i, size_t j) const { return *gsl_matrix_complex_ptr(gmat, i, j); }
 
 //! \brief Size accessor
 size_t gsl::cmatrix::size() const

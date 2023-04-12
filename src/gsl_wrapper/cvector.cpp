@@ -38,7 +38,7 @@ gsl::cvector::cvector(const gsl::vector& gvec_other)
 {
     this->calloc(gvec_other.size());
     for (size_t i = 0; i < gvec_other.size(); i++)
-        this->set(i, gsl::complex(gvec_other.get(i), 0.0));
+        GSL_SET_COMPLEX( gsl_vector_complex_ptr( gvec, i ), gsl_vector_get( gvec_other.gvec, i ), 0.0 );
 }
 
 //! \brief Move constructor

@@ -34,10 +34,10 @@ gsl::vector::vector(const gsl::vector &gvec_other)
 //   since contiguous memory can't be reclaimed
 gsl::vector::vector(const gsl::cvector &gvec_other)
 {
-    fmt::print( stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part" );
+    fmt::print( stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part\n" );
     this->calloc(gvec_other.size());
     for (size_t i = 0; i < gvec_other.size(); i++)
-        this->set(i, gvec_other.get(i).real());
+        gsl_vector_set( gvec, i, gsl_vector_complex_get( gvec_other.gvec, i ).dat[0] );
 }
 
 //! \brief Move constructor

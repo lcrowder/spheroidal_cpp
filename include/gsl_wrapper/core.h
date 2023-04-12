@@ -8,6 +8,12 @@
 
 namespace gsl
 {
+    // Forward declarations
+    class vector;
+    class matrix;
+    class cvector;
+    class cmatrix;
+
     class vector
     {
     public:
@@ -21,7 +27,7 @@ namespace gsl
 
         // Conversion constructors
         explicit vector(gsl_vector *gvec_other);
-        vector( const cvector& gvec_other);
+        vector(const cvector &gvec_other);
         // vector( const std::vector<double>& svec );
 
         //! \brief Assignment operators
@@ -32,12 +38,11 @@ namespace gsl
         ~vector();
 
         // Element access
-        double &operator()(size_t i);      // Setter
+        double &operator()(size_t i); // Setter
         void set(size_t i, double val);
 
         double operator()(size_t i) const; // Getter
         double get(size_t i) const;
-
 
         size_t size() const;
 
@@ -52,6 +57,8 @@ namespace gsl
         gsl_vector *gvec;
         void free();
         void calloc(size_t n);
+
+        friend class cvector;
     };
 
     class matrix
@@ -63,7 +70,7 @@ namespace gsl
 
         // Conversion constructors
         explicit matrix(gsl_matrix *gmat_other);
-        matrix( const cmatrix& gmat_other);
+        matrix(const cmatrix &gmat_other);
         // matrix( const std::vector<std::vector<double>>& smat );
 
         // Copy and move constructors
@@ -78,13 +85,12 @@ namespace gsl
         ~matrix();
 
         //! \brief Element access
-        double &operator()(size_t i, size_t j);      // Setters
+        double &operator()(size_t i, size_t j); // Setters
         void set(size_t i, size_t j, double val);
-        
+
         double operator()(size_t i, size_t j) const; // Getters
         double get(size_t i, size_t j) const;
 
-        
         size_t size() const;
         size_t nrows() const;
         size_t ncols() const;
@@ -95,22 +101,21 @@ namespace gsl
         void clear();
 
         void print() const;
-
-        // Other functions to write later
-        // vector( initialization_list )
-        // Do printing better
     protected:
         gsl_matrix *gmat;
         void free();
         void calloc(size_t n, size_t m);
+
+        friend class cmatrix;
     };
 
     class complex
     {
     public:
-        complex(double x);
-        complex(double re, double im);
-        complex(const gsl_complex &gsl_complex_other);
+        inline complex() { GSL_SET_COMPLEX(&z, 0.0, 0.0); }
+        inline complex(double x) { GSL_SET_COMPLEX(&z, x, 0.0); }
+        inline complex(double re, double im) { GSL_SET_COMPLEX(&z, re, im); }
+        inline complex(const gsl_complex &gsl_complex_other) { z = gsl_complex_other; };
 
         inline double real() const { return GSL_REAL(z); };
         inline double imag() const { return GSL_IMAG(z); };
@@ -129,22 +134,24 @@ namespace gsl
         complex &operator/=(double x);
 
         complex &operator=(const complex &gsl_complex_other);
-        complex &operator=(double x);
+        inline void set(double re, double im) { GSL_SET_COMPLEX(&z, re, im); };
+        inline void set(const complex &x) { z = x.z; };
 
-        complex operator-() const;
+        inline complex operator-() const { return gsl_complex_negative(z); };
 
-        complex operator+(const complex &gsl_complex_other) const;
-        complex operator-(const complex &gsl_complex_other) const;
-        complex operator*(const complex &gsl_complex_other) const;
-        complex operator/(const complex &gsl_complex_other) const;
+        inline gsl_complex get_gsl_data() const { return z; };
+
+        friend inline complex operator+(const complex &a, const complex &b) { return gsl_complex_add(a.z, b.z); };
+        friend inline complex operator-(const complex &a, const complex &b) { return gsl_complex_sub(a.z, b.z); };
+        friend inline complex operator*(const complex &a, const complex &b) { return gsl_complex_mul(a.z, b.z); };
+        friend inline complex operator/(const complex &a, const complex &b) { return gsl_complex_div(a.z, b.z); };
+        friend inline bool operator==(const complex &a, const complex &b) { return (a.real() == b.real()) && (a.imag() == b.imag()); }
 
     protected:
         gsl_complex z;
-
-        friend class cvector;
     };
 
-    inline namespace literals
+    inline namespace complex_literals
     {
         inline complex operator""_i(long double y) { return complex(0.0, y); }
     }
@@ -191,6 +198,8 @@ namespace gsl
         gsl_vector_complex *gvec;
         void free();
         void calloc(size_t n);
+
+        friend class vector;
     };
 
     class cmatrix
@@ -237,6 +246,8 @@ namespace gsl
         gsl_matrix_complex *gmat;
         void free();
         void calloc(size_t n, size_t m);
+
+        friend class matrix;
     };
 
 } // namespace gsl

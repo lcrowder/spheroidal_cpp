@@ -26,11 +26,11 @@ gsl::matrix::matrix(gsl_matrix *gmat_other)
 //!   as contiguous memory cannot be reclaimed
 gsl::matrix::matrix(const gsl::cmatrix &gmat_other)
 {
-    fmt::print(stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part");
+    fmt::print(stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part\n");
     this->calloc(gmat_other.nrows(), gmat_other.ncols());
     for (size_t i = 0; i < gmat_other.nrows(); i++)
         for (size_t j = 0; j < gmat_other.ncols(); j++)
-            this->set(i, j, gmat_other.get(i, j).real());
+            gsl_matrix_set( gmat, i, j, gsl_matrix_complex_get( gmat_other.gmat, i, j ).dat[0] );
 }
 
 //! \brief Copy constructor
