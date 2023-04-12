@@ -4,15 +4,17 @@
 #include <vector>
 #include <stdio.h>  
 #include <math.h> 
+#include <gsl_wrapper/core.h>
+#include <gsl_wrapper/utils.hpp>
 using namespace std;
 
 int main()
 {
     int n=1;
     int m=0;
-    vector<double> u;
-    u.push_back(1.5);
+    gsl::vector u;
+    u(0)=(1.5);
 
-    vector<double> cf = cont_frac(n,m,u);
-    cout << "cf=" << cf[0] << endl;
+    gsl::vector cf = cont_frac(n,m,u);
+    cout << "cf=" << cf(0) << endl;
 }

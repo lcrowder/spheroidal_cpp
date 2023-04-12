@@ -33,7 +33,8 @@ FetchContent_MakeAvailable(fmtlib)
 include_directories( PRIVATE ${CMAKE_SOURCE_DIR}/include )
 
 # Add source file subdirectories
-add_subdirectory(src)
+add_subdirectory(src_gsl_wrapper)
+add_subdirectory(src_spheroidal)
 
 # Add example file subdirectories
 add_subdirectory(examples)
