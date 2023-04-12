@@ -1,50 +1,15 @@
-#include <spheroidal/grid_functions.h>
-#include <spheroidal/gsl_utils.h>
-#include <spheroidal/gsl_wrapper.h>
+#include <gsl_wrapper/core.h>
+#include <gsl_wrapper/utils.hpp>
 #include <fmt/core.h>
 
 int main()
 {
-    gsl::vector vec(5);
-    
-    vec.print( );
+    gsl::cmatrix x(3, 4);
+    for (size_t i = 0; i < 3; i++)
+        for (size_t j = 0; j < 4; j++)
+            x.set(i, j, gsl::complex(0.5 * i + 0.25 * j, 0.25 * i + 0.5 * j));
 
-    for( int i = 0; i < 5; ++i )
-        vec(i) = i;
-
-    vec.print( );
-
-    gsl::vector vec2( vec );
-    vec2.print( );
-
-    const int p = 5;
-
-    gsl::matrix U, V; 
-    gl_grid( p, U, V );
-
-    fmt::print("U =\n");
-    U.print( );
-
-    fmt::print("V =\n");
-    V.print( );
-
-    /*
-    // Get the size of the grid
-    int order = 5, nu, nv;
-    spharm_grid_size_ord( order, nu, nv );
-
-    gsl_matrix *u = gsl_matrix_alloc( nu, nv );
-    gsl_matrix *v = gsl_matrix_alloc( nu, nv );
-    gl_grid( u, v );
-
-    fmt::print("u =\n");
-    gsl_matrix_print( u );
-    fmt::print("\nv =\n");
-    gsl_matrix_print( v );
-
-    gsl_vector_free(x);
-    gsl_vector_free(w);
-    */
+    gsl::cmatrix y = gsl::fft( x, 2 );
     return 0;
     
 }
