@@ -16,9 +16,9 @@ include(CTest)
 
 # Put all testing files here
 set( gsl_wrapper_test_list gsl_wrapper/test_wrapper.cpp
-                          gsl_wrapper/test_wrapper_complex.cpp
+                          gsl_wrapper/test_wrapper_math.cpp
                           gsl_wrapper/test_utils.cpp
-                          gsl_wrapper/test_utils_complex.cpp )
+                          gsl_wrapper/test_fft.cpp )
 
 # Add an executable (but not a ctest) to run all tests
 add_executable( all_gsl_wrapper_tests ${gsl_wrapper_test_list} )

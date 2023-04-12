@@ -1,14 +1,16 @@
 # ------------------ GSL Wrapper ------------------
 
 # If you want to add a new file to include, you need to list it here
-set( source_list gsl_wrapper/utils.cpp
-                 gsl_wrapper/matrix.cpp
+set( source_list gsl_wrapper/matrix.cpp
                  gsl_wrapper/vector.cpp
                  gsl_wrapper/complex.cpp
                  gsl_wrapper/cmatrix.cpp
-                 gsl_wrapper/cvector.cpp )
+                 gsl_wrapper/cvector.cpp
+                 gsl_wrapper/fft.cpp 
+                 gsl_wrapper/utils.cpp)
 
 set( header_list ../include/gsl_wrapper/core.h
+                 ../include/gsl_wrapper/fft.h
                  ../include/gsl_wrapper/utils.hpp )
 
 add_library(gsl_wrapper ${source_list} ${header_list})
