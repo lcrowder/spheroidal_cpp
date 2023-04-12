@@ -3,7 +3,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_complex_math.h>
-#include <iostream>
+
 
 /*!
  * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
@@ -96,7 +96,23 @@ gsl::cvector gsl::linspace(gsl::complex a, gsl::complex b, size_t n)
     gsl::cvector x(n);
     double dx = (b - a).abs() / (n - 1);
     for (int i = 0; i < n; ++i)
-        x.set( i, a );//+ dx * i );
+        x.set(i, a + dx * i);
+    return x;
+}
+
+//! \brief Return evenly spaced values within a given interval.
+gsl::vector gsl::arange(double start, double stop, double step)
+{
+    if (step == 0)
+        return gsl::vector();
+
+    if ((stop - start) / step < 0)
+        return gsl::vector();
+
+    size_t n = ceil((stop - start) / step);
+    gsl::vector x(n);
+    for (int i = 0; i < n; ++i)
+        x(i) = start + i * step;
     return x;
 }
 
@@ -123,10 +139,10 @@ void gsl::meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X
     for (int i = 0; i < x.size(); ++i)
         for (int j = 0; j < y.size(); ++j)
         {
-            //X(i, j) = x(i);
-            //Y(i, j) = y(j);
-            X.set( i, j, x.get(i) );
-            Y.set( i, j, y.get(j) );
+            // X(i, j) = x(i);
+            // Y(i, j) = y(j);
+            X.set(i, j, x.get(i));
+            Y.set(i, j, y.get(j));
         }
 }
 
@@ -138,6 +154,3 @@ gsl::matrix gsl::eye(size_t n)
         I(i, i) = 1;
     return I;
 }
-
-//! \brief Compute FFT for each column of a gsl::matrix
-

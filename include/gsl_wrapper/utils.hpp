@@ -1,9 +1,7 @@
-#ifndef GSL_UTILS_HPP_
-#define GSL_UTILS_HPP_
+#ifndef GSL_WRAPPER_UTILS_HPP_
+#define GSL_WRAPPER_UTILS_HPP_
 
 #include <gsl_wrapper/core.h>
-#include <iostream>
-#include <functional>
 #include <utility>
 
 namespace gsl
@@ -19,6 +17,8 @@ namespace gsl
 
     //! \brief Complex version of linspace
     gsl::cvector linspace(gsl::complex a, gsl::complex b, size_t n);
+
+    gsl::vector arange(double a, double b, double step = 1.0);
 
     /*! \brief Store 2D grid coordinates based on 1D input gsl::vectors */
     void meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, gsl::matrix &Y);
@@ -131,4 +131,4 @@ namespace gsl
 
 } // namespace gsl
 
-#endif // GSL_UTILS_HPP_
+#endif // GSL_WRAPPER_UTILS_HPP_
