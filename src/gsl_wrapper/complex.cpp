@@ -3,28 +3,28 @@
 #include <gsl/gsl_complex_math.h>
 
 //! \brief Addition assignment operator
-gsl::complex &gsl::complex::operator+=(const complex &gsl_complex_other)
+gsl::complex &gsl::complex::operator+=(complex gsl_complex_other)
 {
     z = gsl_complex_add(z, gsl_complex_other.z);
     return *this;
 }
 
 //! \brief Subtraction assignment operator
-gsl::complex &gsl::complex::operator-=(const complex &gsl_complex_other)
+gsl::complex &gsl::complex::operator-=(complex gsl_complex_other)
 {
     z = gsl_complex_sub(z, gsl_complex_other.z);
     return *this;
 }
 
 //! \brief Multiplication assignment operator
-gsl::complex &gsl::complex::operator*=(const complex &gsl_complex_other)
+gsl::complex &gsl::complex::operator*=(complex gsl_complex_other)
 {
     z = gsl_complex_mul(z, gsl_complex_other.z);
     return *this;
 }
 
 //! \brief Division assignment operator
-gsl::complex &gsl::complex::operator/=(const complex &gsl_complex_other)
+gsl::complex &gsl::complex::operator/=(complex gsl_complex_other)
 {
     z = gsl_complex_div(z, gsl_complex_other.z);
     return *this;
@@ -59,7 +59,7 @@ gsl::complex &gsl::complex::operator/=(double x)
 }
 
 //! \brief Assignment operator
-gsl::complex &gsl::complex::operator=(const complex &gsl_complex_other)
+gsl::complex &gsl::complex::operator=(gsl::complex gsl_complex_other)
 {
     z = gsl_complex_other.z;
     return *this;

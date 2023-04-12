@@ -21,18 +21,6 @@ gsl::matrix::matrix(gsl_matrix *gmat_other)
     gsl_matrix_memcpy(gmat, gmat_other);
 }
 
-//! \brief Convert gsl::cmatrix to gsl::matrix
-//! \note User-defined move function is not useful,
-//!   as contiguous memory cannot be reclaimed
-gsl::matrix::matrix(const gsl::cmatrix &gmat_other)
-{
-    fmt::print(stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part\n");
-    this->calloc(gmat_other.nrows(), gmat_other.ncols());
-    for (size_t i = 0; i < gmat_other.nrows(); i++)
-        for (size_t j = 0; j < gmat_other.ncols(); j++)
-            gsl_matrix_set( gmat, i, j, gsl_matrix_complex_get( gmat_other.gmat, i, j ).dat[0] );
-}
-
 //! \brief Copy constructor
 gsl::matrix::matrix(const gsl::matrix &gmat_other)
 {

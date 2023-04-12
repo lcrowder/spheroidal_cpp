@@ -2,6 +2,7 @@
 #include <gsl_wrapper/core.h>
 #include <gsl_wrapper/utils.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <gsl/gsl_math.h>
 #include <cmath>
 
@@ -54,6 +55,47 @@ TEST_CASE("linspace", "[linspace]")
     REQUIRE(v5(2) == 0.5);
     REQUIRE(v5(3) == 0.75);
     REQUIRE(v5(4) == 1.0);
+}
+
+// Use Catch2 to test the gsl::arange function
+TEST_CASE("arange", "[arange]")
+{
+    // Test arange 0 step size.
+    // Should return an empty vector
+    gsl::vector v0 = gsl::arange(0.0, 1.0, 0.0);
+    REQUIRE(v0.size() == 0);
+    REQUIRE(v0.get_gsl_ptr() == nullptr);
+
+    // Test arange with default step size
+    gsl::vector v1 = gsl::arange(0.0, 3.0);
+    REQUIRE(v1.size() == 3);
+    REQUIRE(v1.get_gsl_ptr() != nullptr);
+    REQUIRE(v1(0) == 0.0);
+    REQUIRE(v1(1) == 1.0);
+    REQUIRE(v1(2) == 2.0);
+
+    // Test arange with unaligned step size
+    gsl::vector v2 = gsl::arange(0.0, 1.0, 0.3);
+    REQUIRE(v2.size() == 4);
+    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE_THAT(v2(0), Catch::Matchers::WithinAbs(0.0, 1e-12));
+    REQUIRE_THAT(v2(1), Catch::Matchers::WithinAbs(0.3, 1e-12));
+    REQUIRE_THAT(v2(2), Catch::Matchers::WithinAbs(0.6, 1e-12));
+    REQUIRE_THAT(v2(3), Catch::Matchers::WithinAbs(0.9, 1e-12));
+
+    // Test arange with negative step size, positive interval
+    gsl::vector v3 = gsl::arange(0.0, 1.0, -0.3);
+    REQUIRE(v3.size() == 0);
+    REQUIRE(v3.get_gsl_ptr() == nullptr);
+
+    // Test arange with negative step size, negative interval
+    gsl::vector v4 = gsl::arange(1.0, 0.0, -0.3);
+    REQUIRE(v4.size() == 4);
+    REQUIRE(v4.get_gsl_ptr() != nullptr);
+    REQUIRE_THAT(v4(0), Catch::Matchers::WithinAbs(1.0, 1e-12));
+    REQUIRE_THAT(v4(1), Catch::Matchers::WithinAbs(0.7, 1e-12));
+    REQUIRE_THAT(v4(2), Catch::Matchers::WithinAbs(0.4, 1e-12));
+    REQUIRE_THAT(v4(3), Catch::Matchers::WithinAbs(0.1, 1e-12));
 }
 
 // Use Catch2 to test the leggauss functions

@@ -1,5 +1,6 @@
 #include <gsl_wrapper/core.h>
 #include <gsl/gsl_vector.h>
+#include <gsl/gsl_blas.h>
 #include <fmt/core.h>
 
 /*------ Public Methods for gsl::vector ------*/
@@ -29,17 +30,6 @@ gsl::vector::vector(const gsl::vector &gvec_other)
     gsl_vector_memcpy(gvec, gvec_other.gvec);
 }
 
-//! \brief Conversion constructor from gsl::cvector
-//! \note Move constructor isn't useful,
-//   since contiguous memory can't be reclaimed
-gsl::vector::vector(const gsl::cvector &gvec_other)
-{
-    fmt::print( stderr, "Warning: Conversion from gsl::cvector to gsl::vector discards imaginary part\n" );
-    this->calloc(gvec_other.size());
-    for (size_t i = 0; i < gvec_other.size(); i++)
-        gsl_vector_set( gvec, i, gsl_vector_complex_get( gvec_other.gvec, i ).dat[0] );
-}
-
 //! \brief Move constructor
 gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
 {
@@ -67,6 +57,20 @@ gsl::vector &gsl::vector::operator=(gsl::vector &&gvec_other)
     return *this;
 }
 
+//! \brief Addition assignment operator
+gsl::vector &gsl::vector::operator+=(const gsl::vector &gvec_other)
+{
+    gsl_vector_add(gvec, gvec_other.gvec);
+    return *this;
+}
+
+//! \brief Subtraction assignment operator
+gsl::vector &gsl::vector::operator-=(const gsl::vector &gvec_other)
+{
+    gsl_vector_sub(gvec, gvec_other.gvec);
+    return *this;
+}
+
 //! \brief Destructor
 gsl::vector::~vector()
 {
@@ -80,7 +84,7 @@ double gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i)
 double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
 
 //! \brief Element setter
-double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); } 
+double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
 void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
 
 //! \brief Size accessor
@@ -141,3 +145,95 @@ void gsl::vector::free()
  *         This is slightly slower than using gsl_vector_alloc
  */
 void gsl::vector::calloc(size_t n) { gvec = gsl_vector_calloc(n); }
+
+/*------ friend operators ------*/
+namespace gsl
+{
+    vector operator*(double a, const vector &v)
+    {
+        vector result(v);
+        gsl_vector_scale(result.gvec, a);
+        return result;
+    }
+
+    vector operator*(double a, vector &&v)
+    {
+        gsl_vector_scale(v.gvec, a);
+        return std::move(v);
+    }
+
+    vector operator*(const vector &v, double a)
+    {
+        return a * v;
+    }
+
+    vector operator*(vector &&v, double a)
+    {
+        return a * std::move(v);
+    }
+
+    cvector operator*(complex a, const vector &v)
+    {
+        return cvector(v) * a;
+    }
+
+    cvector operator*(const vector &v, complex a)
+    {
+        return cvector(v) * a;
+    }
+
+    vector operator+(const vector &v1, const vector &v2)
+    {
+        vector result(v1);
+        result += v2;
+        return result;
+    }
+
+    vector operator+(vector &&v1, const vector &v2)
+    {
+        v1 += v2;
+        return std::move(v1);
+    }
+
+    vector operator+(const vector &v1, vector &&v2)
+    {
+        v2 += v1;
+        return std::move(v2);
+    }
+
+    vector operator+(vector &&v1, vector &&v2)
+    {
+        v1 += v2;
+        return std::move(v1);
+    }
+
+    vector operator-(const vector &v1, const vector &v2)
+    {
+        vector result(v1);
+        result -= v2;
+        return result;
+    }
+
+    vector operator-(vector &&v1, const vector &v2)
+    {
+        v1 -= v2;
+        return std::move(v1);
+    }
+
+    vector operator-(const vector &v1, vector &&v2)
+    {
+        v2 -= v1;
+        return std::move(v2);
+    }
+
+    vector operator-(vector &&v1, vector &&v2)
+    {
+        v1 -= v2;
+        return std::move(v1);
+    }
+    
+    bool operator==(const vector &v1, const vector &v2)
+    {
+        return gsl_vector_equal( v1.gvec, v2.gvec );
+    }
+}

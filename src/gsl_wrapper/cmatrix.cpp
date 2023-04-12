@@ -72,7 +72,7 @@ gsl::cmatrix::~cmatrix()
 }
 
 //! \brief Element setter
-void gsl::cmatrix::set(size_t i, size_t j, const gsl::complex &val)
+void gsl::cmatrix::set(size_t i, size_t j, gsl::complex val)
 {
     GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), val.real(), val.imag());
 }

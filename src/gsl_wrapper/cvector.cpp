@@ -32,13 +32,13 @@ gsl::cvector::cvector(const gsl::cvector &gvec_other)
 }
 
 //! \brief Conversion constructor from gsl::vector
-//! \note Move constructor isn't useful, 
+//! \note Move constructor isn't useful,
 //   since contiguous memory can't be reclaimed
-gsl::cvector::cvector(const gsl::vector& gvec_other)
+gsl::cvector::cvector(const gsl::vector &gvec_other)
 {
     this->calloc(gvec_other.size());
     for (size_t i = 0; i < gvec_other.size(); i++)
-        GSL_SET_COMPLEX( gsl_vector_complex_ptr( gvec, i ), gsl_vector_get( gvec_other.gvec, i ), 0.0 );
+        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(gvec_other.gvec, i), 0.0);
 }
 
 //! \brief Move constructor
@@ -68,6 +68,20 @@ gsl::cvector &gsl::cvector::operator=(gsl::cvector &&gvec_other)
     return *this;
 }
 
+//! \brief Addition assignment operator
+gsl::cvector &gsl::cvector::operator+=(const gsl::cvector &gvec_other)
+{
+    gsl_vector_complex_add(gvec, gvec_other.gvec);
+    return *this;
+}
+
+//! \brief Subtraction assignment operator
+gsl::cvector &gsl::cvector::operator-=(const gsl::cvector &gvec_other)
+{
+    gsl_vector_complex_sub(gvec, gvec_other.gvec);
+    return *this;
+}
+
 //! \brief Destructor
 gsl::cvector::~cvector()
 {
@@ -77,9 +91,9 @@ gsl::cvector::~cvector()
 }
 
 //! \brief Element getter (the nice C++ versions don't work)
-void gsl::cvector::set(size_t i, const gsl::complex& val)
+void gsl::cvector::set(size_t i, gsl::complex val)
 {
-    GSL_SET_COMPLEX( gsl_vector_complex_ptr( gvec, i ), val.real(), val.imag() );
+    GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
 }
 // const gsl_complex & gsl::cvector::operator()(size_t i) const
 // {
@@ -89,7 +103,7 @@ void gsl::cvector::set(size_t i, const gsl::complex& val)
 //! \brief Element setter (the nice C++ versions don't work)
 gsl::complex gsl::cvector::get(size_t i) const
 {
-    return gsl::complex( *gsl_vector_complex_ptr( gvec, i ) );
+    return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
 }
 // gsl_complex &gsl::cvector::operator()(size_t i)
 // {
@@ -153,7 +167,89 @@ void gsl::cvector::free()
 
 /*!
  * \brief Allocate memory for underlying gsl_vector
- * \note This method allocates contiguous, zero-initialized memory.
+ * \nocomplexte This method allocates contiguous, zero-initialized memory.
  *         This is slightly slower than using gsl_vector_alloc
  */
 void gsl::cvector::calloc(size_t n) { gvec = gsl_vector_complex_calloc(n); }
+
+/*------ friend operators ------*/
+namespace gsl
+{
+    cvector operator*(complex a, const cvector &v)
+    {
+        cvector result(v);
+        gsl_vector_complex_scale(v.gvec, a.get_gsl_data());
+        return result;
+    }
+
+    cvector operator*(complex a, cvector &&v)
+    {
+        gsl_vector_complex_scale(v.gvec, a.get_gsl_data());
+        return v;
+    }
+
+    cvector operator*(const cvector &v, complex a)
+    {
+        return a * v;
+    }
+
+    cvector operator*(cvector &&v, complex a)
+    {
+        return a * std::move( v );
+    }
+
+    cvector operator+(const cvector &v1, const cvector &v2)
+    {
+        cvector result(v1);
+        result += v2;
+        return result;
+    }
+
+    cvector operator+(cvector &&v1, const cvector &v2)
+    {
+        v1 += v2;
+        return v1;
+    }
+
+    cvector operator+(const cvector &v1, cvector &&v2)
+    {
+        v2 += v1;
+        return v2;
+    }
+
+    cvector operator+(cvector &&v1, cvector &&v2)
+    {
+        v1 += v2;
+        return v1;
+    }    
+
+    cvector operator-(const cvector &v1, const cvector &v2)
+    {
+        cvector result(v1);
+        result -= v2;
+        return result;
+    }
+
+    cvector operator-(cvector &&v1, const cvector &v2)
+    {
+        v1 -= v2;
+        return v1;
+    }
+
+    cvector operator-(const cvector &v1, cvector &&v2)
+    {
+        v2 -= v1;
+        return v2;
+    }
+
+    cvector operator-(cvector &&v1, cvector &&v2)
+    {
+        v1 -= v2;
+        return v1;
+    }
+    
+    bool operator==(const cvector &v1, const cvector &v2)
+    {
+        return gsl_vector_complex_equal( v1.gvec, v2.gvec );
+    }
+}
