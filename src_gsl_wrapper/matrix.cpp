@@ -134,6 +134,16 @@ void gsl::matrix::print() const
     }
 }
 
+void gsl::matrix::print2csv( FILE* out ) const
+{
+    for (int i = 0; i < gmat->size1; ++i)
+    {
+        for (int j = 0; j < gmat->size2; ++j)
+            fprintf(out, "%.*g,", gsl_matrix_get(gmat, i, j));
+        fprintf(out, "\n");
+    }
+}
+
 /*------ Protected Methods for gsl::matrix ------*/
 //! \brief Free memory for underlying gsl_matrix
 void gsl::matrix::free()
