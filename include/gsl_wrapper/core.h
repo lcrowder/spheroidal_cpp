@@ -1,6 +1,7 @@
 #ifndef GSL_WRAPPER_CORE_H_
 #define GSL_WRAPPER_CORE_H_
 
+#include <stdio.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
@@ -126,6 +127,7 @@ namespace gsl
         void clear();
 
         void print() const;
+        void print2csv(FILE* out = stdout) const;
     protected:
         gsl_matrix *gmat;
         void free();
