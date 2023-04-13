@@ -1,7 +1,6 @@
 #include <gsl_wrapper/core.h>
 #include <gsl_wrapper/utils.hpp>
 #include <gsl_wrapper/fft.h>
-#include <fmt/core.h>
 
 int main()
 {

@@ -3,9 +3,7 @@
 #include <gsl_wrapper/utils.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-#include <fmt/core.h>
 #include <cmath>
-
 
 // Use Catch2 to test the imag, real, abs, abs2, and arg methods of gsl::complex
 TEST_CASE("gsl::complex methods", "[gsl::complex]")
@@ -254,7 +252,6 @@ TEST_CASE("gsl::vector and gsl::cvector scalar multiplication", "[gsl::vector][g
     REQUIRE( v3.get(2) == gsl::complex(0.0, 3.0) );
 
     gsl::cvector v4( 1.0_i * gsl::arange(1.0, 4.0) );
-    v4.print();
     REQUIRE( v4.get(0) == gsl::complex(0.0, 1.0) );
     REQUIRE( v4.get(1) == gsl::complex(0.0, 2.0) );
     REQUIRE( v4.get(2) == gsl::complex(0.0, 3.0) );

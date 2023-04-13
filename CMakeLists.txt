@@ -22,13 +22,6 @@ include(FetchContent)
 # Necessary to link. Consider doing this with FetchContent instead
 find_package(GSL REQUIRED)
 
-# Add nice formatting library (use this instead of iostream/stdio)
-FetchContent_Declare(
-  fmtlib
-  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 5.3.0)
-FetchContent_MakeAvailable(fmtlib)
-
 # Add include directory to the path
 include_directories( PRIVATE ${CMAKE_SOURCE_DIR}/include )
 

@@ -1,8 +1,8 @@
 #include <gsl_wrapper/core.h>
 #include <gsl/gsl_vector.h>
-#include <fmt/core.h>
-#include <complex.h>
 #include <gsl/gsl_complex.h>
+#include <stdio.h>
+#include <utility>
 
 /*------ Public Methods for gsl::cvector ------*/
 //! \brief Default constructor
@@ -145,15 +145,15 @@ void gsl::cvector::clear()
 }
 
 //! \brief Print the cvector to stdout
-void gsl::cvector::print() const
+void gsl::cvector::print(FILE* out) const
 {
-    fmt::print("[");
+    fprintf(out, "[");
     for (int i = 0; i < gvec->size; ++i)
     {
         auto x = gsl_vector_complex_get(gvec, i);
-        fmt::print((i == 0) ? "{:g}{:+g}j" : ", {:g}{:+g}j", GSL_REAL(x), GSL_IMAG(x));
+        fprintf(out, "%s% 9g%+9gj", ((i == 0) ? "" : ", "), GSL_REAL(x), GSL_IMAG(x));
     }
-    fmt::print("]\n");
+    fprintf(out, "]\n");
 }
 
 /*------ Protected Methods for gsl::cvector ------*/

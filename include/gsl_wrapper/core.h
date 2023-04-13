@@ -58,7 +58,7 @@ namespace gsl
         void resize(size_t n);
         void clear();
 
-        void print() const;
+        void print(FILE* out = stdout) const;
 
         friend vector operator*( double a, const vector &v );
         friend vector operator*( double a, vector &&v );
@@ -126,7 +126,7 @@ namespace gsl
         void resize(size_t n, size_t m);
         void clear();
 
-        void print() const;
+        void print(FILE* out = stdout) const;
         void print2csv(FILE* out = stdout) const;
     protected:
         gsl_matrix *gmat;
@@ -224,7 +224,7 @@ namespace gsl
         void resize(size_t n);
         void clear();
 
-        void print() const;
+        void print(FILE* out = stdout) const;
 
         friend cvector operator*( complex a, const cvector &v );
         friend cvector operator*( complex a, cvector &&v );
@@ -288,7 +288,7 @@ namespace gsl
         void resize(size_t n, size_t m);
         void clear();
 
-        void print() const;
+        void print(FILE* out = stdout) const;
 
     protected:
         gsl_matrix_complex *gmat;
