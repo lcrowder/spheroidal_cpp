@@ -12,10 +12,22 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int p=atoi(argv[1]);
-    double ua=atof(argv[2]);
-    double ub=atof(argv[3]);
-    int N=atoi(argv[4]);
+    int p=2, N=3;
+    double ua=1.1, ub=2.1;
+    
+    if (argc==5)
+    {
+        p=atoi(argv[1]);
+        ua=atof(argv[2]);
+        ub=atof(argv[3]);
+        N=atoi(argv[4]);
+    }
+    
+
+    cout << "p=" << p <<endl;
+    cout << "ua=" << ua <<endl;
+    cout << "ub=" << ub <<endl;
+    cout << "N=" << N <<endl;
 
     // double h=(ub-ua)/(N-1);
     // vector<double> u;
@@ -35,6 +47,9 @@ int main(int argc, char *argv[])
     cout << "Last u-value is " << u(u.size()-1) << endl;
 
     gsl::matrix P;
+
+    cout << "initialized P" << endl;
+
     legendre_otc(p, u, P);
     cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;
     

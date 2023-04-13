@@ -23,14 +23,14 @@ gsl::vector cont_frac(int n, int m, gsl::vector u)
     int N=u.size();
     gsl::vector H(N);
 
-    // logfile << "Length of u array is " << N << endl;
+    logfile << "Length of u array is " << N << endl;
     
     // Loop over each u value, since each may need different number of iterations to converge
     for(int i=0 ; i<N; ++i)
     {
         double ui=u(i);
 
-        // logfile << "u[" << i << "]=" << ui << endl; 
+        logfile << "u[" << i << "]=" << ui << endl; 
 
         c0=tiny;
         f0=tiny;
@@ -50,7 +50,7 @@ gsl::vector cont_frac(int n, int m, gsl::vector u)
 
             if (fabs(delta-1.)<tol)
             {
-                // logfile << "continued fraction algorithm converged in " << k << " iterations" <<endl;
+                logfile << "continued fraction algorithm converged in " << k << " iterations" <<endl;
                 break;
             }
             
@@ -66,7 +66,7 @@ gsl::vector cont_frac(int n, int m, gsl::vector u)
 
         }
         H(i)=f1;
-        // logfile << "H["<< i << "]=" << H[i] << endl;
+        logfile << "H["<< i << "]=" << H(i) << endl;
     }
     logfile.close();
     return H;
@@ -81,6 +81,7 @@ int geti(int n,int m)
 void legendre_otc(int p, gsl::vector u, gsl::matrix P)
 {
     ofstream logfile("legendre_otc.log");
+    logfile << "opened log file." << endl;
     
     // Initialize some stuff
     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;  
