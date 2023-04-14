@@ -47,11 +47,12 @@ int main(int argc, char *argv[])
     cout << "Last u-value is " << u(u.size()-1) << endl;
 
     gsl::matrix P;
+    gsl::matrix Q;
 
-    cout << "initialized P" << endl;
-
-    legendre_otc(p, u, P);
+    legendre_otc(p, u, P, Q);
+    // legendre_otc(p, u, P);
     cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;
+    // cout << "Last entry of Q is " << Q.get((p+1)*(p+1)-1,N-1) << endl;
     
     int sp=(p+1)*(p+1);
 
@@ -63,22 +64,22 @@ int main(int argc, char *argv[])
     
 
     // Open a file for writing
-    ofstream Pfile("../../data/P.txt");
-    // ofstream Qfile("data/Q.txt");
-    // ofstream dPfile("data/dP.txt");
-    // ofstream dQfile("data/dQ.txt");
+    // ofstream Pfile("../../data/P.txt");
+    // ofstream Qfile("../../data/Q.txt");
+    // ofstream dPfile("../../data/dP.txt");
+    // ofstream dQfile("../../data/dQ.txt");
 
     // Set precision to 16 decimal places
-    Pfile << fixed << setprecision(16);
+    // Pfile << fixed << setprecision(16);
     // Qfile << fixed << setprecision(16);
     // dPfile << fixed << setprecision(16);
     // dQfile << fixed << setprecision(16);
 
     // Check if files are open
-    if (!Pfile.is_open()) {
-        cerr << "Unable to open P file" << std::endl;
-        return 1;
-    }
+    // if (!Pfile.is_open()) {
+    //     cerr << "Unable to open P file" << std::endl;
+    //     return 1;
+    // }
     // if (!Qfile.is_open()) {
     //     cerr << "Unable to open Q file" << std::endl;
     //     return 1;
@@ -93,21 +94,21 @@ int main(int argc, char *argv[])
     // }
 
     // Write the vector to the files
-    for (int i=0; i<sp; ++i) {
-        for (int j=0; j<N; ++j) {
-            Pfile << scientific << P.get(i,j) << " ";
-            // Qfile << scientific << Q.get(i,j) << " ";
-            // dPfile << scientific << dP.get(i,j) << " ";
+    // for (int i=0; i<sp; ++i) {
+    //     for (int j=0; j<N; ++j) {
+    //         Pfile << scientific << P.get(i,j) << " ";
+    //         Qfile << scientific << Q.get(i,j) << " ";
+    //         // dPfile << scientific << dP.get(i,j) << " ";
             // dQfile << scientific << dQ.get(i,j) << " ";
-        }
-        Pfile << endl;
+        // }
+        // Pfile << endl;
         // Qfile << endl;
         // dPfile << endl;
         // dQfile << endl;
-    }
+    // }
 
     // Close the files
-    Pfile.close();
+    // Pfile.close();
     // Qfile.close();
     // dPfile.close();
     // dQfile.close();

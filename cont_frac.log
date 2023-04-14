@@ -1,4 +1,10 @@
-Length of u array is 1
-u[0]=1.5000
-continued fraction algorithm converged in 19 iterations
-H[0]=0.25733
+Length of u array is 3
+u[0]=1.1000
+continued fraction algorithm converged in 37 iterations
+H[0]=0.81724
+u[1]=1.6000
+continued fraction algorithm converged in 17 iterations
+H[1]=0.48627
+u[2]=2.1000
+continued fraction algorithm converged in 14 iterations
+H[2]=0.35635

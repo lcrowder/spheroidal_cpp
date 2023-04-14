@@ -82,22 +82,11 @@ int geti(int n, int m)
     return m + n * (n + 1);
 }
 
-// // Testing stuff
-// void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
-// {
-//     ofstream logfile("legendre_otc.log");
-//     logfile << "opened log file." << endl;
-
-//     logfile << "p=" << p << endl;
-//     logfile << "u(0)=" << u(0) << endl;
-
-//     logfile.close();
-// }
 
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 {
-    ofstream logfile("../../legendre_otc.log");
-    logfile << "opened log file." << endl;
+    FILE *logfile = fopen("../../legendre_otc.log", "w");
+    fprintf(logfile, "opened log file.\n");
 
     // Initialize some stuff
     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
@@ -138,7 +127,7 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
     {
         P.set(0, j, 1.);
     }
-    logfile << "P_0^0 computed." << endl;
+    fprintf(logfile, "P_0^0 computed.\n");
 
     // populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
     if (p > 0)
@@ -175,8 +164,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
                     // logfile << "found P_m^{-m}[" << j <<"]" << endl;
                 }
 
-                logfile << "P_{" << m << "}^{" << m << "} computed." << endl;
-                logfile << "P_{" << m << "}^{" << -m << "} computed." << endl;
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",m,-m );
             }
 
             if (m < p)
@@ -199,8 +188,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
                     // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
                 }
 
-                logfile << "P_{" << m + 1 << "}^{" << m << "} computed." << endl;
-                logfile << "P_{" << m + 1 << "}^{" << -m << "} computed." << endl;
+                fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, -m );
             }
         }
     }
@@ -224,261 +213,269 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
                     P.set(nm_index, j, ((2 * n - 1) * u(j) * P.get(nm1m_index, j) - (n + m - 1) * P.get(nm2m_index, j)) / (n - m));
                     P.set(neg_nm_index, j, neg_nm_coef * P.get(nm_index, j));
                 }
-                logfile << "P_{" << n << "}^{" << m << "} computed." << endl;
-                logfile << "P_{" << n << "}^{" << -m << "} computed." << endl;
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",n,m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",n,-m );
             }
         }
     }
 
-    logfile << "P complete. " << endl;
-    logfile.close();
+    fprintf(logfile, "P complete. \n" );
+    fclose(logfile);
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// void legendre_otc(int p, vector<double> u, vector<vector<double> > &P, vector<vector<double> > &Q)
-// {
-//     ofstream logfile("legendre_otc.log");
 
-//     // Initialize some stuff
-//     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
-//     int nm_index, nm1m_index, nm2m_index, neg_nm_index;
-//     int pp_index, neg_pp_index, pm_index, pm1m_index, neg_pm_index, neg_pm1m_index;
-//     int np1m_index, np2m_index, n, m;
-//     double mm_coef, Qpm1m_coef, neg_pm_coef, neg_pm1m_coef, neg_mm_coef, neg_nm_coef, neg_pp_coef, Qpp1p_coef;
-//     vector<double> H;
 
-//     int N=u.size();
+void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
+{
+    FILE *logfile = fopen("../../legendre_otc.log", "w");
+    fprintf(logfile, "opened log file.\n");
 
-//     // Check that all u-values are valid: u>1
-//     for (int j=0; j<N; ++j)
-//     {
-//         if (u[j]<=1.) {cerr << "all u-values must be strictly greater than 1."; break; }
-//     }
+    // Initialize some stuff
+    int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
+    int nm_index, nm1m_index, nm2m_index, neg_nm_index;
+    int pp_index, neg_pp_index, pm_index, pm1m_index, neg_pm_index, neg_pm1m_index;
+    int np1m_index, np2m_index, n, m;
+    double mm_coef, Qpm1m_coef, neg_pm_coef, neg_pm1m_coef, neg_mm_coef, neg_nm_coef, neg_pp_coef, Qpp1p_coef;
+    gsl::vector H;
 
-//     int sp=(p+1)*(p+1); //Number of P and/or Q functions to compute
+    int N = u.size();
 
-//     // Initialize P, Q, dP, dQ as 2D vectors
-//     P.resize( sp, vector<double>(N));
-//     Q.resize( sp, vector<double>(N));
+    // Check that all u-values are valid: u>1
+    for (int j = 0; j < N; ++j)
+    {
+        if (u(j) <= 1.)
+        {
+            cerr << "all u-values must be strictly greater than 1.";
+            break;
+        }
+    }
 
-//     // Vectors of n and m values corresponding to each index.
-//     vector<int> nn(sp);
-//     vector<int> mm(sp);
-//     for (int i=0; i<sp; ++i)
-//     {
-//         nn[i]=sqrt(floor(i));
-//         mm[i]=i-nn[i]*(nn[i]+1);
-//         // logfile << "i=" << i << endl;
-//         // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
-//     }
+    int sp = (p + 1) * (p + 1); // Number of P and/or Q functions to compute
 
-//     // P_0^0(u)=1
-//     for (int j=0; j< N; ++j){P[0][j]=1.;}
-//     logfile << "P_0^0 computed." << endl;
+    // Initialize P, Q, dP, dQ as 2D vectors
+    P.resize(sp, N);
 
-//     //populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
-//     if (p > 0)
-//     {
-//         for (int m=0; m<=p; ++m)
-//         {
-//             // logfile << "this m=" << m << endl;
+    // Vectors of n and m values corresponding to each index.
+    vector<int> nn(sp);
+    vector<int> mm(sp);
+    for (int i = 0; i < sp; ++i)
+    {
+        nn[i] = sqrt(floor(i));
+        mm[i] = i - nn[i] * (nn[i] + 1);
+        // logfile << "i=" << i << endl;
+        // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
+    }
 
-//             if (m>0)
-//             {
-//                 mm_index = geti(m,m);
-//                 // logfile << "found mm index: " << mm_index << endl;
+    // P_0^0(u)=1
+    for (int j = 0; j < N; ++j)
+    {
+        P.set(0, j, 1.);
+    }
+    fprintf(logfile, "P_0^0 computed.\n");
 
-//                 mm_coef = gsl_sf_doublefact(2.*m-1.);
-//                 // logfile << "found (2m-1)!!" << endl;
+    // populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
+    if (p > 0)
+    {
+        for (int m = 0; m <= p; ++m)
+        {
+            // logfile << "this m=" << m << endl;
 
-//                 neg_mm_index=geti(m,-m);
-//                 // logfile << "found negative mm index: " << neg_mm_index << endl;
+            if (m > 0)
+            {
+                mm_index = geti(m, m);
+                // logfile << "found mm index: " << mm_index << endl;
 
-//                 neg_mm_coef=1./gsl_sf_fact(2.*m);
-//                 // logfile << "found negative mm coefficient" << endl;
+                mm_coef = gsl_sf_doublefact(2. * m - 1.);
+                // logfile << "found (2m-1)!!" << endl;
 
-//                 for (int j=0; j< N; ++j)
-//                 {
-//                     // logfile << "u^2-1=" << u[j]*u[j]-1. << endl;
-//                     // logfile << "exponent = " << 0.5*m << endl;
-//                     // logfile << "(u^2-1)^(m/2)=" << pow(u[j]*u[j]-1. , 0.5*m) << endl;
-//                     // logfile << "C(u^2-1)^(m/2)=" << mm_coef*pow(u[j]*u[j]-1. , 0.5*m) << endl;
+                neg_mm_index = geti(m, -m);
+                // logfile << "found negative mm index: " << neg_mm_index << endl;
 
-//                     P[mm_index][j]=mm_coef*pow(u[j]*u[j]-1. , 0.5*m);     // P_m^m
-//                     // logfile << "found P_m^m[" << j <<"]" << endl;
+                neg_mm_coef = 1. / gsl_sf_fact(2. * m);
+                // logfile << "found negative mm coefficient" << endl;
 
-//                     P[neg_mm_index][j]=neg_mm_coef*P[mm_index][j];      //P_m^{-m}
-//                     // logfile << "found P_m^{-m}[" << j <<"]" << endl;
-//                 }
+                for (int j = 0; j < N; ++j)
+                {
+                    // logfile << "u^2-1=" << u[j]*u[j]-1. << endl;
+                    // logfile << "exponent = " << 0.5*m << endl;
+                    // logfile << "(u^2-1)^(m/2)=" << pow(u[j]*u[j]-1. , 0.5*m) << endl;
+                    // logfile << "C(u^2-1)^(m/2)=" << mm_coef*pow(u[j]*u[j]-1. , 0.5*m) << endl;
 
-//                 logfile << "P_{" << m << "}^{" <<  m << "} computed." << endl;
-//                 logfile << "P_{" << m << "}^{" << -m << "} computed." << endl;
+                    P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m
+                    // logfile << "found P_m^m[" << j <<"]" << endl;
 
-//             }
+                    P.set(neg_mm_index, j, neg_mm_coef * P.get(mm_index, j)); // P_m^{-m}
+                    // logfile << "found P_m^{-m}[" << j <<"]" << endl;
+                }
 
-//             if (m < p)
-//             {
-//                 mm_index = geti(m,m);
-//                 mp1m_index=geti(m+1,m);
-//                 // logfile << "mp1m_index=" << mp1m_index << endl;
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",m,-m );
+            }
 
-//                 neg_mp1m_index=geti(m+1,-m);
-//                 // logfile << "neg_mp1m_index=" << neg_mp1m_index << endl;
+            if (m < p)
+            {
+                mm_index = geti(m, m);
+                mp1m_index = geti(m + 1, m);
+                // logfile << "mp1m_index=" << mp1m_index << endl;
 
-//                 for (int j=0; j<N; ++j)
-//                 {
-//                     // logfile << "P[2][" << j << "]=" << P[2][j] << endl;
+                neg_mp1m_index = geti(m + 1, -m);
+                // logfile << "neg_mp1m_index=" << neg_mp1m_index << endl;
 
-//                     P[mp1m_index][j] = (2*m+1)* u[j]* P[mm_index][j];       //P_{m+1}^m
-//                     // logfile << "P[(m+1,m)[" << j << "]=" << P[mp1m_index][j] << endl;
+                for (int j = 0; j < N; ++j)
+                {
+                    // logfile << "P[2][" << j << "]=" << P[2][j] << endl;
 
-//                     P[neg_mp1m_index][j] =1./gsl_sf_fact(2.*m+1.) *P[mp1m_index][j];    //P_{m+1}^{-m}
-//                     // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
-//                 }
+                    P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m
+                    // logfile << "P[(m+1,m)[" << j << "]=" << P[mp1m_index][j] << endl;
 
-//                 logfile << "P_{" << m+1 << "}^{" << m << "} computed." << endl;
-//                 logfile << "P_{" << m+1 << "}^{" << -m << "} computed." << endl;
-//             }
-//         }
-//     }
+                    P.set(neg_mp1m_index, j, 1. / gsl_sf_fact(2. * m + 1.) * P.get(mp1m_index, j)); // P_{m+1}^{-m}
+                    // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
+                }
 
-//     //Use recursion if higher order is needed.
-//     if (p > 1)
-//     {
-//         for (int m=0; m<=p-2; ++m)
-//         {
-//             //Use forward recursion to compute more P_n^m.
-//             for (int n=m+2; n<=p; ++n)
-//             {
-//                 nm_index=geti(n,m);
-//                 nm1m_index=geti(n-1,m);
-//                 nm2m_index=geti(n-2,m);
-//                 neg_nm_index=geti(n,-m);
-//                 neg_nm_coef=(gsl_sf_fact(1.*(n-m)))/gsl_sf_fact(1.*(n+m));
+                fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, -m );
+            }
+        }
+    }
 
-//                 for (int j=0; j< N; ++j)
-//                 {
-//                     P[nm_index][j]=( (2*n-1)*u[j]*P[nm1m_index][j]-(n+m-1)*P[nm2m_index][j] )/(n-m);
-//                     P[neg_nm_index][j]=neg_nm_coef*P[nm_index][j];
-//                 }
-//                 logfile << "P_{" << n << "}^{" << m << "} computed." << endl;
-//                 logfile << "P_{" << n << "}^{" << -m << "} computed." << endl;
-//             }
-//         }
-//     }
+    // Use recursion if higher order is needed.
+    if (p > 1)
+    {
+        for (int m = 0; m <= p - 2; ++m)
+        {
+            // Use forward recursion to compute more P_n^m.
+            for (int n = m + 2; n <= p; ++n)
+            {
+                nm_index = geti(n, m);
+                nm1m_index = geti(n - 1, m);
+                nm2m_index = geti(n - 2, m);
+                neg_nm_index = geti(n, -m);
+                neg_nm_coef = (gsl_sf_fact(1. * (n - m))) / gsl_sf_fact(1. * (n + m));
 
-//     logfile << "P complete. " << endl;
+                for (int j = 0; j < N; ++j)
+                {
+                    P.set(nm_index, j, ((2 * n - 1) * u(j) * P.get(nm1m_index, j) - (n + m - 1) * P.get(nm2m_index, j)) / (n - m));
+                    P.set(neg_nm_index, j, neg_nm_coef * P.get(nm_index, j));
+                }
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",n,m );
+                fprintf(logfile, "P_{%d}^{%d} computed.\n",n,-m );
+            }
+        }
+    }
 
-//     //--------------------------------------------------------------------------------------
-//     // calculate Q:
+    fprintf(logfile, "P complete. \n" );
 
-//     // Calculate highest order separately
-//     H = cont_frac(p+1,p,u);
-//     pp_index=geti(p,p);
-//     neg_pp_index=geti(p,-p);
-//     neg_pp_coef=1./gsl_sf_fact(2.*p);
-//     Qpp1p_coef=gsl_sf_fact(2.*p)*pow(-1,p);
+    //--------------------------------------------------------------------------------------
+    // calculate Q:
 
-//     for (int j=0; j<N; ++j)
-//     {
-//         Q[pp_index][j]= Qpp1p_coef/ (((2*p+1)*u[j]-H[j])*P[pp_index][j]);     //Q_p^p
-//         Q[neg_pp_index][j]=neg_pp_coef * Q[pp_index][j];                           //Q_p^{-p}
-//     }
 
-//     logfile << "Q_{" << p << "}^{" <<  p << "} computed." << endl;
-//     logfile << "Q_{" << p << "}^{" << -p << "} computed." << endl;
+    // Calculate highest order separately
+    H = cont_frac(p+1,p,u);
+    pp_index=geti(p,p);
+    neg_pp_index=geti(p,-p);
+    neg_pp_coef=1./gsl_sf_fact(2.*p);
+    Qpp1p_coef=gsl_sf_fact(2.*p)*pow(-1,p);
 
-//     if (p > 0)
-//     {
+    for (int j=0; j<N; ++j)
+    {
+        Q.set(pp_index,j, Qpp1p_coef/ (((2*p+1)*u(j)-H(j))*P.get(pp_index,j)) );     //Q_p^p
+        Q.set(neg_pp_index,j, neg_pp_coef * Q.get(pp_index,j));                           //Q_p^{-p}
+    }
 
-//         for (int m=0; m<=p-1; ++m)
-//         {
+    fprintf(logfile , "Q_{%d}^{%d} computed.\n",p,p);
+    fprintf(logfile , "Q_{%d}^{%d} computed.\n",p,-p);
 
-//             logfile << "before cont_frac: m=" << m <<endl;
-//             H=cont_frac(p,m,u);
-//             logfile << "after cont_frac: m=" << m <<endl;
-//             pm_index=geti(p,m);
-//             logfile << "("<<p << "," << m <<") index = " <<pm_index << endl;
-//             pm1m_index=geti(p-1,m);
-//             logfile << "("<<p-1 << "," << m <<") index = " <<pm1m_index << endl;
-//             neg_pm_index=geti(p,-m);
-//             logfile << "("<<p << "," << -m <<") index = " << neg_pm_index << endl;
-//             neg_pm1m_index=geti(p-1,-m);
-//             logfile << "("<<p-1 << "," << -m <<") index = " <<neg_pm1m_index << endl;
+    if (p > 0)
+    {
 
-//             Qpm1m_coef=(1.*gsl_sf_fact(p+m-1.))/gsl_sf_fact(p-m+0.)*pow(-1,m);
-//             neg_pm_coef=(1.*gsl_sf_fact(p-m+0.))/gsl_sf_fact(p+m+0.);
-//             neg_pm1m_coef=(1.*gsl_sf_fact(p-1.-m))/gsl_sf_fact(p-1.+m);
+        for (int m=0; m<=p-1; ++m)
+        {
 
-//             logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+            // logfile << "before cont_frac: m=" << m <<endl;
+            H=cont_frac(p,m,u);
+            // logfile << "after cont_frac: m=" << m <<endl;
+            pm_index=geti(p,m);
+            // logfile << "("<<p << "," << m <<") index = " <<pm_index << endl;
+            pm1m_index=geti(p-1,m);
+            // logfile << "("<<p-1 << "," << m <<") index = " <<pm1m_index << endl;
+            neg_pm_index=geti(p,-m);
+            // logfile << "("<<p << "," << -m <<") index = " << neg_pm_index << endl;
+            neg_pm1m_index=geti(p-1,-m);
+            // logfile << "("<<p-1 << "," << -m <<") index = " <<neg_pm1m_index << endl;
 
-//             for (int j=0; j<N; ++j)
-//             {
-//                 logfile << "j=" << j << endl;
+            Qpm1m_coef=(1.*gsl_sf_fact(p+m-1.))/gsl_sf_fact(p-m+0.)*pow(-1,m);
+            neg_pm_coef=(1.*gsl_sf_fact(p-m+0.))/gsl_sf_fact(p+m+0.);
+            neg_pm1m_coef=(1.*gsl_sf_fact(p-1.-m))/gsl_sf_fact(p-1.+m);
 
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+            // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
 
-//                 Q[pm1m_index][j]=Qpm1m_coef / (P[pm_index][j]-H[j]*P[pm1m_index][j]);
+            for (int j=0; j<N; ++j)
+            {
+                Q.set(pm1m_index,j, Qpm1m_coef / (P.get(pm_index,j)-H(j)*P.get(pm1m_index,j)));
+                Q.set(pm_index,j, H(j)*Q.get(pm1m_index,j));
 
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+                if (m>0)
+                {
+                    Q.set(neg_pm1m_index,j, neg_pm1m_coef*Q.get(pm1m_index,j));
+                    Q.set(neg_pm_index,j, neg_pm_coef*Q.get(pm_index,j));
+                }
 
-//                 Q[pm_index][j]=H[j]*Q[pm1m_index][j];
+            }
 
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+            fprintf(logfile, "Q_{%d}^{%d} computed.\n", p,m);
+            fprintf(logfile, "Q_{%d}^{%d} computed.\n", p-1,m);
+            fprintf(logfile, "Q_{%d}^{%d} computed.\n", p,-m);
+            fprintf(logfile, "Q_{%d}^{%d} computed.\n", p-1,-m);
 
-//                 if (m>0)
-//                 {
-//                     Q[neg_pm1m_index][j]=neg_pm1m_coef*Q[pm1m_index][j];
-//                     Q[neg_pm_index][j]=neg_pm_coef*Q[pm_index][j];
-//                 }
 
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-//             }
+            // Use recursion to compute remaining Qnm's
+            if (p > 1)
+            {
 
-//             logfile << "Q_{" << p << "}^{" <<  m << "} computed." << endl;
-//             logfile << "Q_{" << p-1 << "}^{" <<  m << "} computed." << endl;
-//             logfile << "Q_{" << p << "}^{" <<  -m << "} computed." << endl;
-//             logfile << "Q_{" << p-1 << "}^{" <<  -m << "} computed." << endl;
+                //Use backward recursion to compute Q_n^m for n=p-2:m
+                for (int n=p-2; n>=m; --n)
+                {
+                    nm_index=geti(n,m);
+                    np1m_index=geti(n+1,m);
+                    np2m_index=geti(n+2,m);
+                    neg_nm_index=geti(n,-m);
+                    neg_nm_coef=(1.*gsl_sf_fact(n-m+0.))/gsl_sf_fact(n+m+0.);
 
-//             logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+                    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
 
-//             // Use recursion to compute remaining Qnm's
-//             if (p > 1)
-//             {
+                    for (int j=0; j<N; ++j)
+                    {
+                        Q.set(nm_index, j, ((2*n+3)*u(j)*Q.get(np1m_index,j)-(n-m+2)*Q.get(np2m_index,j))/(n+m+1.));
 
-//                 //Use backward recursion to compute Q_n^m for n=p-2:m
-//                 for (int n=p-2; n>=m; --n)
-//                 {
-//                     nm_index=geti(n,m);
-//                     np1m_index=geti(n+1,m);
-//                     np2m_index=geti(n+2,m);
-//                     neg_nm_index=geti(n,-m);
-//                     neg_nm_coef=(1.*gsl_sf_fact(n-m+0.))/gsl_sf_fact(n+m+0.);
+                        if (m>0)
+                        {
+                            Q.set(neg_nm_index, j, neg_nm_coef * Q.get(nm_index,j));
+                        }
+                    }
+                    
+                    fprintf(logfile, "Q_{%d}^{%d} computed.\n", n,m);
+                    fprintf(logfile, "Q_{%d}^{%d} computed.\n", n,-m);
+                
+                    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+                }
+            }
+        }
+    }
 
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+    fprintf(logfile, "Q complete.\n");
+    fclose(logfile);
+}
 
-//                     for (int j=0; j<N; ++j)
-//                     {
-//                         Q[nm_index][j]=((2*n+3)*u[j]*Q[np1m_index][j]-(n-m+2)*Q[np2m_index][j])/(n+m+1.);
 
-//                         if (m>0)
-//                         {
-//                             Q[neg_nm_index][j]=neg_nm_coef * Q[nm_index][j];
-//                         }
-//                     }
-//                     logfile << "Q_{" << n << "}^{" <<  m << "} computed." << endl;
-//                     logfile << "Q_{" << n << "}^{" << -m << "} computed." << endl;
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-//                 }
-//             }
-//         }
-//     }
 
-//     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-//     logfile << "Q complete." << endl;
-//     logfile.close();
-// }
+
+
+
+
+
+
 
 // void Dlegendre_otc(int p, vector<double> u, vector<vector<double> > &dP)
 // {
