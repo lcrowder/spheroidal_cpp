@@ -128,6 +128,15 @@ void gsl::cmatrix::resize(size_t n, size_t m)
     this->calloc(n, m);
 }
 
+//! \brief Reshape the array
+void gsl::cmatrix::reshape(size_t n, size_t m)
+{
+    // if (n * m != this->size())
+    //     throw std::runtime_error("Cannot reshape cmatrix to new size");
+    gmat->size1 = n;
+    gmat->size2 = m;
+}
+
 //! \brief Clear the gsl::matric and free the underlying gsl_matrix_complex
 void gsl::cmatrix::clear()
 {

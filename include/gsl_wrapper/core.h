@@ -86,6 +86,7 @@ namespace gsl
         void calloc(size_t n);
 
         friend class cvector;
+        friend class matrix;
     };
 
     class matrix
@@ -97,6 +98,7 @@ namespace gsl
 
         // Conversion constructors
         explicit matrix(gsl_matrix *gmat_other);
+        matrix( const vector& v );
         // matrix( const std::vector<std::vector<double>>& smat );
 
         // Copy and move constructors
@@ -124,10 +126,12 @@ namespace gsl
         gsl_matrix *get_gsl_ptr() const { return gmat; }
 
         void resize(size_t n, size_t m);
+        matrix reshape(size_t n, size_t m);
         void clear();
 
         void print(FILE* out = stdout) const;
-        void print2csv(FILE* out = stdout) const;
+        void print_csv(FILE* out = stdout) const;
+        void load_csv(FILE* in = stdin);
     protected:
         gsl_matrix *gmat;
         void free();
@@ -286,6 +290,8 @@ namespace gsl
         gsl_matrix_complex *get_gsl_ptr() const { return gmat; }
 
         void resize(size_t n, size_t m);
+        void reshape(size_t n, size_t m);
+
         void clear();
 
         void print(FILE* out = stdout) const;

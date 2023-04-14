@@ -34,6 +34,14 @@ gsl::matrix::matrix(gsl::matrix &&gmat_other) : gmat(gmat_other.gmat)
     gmat_other.gmat = nullptr;
 }
 
+//! \brief Convert vector into nx1 matrix
+gsl::matrix::matrix(const gsl::vector &gvec_other)
+{
+    this->calloc(gvec_other.size(), 1);
+    for (size_t i = 0; i < gvec_other.size(); i++)
+        gsl_matrix_set(gmat, i, 0, gsl_vector_get( gvec_other.gvec, i ) );
+}
+
 //! \brief Assignment operator
 gsl::matrix &gsl::matrix::operator=(const gsl::matrix &gmat_other)
 {
@@ -114,6 +122,17 @@ void gsl::matrix::resize(size_t n, size_t m)
     this->calloc(n, m);
 }
 
+//! \brief Make a copy of the gsl::matrix by size n1 x m1 instead of n x m (note the number of elements is unchanges)
+gsl::matrix gsl::matrix::reshape( size_t n, size_t m )
+{
+    gsl::matrix gmat_new(n, m);
+
+    for( size_t t = 0; t < n * m; t++ )
+        gmat_new( t / m, t % m ) = this->get( t / this->ncols(), t % this->ncols() );
+    
+    return gmat_new;
+}
+
 //! \brief Clear the gsl::matric and free the underlying gsl_matrix
 void gsl::matrix::clear()
 {
@@ -134,7 +153,7 @@ void gsl::matrix::print(FILE *out) const
     }
 }
 
-void gsl::matrix::print2csv(FILE *out) const
+void gsl::matrix::print_csv(FILE *out) const
 {
     for (int i = 0; i < gmat->size1; ++i)
     {
@@ -142,6 +161,35 @@ void gsl::matrix::print2csv(FILE *out) const
             fprintf(out, "%.17g,", gsl_matrix_get(gmat, i, j));
         fprintf(out, "\n");
     }
+}
+
+void gsl::matrix::load_csv(FILE *in)
+{
+    // Count the number of rows and columns
+    size_t n = 0;
+    size_t m = 0;
+    char c;
+    while ((c = fgetc(in)) != EOF)
+    {
+        if (c == '\n')
+            ++n;
+        else if (c == ',')
+            ++m;
+    }
+    m = (m / n) + 1;
+    this->resize(n, m);
+
+    // Rewind the file
+    rewind(in);
+
+    // Read the data
+    double val;
+    for (size_t i = 0; i < n; ++i)
+        for (size_t j = 0; j < m; ++j)
+        {
+            fscanf(in, "%lf,", &val);
+            gsl_matrix_set(gmat, i, j, val);
+        }
 }
 
 /*------ Protected Methods for gsl::matrix ------*/
