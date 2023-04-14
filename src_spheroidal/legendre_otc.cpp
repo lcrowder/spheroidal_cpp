@@ -82,18 +82,22 @@ int geti(int n, int m)
 }
 
 
+
+// Computes associated legendre functions off the cut of the first kind, P_n^m(u), u>1
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 {
+
+    // Open a log file to print status updates of computations
     FILE *logfile = fopen("../../legendre_otc.log", "w");
     fprintf(logfile, "opened log file.\n");
 
-    // Initialize some stuff
+    // Initialize index and coefficient variables
     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
     int nm_index, nm1m_index, nm2m_index, neg_nm_index;
     int np1m_index, np2m_index, n, m;
     double mm_coef, neg_mm_coef, neg_nm_coef;
-
     int N = u.size();
+    int sp = (p + 1) * (p + 1); // Number of P and/or Q functions to compute
 
     // Check that all u-values are valid: u>1
     for (int j = 0; j < N; ++j)
@@ -105,9 +109,6 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
         }
     }
 
-    int sp = (p + 1) * (p + 1); // Number of P and/or Q functions to compute
-
-    // Initialize P, Q, dP, dQ as 2D vectors
     P.resize(sp, N);
 
     // Vectors of n and m values corresponding to each index.
@@ -117,8 +118,6 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
     {
         nn[i] = sqrt(floor(i));
         mm[i] = i - nn[i] * (nn[i] + 1);
-        // logfile << "i=" << i << endl;
-        // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
     }
 
     // P_0^0(u)=1
@@ -133,34 +132,17 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
     {
         for (int m = 0; m <= p; ++m)
         {
-            // logfile << "this m=" << m << endl;
-
             if (m > 0)
             {
                 mm_index = geti(m, m);
-                // logfile << "found mm index: " << mm_index << endl;
-
                 mm_coef = gsl_sf_doublefact(2. * m - 1.);
-                // logfile << "found (2m-1)!!" << endl;
-
                 neg_mm_index = geti(m, -m);
-                // logfile << "found negative mm index: " << neg_mm_index << endl;
-
                 neg_mm_coef = 1. / gsl_sf_fact(2. * m);
-                // logfile << "found negative mm coefficient" << endl;
 
                 for (int j = 0; j < N; ++j)
                 {
-                    // logfile << "u^2-1=" << u[j]*u[j]-1. << endl;
-                    // logfile << "exponent = " << 0.5*m << endl;
-                    // logfile << "(u^2-1)^(m/2)=" << pow(u[j]*u[j]-1. , 0.5*m) << endl;
-                    // logfile << "C(u^2-1)^(m/2)=" << mm_coef*pow(u[j]*u[j]-1. , 0.5*m) << endl;
-
                     P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m
-                    // logfile << "found P_m^m[" << j <<"]" << endl;
-
                     P.set(neg_mm_index, j, neg_mm_coef * P.get(mm_index, j)); // P_m^{-m}
-                    // logfile << "found P_m^{-m}[" << j <<"]" << endl;
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
@@ -171,20 +153,12 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
             {
                 mm_index = geti(m, m);
                 mp1m_index = geti(m + 1, m);
-                // logfile << "mp1m_index=" << mp1m_index << endl;
-
                 neg_mp1m_index = geti(m + 1, -m);
-                // logfile << "neg_mp1m_index=" << neg_mp1m_index << endl;
 
                 for (int j = 0; j < N; ++j)
                 {
-                    // logfile << "P[2][" << j << "]=" << P[2][j] << endl;
-
                     P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m
-                    // logfile << "P[(m+1,m)[" << j << "]=" << P[mp1m_index][j] << endl;
-
                     P.set(neg_mp1m_index, j, 1. / gsl_sf_fact(2. * m + 1.) * P.get(mp1m_index, j)); // P_{m+1}^{-m}
-                    // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
@@ -230,15 +204,15 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     FILE *logfile = fopen("../../legendre_otc.log", "w");
     fprintf(logfile, "opened log file.\n");
 
-    // Initialize some stuff
+    // Initialize index and coeficient variables
     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
     int nm_index, nm1m_index, nm2m_index, neg_nm_index;
     int pp_index, neg_pp_index, pm_index, pm1m_index, neg_pm_index, neg_pm1m_index;
     int np1m_index, np2m_index, n, m;
     double mm_coef, Qpm1m_coef, neg_pm_coef, neg_pm1m_coef, neg_mm_coef, neg_nm_coef, neg_pp_coef, Qpp1p_coef;
     gsl::vector H;
-
     int N = u.size();
+    int sp = (p + 1) * (p + 1); // Number of P and Q functions to compute
 
     // Check that all u-values are valid: u>1
     for (int j = 0; j < N; ++j)
@@ -250,10 +224,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
         }
     }
 
-    int sp = (p + 1) * (p + 1); // Number of P and/or Q functions to compute
-
-    // Initialize P, Q, dP, dQ as 2D vectors
     P.resize(sp, N);
+    Q.resize(sp, N);
 
     // Vectors of n and m values corresponding to each index.
     vector<int> nn(sp);
@@ -262,8 +234,6 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     {
         nn[i] = sqrt(floor(i));
         mm[i] = i - nn[i] * (nn[i] + 1);
-        // logfile << "i=" << i << endl;
-        // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
     }
 
     // P_0^0(u)=1
@@ -278,34 +248,17 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     {
         for (int m = 0; m <= p; ++m)
         {
-            // logfile << "this m=" << m << endl;
-
             if (m > 0)
             {
                 mm_index = geti(m, m);
-                // logfile << "found mm index: " << mm_index << endl;
-
                 mm_coef = gsl_sf_doublefact(2. * m - 1.);
-                // logfile << "found (2m-1)!!" << endl;
-
                 neg_mm_index = geti(m, -m);
-                // logfile << "found negative mm index: " << neg_mm_index << endl;
-
                 neg_mm_coef = 1. / gsl_sf_fact(2. * m);
-                // logfile << "found negative mm coefficient" << endl;
 
                 for (int j = 0; j < N; ++j)
                 {
-                    // logfile << "u^2-1=" << u[j]*u[j]-1. << endl;
-                    // logfile << "exponent = " << 0.5*m << endl;
-                    // logfile << "(u^2-1)^(m/2)=" << pow(u[j]*u[j]-1. , 0.5*m) << endl;
-                    // logfile << "C(u^2-1)^(m/2)=" << mm_coef*pow(u[j]*u[j]-1. , 0.5*m) << endl;
-
-                    P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m
-                    // logfile << "found P_m^m[" << j <<"]" << endl;
-
+                    P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m  
                     P.set(neg_mm_index, j, neg_mm_coef * P.get(mm_index, j)); // P_m^{-m}
-                    // logfile << "found P_m^{-m}[" << j <<"]" << endl;
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
@@ -316,20 +269,12 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
             {
                 mm_index = geti(m, m);
                 mp1m_index = geti(m + 1, m);
-                // logfile << "mp1m_index=" << mp1m_index << endl;
-
                 neg_mp1m_index = geti(m + 1, -m);
-                // logfile << "neg_mp1m_index=" << neg_mp1m_index << endl;
 
                 for (int j = 0; j < N; ++j)
                 {
-                    // logfile << "P[2][" << j << "]=" << P[2][j] << endl;
-
-                    P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m
-                    // logfile << "P[(m+1,m)[" << j << "]=" << P[mp1m_index][j] << endl;
-
+                    P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m 
                     P.set(neg_mp1m_index, j, 1. / gsl_sf_fact(2. * m + 1.) * P.get(mp1m_index, j)); // P_{m+1}^{-m}
-                    // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
@@ -366,10 +311,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     fprintf(logfile, "P complete. \n" );
 
     //--------------------------------------------------------------------------------------
-    // calculate Q:
-
-
-    // Calculate highest order separately
+    // now calculate Qs:
+    // Calculate highest order separately, using continued fraction and Wronskian
     H = cont_frac(p+1,p,u);
     pp_index=geti(p,p);
     neg_pp_index=geti(p,-p);
@@ -379,7 +322,7 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     for (int j=0; j<N; ++j)
     {
         Q.set(pp_index,j, Qpp1p_coef/ (((2*p+1)*u(j)-H(j))*P.get(pp_index,j)) );     //Q_p^p
-        Q.set(neg_pp_index,j, neg_pp_coef * Q.get(pp_index,j));                           //Q_p^{-p}
+        Q.set(neg_pp_index,j, neg_pp_coef * Q.get(pp_index,j));                      //Q_p^{-p}
     }
 
     fprintf(logfile , "Q_{%d}^{%d} computed.\n",p,p);
@@ -390,24 +333,15 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
         for (int m=0; m<=p-1; ++m)
         {
-
-            // logfile << "before cont_frac: m=" << m <<endl;
             H=cont_frac(p,m,u);
-            // logfile << "after cont_frac: m=" << m <<endl;
             pm_index=geti(p,m);
-            // logfile << "("<<p << "," << m <<") index = " <<pm_index << endl;
             pm1m_index=geti(p-1,m);
-            // logfile << "("<<p-1 << "," << m <<") index = " <<pm1m_index << endl;
             neg_pm_index=geti(p,-m);
-            // logfile << "("<<p << "," << -m <<") index = " << neg_pm_index << endl;
             neg_pm1m_index=geti(p-1,-m);
-            // logfile << "("<<p-1 << "," << -m <<") index = " <<neg_pm1m_index << endl;
 
             Qpm1m_coef=(1.*gsl_sf_fact(p+m-1.))/gsl_sf_fact(p-m+0.)*pow(-1,m);
             neg_pm_coef=(1.*gsl_sf_fact(p-m+0.))/gsl_sf_fact(p+m+0.);
-            neg_pm1m_coef=(1.*gsl_sf_fact(p-1.-m))/gsl_sf_fact(p-1.+m);
-
-            // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
+            neg_pm1m_coef=(1.*gsl_sf_fact(p-1.-m))/gsl_sf_fact(p-1.+m);    
 
             for (int j=0; j<N; ++j)
             {
@@ -427,11 +361,9 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
             fprintf(logfile, "Q_{%d}^{%d} computed.\n", p,-m);
             fprintf(logfile, "Q_{%d}^{%d} computed.\n", p-1,-m);
 
-
             // Use recursion to compute remaining Qnm's
             if (p > 1)
             {
-
                 //Use backward recursion to compute Q_n^m for n=p-2:m
                 for (int n=p-2; n>=m; --n)
                 {
@@ -440,8 +372,6 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
                     np2m_index=geti(n+2,m);
                     neg_nm_index=geti(n,-m);
                     neg_nm_coef=(1.*gsl_sf_fact(n-m+0.))/gsl_sf_fact(n+m+0.);
-
-                    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
 
                     for (int j=0; j<N; ++j)
                     {
@@ -452,17 +382,15 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
                             Q.set(neg_nm_index, j, neg_nm_coef * Q.get(nm_index,j));
                         }
                     }
-                    
+
                     fprintf(logfile, "Q_{%d}^{%d} computed.\n", n,m);
                     fprintf(logfile, "Q_{%d}^{%d} computed.\n", n,-m);
                 
-                    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
                 }
             }
         }
     }
 
-    // logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
     fprintf(logfile, "Q complete.\n");
     fclose(logfile);
 }
@@ -471,421 +399,103 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
 
 
-
-
-
-
-
-// void Dlegendre_otc(int p, vector<double> u, vector<vector<double> > &dP)
-// {
-//     ofstream logfile("Dlegendre_otc.log");
-
-//     // Initialize some stuff
-//     int nm_index, np1m_index, np2m_index, n, m;
-//     int N=u.size();
-//     int sp=(p+1)*(p+1); //Number of P and/or Q functions to compute
-
-//     vector<vector<double> > P;
-//     legendre_otc(p+1,u,&P);
-
-//     // Initialize dPas 2D vector
-//     dP.resize( sp, vector<double>(N));
-
-//     // Vectors of n and m values corresponding to each index.
-//     vector<int> nn(sp);
-//     vector<int> mm(sp);
-//     for (int i=0; i<sp; ++i)
-//     {
-//         nn[i]=sqrt(floor(i));
-//         mm[i]=i-nn[i]*(nn[i]+1);
-//         // logfile << "i=" << i << endl;
-//         // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
-//     }
-
-//     // Compute derivatives
-//     logfile << "computing derivatives now..." << endl;
-
-//     for (int k=0; k<sp; ++k)
-//     {
-//         n=nn[k];
-//         m=mm[k];
-//         nm_index=geti(n,m);
-//         np1m_index=geti(n+1,m);
-
-//         logfile << "n=" << n << endl;
-//         logfile << "m=" << m << endl;
-
-//         for (int j=0; j<N; ++j)
-//         {
-//             dP[nm_index][j]=((m-n-1)*P[np1m_index][j]+(n+1)*u[j]*P[nm_index][j])/(1.-u[j]*u[j]);
-//         }
-
-//         logfile << "dP_{" << n << "}^{" << m <<"} computed." << endl;
-//     }
-//     logfile << "derivatives complete." << endl;
-// }
-
-// void Dlegendre_otc(int p, vector<double> u, vector<vector<double> > &dP, vector<vector<double> > &dQ)
-// {
-
-//     ofstream logfile("Dlegendre_otc.log");
-
-//     // Initialize some stuff
-//     int nm_index, np1m_index, np2m_index, n, m;
-//     int N=u.size();
-//     int sp=(p+1)*(p+1); //Number of P and/or Q functions to compute
-
-//     vector<vector<double> > P;
-//     vector<vector<double> > Q;
-//     legendre_otc(p+1,u,&P,&Q);
-
-//     // Initialize dP, dQ as 2D vectors
-//     dP.resize( sp, vector<double>(N));
-//     dQ.resize( sp, vector<double>(N));
-
-//     // Vectors of n and m values corresponding to each index.
-//     vector<int> nn(sp);
-//     vector<int> mm(sp);
-//     for (int i=0; i<sp; ++i)
-//     {
-//         nn[i]=sqrt(floor(i));
-//         mm[i]=i-nn[i]*(nn[i]+1);
-//         // logfile << "i=" << i << endl;
-//         // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
-//     }
-
-//     // Compute derivatives
-//     logfile << "computing derivatives now..." << endl;
-
-//     for (int k=0; k<sp; ++k)
-//     {
-//         n=nn[k];
-//         m=mm[k];
-//         nm_index=geti(n,m);
-//         np1m_index=geti(n+1,m);
-
-//         logfile << "n=" << n << endl;
-//         logfile << "m=" << m << endl;
-
-//         for (int j=0; j<N; ++j)
-//         {
-//             dP[nm_index][j]=((m-n-1)*P[np1m_index][j]+(n+1)*u[j]*P[nm_index][j])/(1.-u[j]*u[j]);
-//             dQ[nm_index][j]=((m-n-1)*Q[np1m_index][j]+(n+1)*u[j]*Q[nm_index][j])/(1.-u[j]*u[j]);
-//         }
-
-//         logfile << "dP_{" << n << "}^{" << m <<"} computed." << endl;
-//         logfile << "dQ_{" << n << "}^{" << m <<"} computed." << endl;
-//     }
-//     logfile << "derivatives complete." << endl;
-// }
-
-// //////////////////////////// //////////////////////////// //////////////////////////// //////////////////////////
-
-// void legendre_otc(int p, vector<double> u, vector<vector<double> > *P, vector<vector<double> > *Q, vector<vector<double> > *dP, vector<vector<double> > *dQ)
-// {
-
-//     ofstream logfile("legendre_otc.log");
-
-//     // Initialize some stuff
-//     int mm_index, neg_mm_index, mp1m_index, neg_mp1m_index;
-//     int nm_index, nm1m_index, nm2m_index, neg_nm_index;
-//     int pp_index, neg_pp_index, pm_index, pm1m_index, neg_pm_index, neg_pm1m_index;
-//     int np1m_index, np2m_index, n, m;
-//     double mm_coef, Qpm1m_coef, neg_pm_coef, neg_pm1m_coef, neg_mm_coef, neg_nm_coef, neg_pp_coef, Qpp1p_coef;
-//     vector<double> H;
-
-//     int N=u.size();
-//     int pmax=p;
-
-//     //must compute Q in order to find dQ
-//     if (dQoption==1 and Qoption==0){Qoption=1;}
-
-//     // Check that all u-values are valid: u>1
-//     for (int j=0; j<N; ++j)
-//     {
-//         if (u[j]<=1.) {cerr << "all u-values must be strictly greater than 1."; break; }
-//     }
-
-//     // To compute derivatives, we need one higher order of P, Q (p+1) for recurrence relation
-//     int sp=(p+1)*(p+1); //Number of dP and/or dQ functions to compute
-//     if (dPoption == 1 or dQoption == 1){pmax+=1;}
-//     int sp=(pmax+1)*(pmax+1); //Number of P and Q functions to compute
-
-//     // Initialize P, Q, dP, dQ as 2D vectors
-//     vector<vector<double> >  P( sp, vector<double>(N));
-//     vector<vector<double> >  Q( sp, vector<double>(N));
-//     vector<vector<double> > dP(dsp, vector<double>(N));
-//     vector<vector<double> > dQ(dsp, vector<double>(N));
-
-//     // Vectors of n and m values corresponding to each index.
-//     vector<int> nn(sp);
-//     vector<int> mm(sp);
-//     for (int i=0; i<sp; ++i)
-//     {
-//         nn[i]=sqrt(floor(i));
-//         mm[i]=i-nn[i]*(nn[i]+1);
-//         // logfile << "i=" << i << endl;
-//         // logfile << "n=" << nn[i] << ", m=" << mm[i] << endl;
-//     }
-
-//     // P_0^0(u)=1
-//     for (int j=0; j< N; ++j){P[0][j]=1.;}
-//     logfile << "P_0^0 computed." << endl;
-
-//     //populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
-//     if (pmax > 0)
-//     {
-//         for (int m=0; m<=pmax; ++m)
-//         {
-//             // logfile << "this m=" << m << endl;
-
-//             if (m>0)
-//             {
-//                 mm_index = geti(m,m);
-//                 // logfile << "found mm index: " << mm_index << endl;
-
-//                 mm_coef = gsl_sf_doublefact(2.*m-1.);
-//                 // logfile << "found (2m-1)!!" << endl;
-
-//                 neg_mm_index=geti(m,-m);
-//                 // logfile << "found negative mm index: " << neg_mm_index << endl;
-
-//                 neg_mm_coef=1./gsl_sf_fact(2.*m);
-//                 // logfile << "found negative mm coefficient" << endl;
-
-//                 for (int j=0; j< N; ++j)
-//                 {
-//                     // logfile << "u^2-1=" << u[j]*u[j]-1. << endl;
-//                     // logfile << "exponent = " << 0.5*m << endl;
-//                     // logfile << "(u^2-1)^(m/2)=" << pow(u[j]*u[j]-1. , 0.5*m) << endl;
-//                     // logfile << "C(u^2-1)^(m/2)=" << mm_coef*pow(u[j]*u[j]-1. , 0.5*m) << endl;
-
-//                     P[mm_index][j]=mm_coef*pow(u[j]*u[j]-1. , 0.5*m);     // P_m^m
-//                     // logfile << "found P_m^m[" << j <<"]" << endl;
-
-//                     P[neg_mm_index][j]=neg_mm_coef*P[mm_index][j];      //P_m^{-m}
-//                     // logfile << "found P_m^{-m}[" << j <<"]" << endl;
-//                 }
-
-//                 logfile << "P_{" << m << "}^{" <<  m << "} computed." << endl;
-//                 logfile << "P_{" << m << "}^{" << -m << "} computed." << endl;
-
-//             }
-
-//             if (m < pmax)
-//             {
-//                 mm_index = geti(m,m);
-//                 mp1m_index=geti(m+1,m);
-//                 // logfile << "mp1m_index=" << mp1m_index << endl;
-
-//                 neg_mp1m_index=geti(m+1,-m);
-//                 // logfile << "neg_mp1m_index=" << neg_mp1m_index << endl;
-
-//                 for (int j=0; j<N; ++j)
-//                 {
-//                     // logfile << "P[2][" << j << "]=" << P[2][j] << endl;
-
-//                     P[mp1m_index][j] = (2*m+1)* u[j]* P[mm_index][j];       //P_{m+1}^m
-//                     // logfile << "P[(m+1,m)[" << j << "]=" << P[mp1m_index][j] << endl;
-
-//                     P[neg_mp1m_index][j] =1./gsl_sf_fact(2.*m+1.) *P[mp1m_index][j];    //P_{m+1}^{-m}
-//                     // logfile << "P[(m+1,-m][" << j << "]=" << P[neg_mp1m_index][j] << endl;
-//                 }
-
-//                 logfile << "P_{" << m+1 << "}^{" << m << "} computed." << endl;
-//                 logfile << "P_{" << m+1 << "}^{" << -m << "} computed." << endl;
-//             }
-//         }
-//     }
-
-//     //Use recursion if higher order is needed.
-//     if (pmax > 1)
-//     {
-//         for (int m=0; m<=pmax-2; ++m)
-//         {
-//             //Use forward recursion to compute more P_n^m.
-//             for (int n=m+2; n<=pmax; ++n)
-//             {
-//                 nm_index=geti(n,m);
-//                 nm1m_index=geti(n-1,m);
-//                 nm2m_index=geti(n-2,m);
-//                 neg_nm_index=geti(n,-m);
-//                 neg_nm_coef=(gsl_sf_fact(1.*(n-m)))/gsl_sf_fact(1.*(n+m));
-
-//                 for (int j=0; j< N; ++j)
-//                 {
-//                     P[nm_index][j]=( (2*n-1)*u[j]*P[nm1m_index][j]-(n+m-1)*P[nm2m_index][j] )/(n-m);
-//                     P[neg_nm_index][j]=neg_nm_coef*P[nm_index][j];
-//                 }
-//                 logfile << "P_{" << n << "}^{" << m << "} computed." << endl;
-//                 logfile << "P_{" << n << "}^{" << -m << "} computed." << endl;
-//             }
-//         }
-//     }
-
-//     logfile << "P complete. " << endl;
-
-//     //--------------------------------------------------------------------------------------
-//     // If desired, calculate Q:
-//     if (Qoption==1)
-//     {
-//         // Calculate highest order separately
-//         H = cont_frac(pmax+1,pmax,u);
-//         pp_index=geti(pmax,pmax);
-//         neg_pp_index=geti(pmax,-pmax);
-//         neg_pp_coef=1./gsl_sf_fact(2.*pmax);
-//         Qpp1p_coef=gsl_sf_fact(2.*pmax)*pow(-1,pmax);
-
-//         for (int j=0; j<N; ++j)
-//         {
-//             Q[pp_index][j]= Qpp1p_coef/ (((2*pmax+1)*u[j]-H[j])*P[pp_index][j]);     //Q_p^p
-//             Q[neg_pp_index][j]=neg_pp_coef * Q[pp_index][j];                           //Q_p^{-p}
-//         }
-
-//         logfile << "Q_{" << pmax << "}^{" <<  pmax << "} computed." << endl;
-//         logfile << "Q_{" << pmax << "}^{" << -pmax << "} computed." << endl;
-
-//         if (pmax > 0)
-//         {
-
-//             for (int m=0; m<=pmax-1; ++m)
-//             {
-
-//                 logfile << "before cont_frac: m=" << m <<endl;
-//                 H=cont_frac(pmax,m,u);
-//                 logfile << "after cont_frac: m=" << m <<endl;
-//                 pm_index=geti(pmax,m);
-//                 logfile << "("<<pmax << "," << m <<") index = " <<pm_index << endl;
-//                 pm1m_index=geti(pmax-1,m);
-//                 logfile << "("<<pmax-1 << "," << m <<") index = " <<pm1m_index << endl;
-//                 neg_pm_index=geti(pmax,-m);
-//                 logfile << "("<<pmax << "," << -m <<") index = " << neg_pm_index << endl;
-//                 neg_pm1m_index=geti(pmax-1,-m);
-//                 logfile << "("<<pmax-1 << "," << -m <<") index = " <<neg_pm1m_index << endl;
-
-//                 Qpm1m_coef=(1.*gsl_sf_fact(pmax+m-1.))/gsl_sf_fact(pmax-m+0.)*pow(-1,m);
-//                 neg_pm_coef=(1.*gsl_sf_fact(pmax-m+0.))/gsl_sf_fact(pmax+m+0.);
-//                 neg_pm1m_coef=(1.*gsl_sf_fact(pmax-1.-m))/gsl_sf_fact(pmax-1.+m);
-
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                 for (int j=0; j<N; ++j)
-//                 {
-//                     logfile << "j=" << j << endl;
-
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                     Q[pm1m_index][j]=Qpm1m_coef / (P[pm_index][j]-H[j]*P[pm1m_index][j]);
-
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                     Q[pm_index][j]=H[j]*Q[pm1m_index][j];
-
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                     if (m>0)
-//                     {
-//                         Q[neg_pm1m_index][j]=neg_pm1m_coef*Q[pm1m_index][j];
-//                         Q[neg_pm_index][j]=neg_pm_coef*Q[pm_index][j];
-//                     }
-
-//                     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-//                 }
-
-//                 logfile << "Q_{" << pmax << "}^{" <<  m << "} computed." << endl;
-//                 logfile << "Q_{" << pmax-1 << "}^{" <<  m << "} computed." << endl;
-//                 logfile << "Q_{" << pmax << "}^{" <<  -m << "} computed." << endl;
-//                 logfile << "Q_{" << pmax-1 << "}^{" <<  -m << "} computed." << endl;
-
-//                 logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                 // Use recursion to compute remaining Qnm's
-//                 if (pmax > 1)
-//                 {
-
-//                     //Use backward recursion to compute Q_n^m for n=p-2:m
-//                     for (int n=pmax-2; n>=m; --n)
-//                     {
-//                         nm_index=geti(n,m);
-//                         np1m_index=geti(n+1,m);
-//                         np2m_index=geti(n+2,m);
-//                         neg_nm_index=geti(n,-m);
-//                         neg_nm_coef=(1.*gsl_sf_fact(n-m+0.))/gsl_sf_fact(n+m+0.);
-
-//                         logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//                         for (int j=0; j<N; ++j)
-//                         {
-//                             Q[nm_index][j]=((2*n+3)*u[j]*Q[np1m_index][j]-(n-m+2)*Q[np2m_index][j])/(n+m+1.);
-
-//                             if (m>0)
-//                             {
-//                                 Q[neg_nm_index][j]=neg_nm_coef * Q[nm_index][j];
-//                             }
-//                         }
-//                         logfile << "Q_{" << n << "}^{" <<  m << "} computed." << endl;
-//                         logfile << "Q_{" << n << "}^{" << -m << "} computed." << endl;
-//                         logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-//                     }
-//                 }
-//             }
-//         }
-//         logfile << "Q complete." << endl;
-//     }
-
-//     logfile << "Q_0^0(" << u[0] << ") = " << Q[0][0] << endl;
-
-//     //--------------------------------------------------------------------------------------
-
-//     // Compute derivatives, if desired
-//     if (dPoption==1 or dQoption==1)
-//     {
-//         logfile << "computing derivatives now..." << endl;
-
-//         for (int k=0; k<dsp; ++k)
-//         {
-//             n=nn[k];
-//             m=mm[k];
-//             nm_index=geti(n,m);
-//             np1m_index=geti(n+1,m);
-
-//             logfile << "n=" << n << endl;
-//             logfile << "m=" << m << endl;
-
-//             for (int j=0; j<N; ++j)
-//             {
-//                 if (dPoption==1) { dP[nm_index][j]=((m-n-1)*P[np1m_index][j]+(n+1)*u[j]*P[nm_index][j])/(1.-u[j]*u[j]); }
-//                 if (dQoption==1) { dQ[nm_index][j]=((m-n-1)*Q[np1m_index][j]+(n+1)*u[j]*Q[nm_index][j])/(1.-u[j]*u[j]); }
-//             }
-
-//             if (dPoption==1) { logfile << "dP_{" << n << "}^{" << m <<"} computed." << endl; }
-//             if (dQoption==1) { logfile << "dQ_{" << n << "}^{" << m <<"} computed." << endl; }
-//         }
-//     }
-
-//     // Store all arrays into 3D matrix
-//     int num_matrices=1+Qoption+dPoption+dQoption;
-
-//     // logfile << "num matrices = " << num_matrices << endl;
-
-//     vector<vector<vector<double> > > PQdPdQ(num_matrices, vector<vector<double> >(dsp, vector<double>(N)));
-
-//     // logfile << "PQdPdQ dim 1 size =" << PQdPdQ.size() << endl;
-//     // logfile << "PQdPdQ dim 2 size =" << PQdPdQ[0].size() << endl;
-//     // logfile << "PQdPdQ dim 3 size =" << PQdPdQ[0][0].size() << endl;
-
-//     for (int i=0; i<dsp; ++i )
-//     {
-//         for (int j=0; j<N; ++j)
-//         {
-//             PQdPdQ[0][i][j]=P[i][j];
-//             if (Qoption==1) {PQdPdQ[1][i][j]=Q[i][j]; }
-//             if (dPoption==1) {PQdPdQ[1+Qoption][i][j]=dP[i][j]; }
-//             if (dQoption==1) {PQdPdQ[2+dPoption][i][j]=dQ[i][j]; }
-//         }
-//     }
-
-//     logfile.close();
-//     return PQdPdQ;
-
-// }
+void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &dP)
+{
+    FILE* logfile= fopen("../../Dlegendre_otc.log","w");
+
+    // Initialize index and coefficient variables
+    int nm_index, np1m_index, np2m_index, n, m;
+    int N=u.size();
+    int sp=(p+1)*(p+1); //Number of dP functions to compute
+
+    gsl::matrix P_pp1;
+    legendre_otc(p+1, u, P_pp1); // Need to compute P up to order p+1 in order to get dP to order p
+
+    dP.resize(sp, N);
+    P.resize(sp, N);
+
+    // Vectors of n and m values corresponding to each index.
+    vector<int> nn(sp);
+    vector<int> mm(sp);
+    for (int i=0; i<sp; ++i)
+    {
+        nn[i]=sqrt(floor(i));
+        mm[i]=i-nn[i]*(nn[i]+1);
+    }
+
+    // Compute derivatives using recurrence relation dPnm= [(m-n-1)*P_{n+1}^m(u) + (n+1)*u*P_n^m(u)]/(1-u^2)
+    // --------------------------------------------------------------------------------
+    fprintf(logfile, "computing dP:\n");
+
+    for (int k=0; k<sp; ++k)
+    {
+        n=nn[k];
+        m=mm[k];
+        nm_index=geti(n,m);
+        np1m_index=geti(n+1,m);
+
+        for (int j=0; j<N; ++j)
+        {
+            dP.set(nm_index, j, ((m-n-1)*P_pp1.get(np1m_index,j)+(n+1)*u(j)*P_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
+            P.set(nm_index, j, P_pp1.get(nm_index, j));
+        }
+
+        fprintf(logfile, "dP_{%d}^{%d} computed.\n",n,m);
+    }
+    fprintf(logfile,  "dP complete.\n");
+    fclose(logfile);
+}
+
+
+
+void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q, gsl::matrix &dP, gsl::matrix &dQ)
+{
+    FILE* logfile= fopen("../../Dlegendre_otc.log","w");
+
+    // Initialize index and coefficient variables
+    int nm_index, np1m_index, np2m_index, n, m;
+    int N=u.size();
+    int sp=(p+1)*(p+1); //Number of dP, dQ functions to compute
+
+    gsl::matrix P_pp1, Q_pp1;
+    legendre_otc(p+1, u, P_pp1, Q_pp1); // Need to compute P up to order p+1 in order to get dP to order p
+
+    dP.resize(sp, N);
+    P.resize(sp, N);
+    dQ.resize(sp, N);
+    Q.resize(sp, N);
+
+    // Vectors of n and m values corresponding to each index.
+    vector<int> nn(sp);
+    vector<int> mm(sp);
+    for (int i=0; i<sp; ++i)
+    {
+        nn[i]=sqrt(floor(i));
+        mm[i]=i-nn[i]*(nn[i]+1);
+    }
+
+    // Compute derivatives using recurrence relation dPnm= [(m-n-1)*P_{n+1}^m(u) + (n+1)*u*P_n^m(u)]/(1-u^2)
+    // --------------------------------------------------------------------------------
+    fprintf(logfile, "computing dP, dQ:\n");
+
+    for (int k=0; k<sp; ++k)
+    {
+        n=nn[k];
+        m=mm[k];
+        nm_index=geti(n,m);
+        np1m_index=geti(n+1,m);
+
+        for (int j=0; j<N; ++j)
+        {
+            dP.set(nm_index, j, ((m-n-1)*P_pp1.get(np1m_index,j)+(n+1)*u(j)*P_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
+            P.set(nm_index, j, P_pp1.get(nm_index, j));
+            dQ.set(nm_index, j, ((m-n-1)*Q_pp1.get(np1m_index,j)+(n+1)*u(j)*Q_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
+            Q.set(nm_index, j, Q_pp1.get(nm_index, j));
+        }
+
+        fprintf(logfile, "dP_{%d}^{%d} computed.\n",n,m);
+        fprintf(logfile, "dQ_{%d}^{%d} computed.\n",n,m);
+    }
+    fprintf(logfile,  "dP, dQ complete.\n");
+    fclose(logfile);
+}

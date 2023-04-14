@@ -7,10 +7,9 @@ using namespace std;
 
 gsl::vector  cont_frac(int n, int m, gsl::vector  u);
 int geti(int n,int m);
-// vector<vector<vector<double> > > legendre_otc(int p, vector<double> u, int Qoption = 1, int dPoption = 0, int dQoption = 0);
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P);
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q);
-// void Dlegendre_otc(int p, vector<double> u, vector<vector<double> > &dP);
-// void Dlegendre_otc(int p, vector<double> u, vector<vector<double> > &dP, vector<vector<double> > &dQ);
+void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &dP);
+void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q, gsl::matrix &dP, gsl::matrix &dQ);
 
 #endif // _LEGENDGRE_OTC_H_
