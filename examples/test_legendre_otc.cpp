@@ -53,10 +53,10 @@ int main(int argc, char *argv[])
     FILE* dPfile = fopen("../../data/dP.csv","w");
     FILE* dQfile = fopen("../../data/dQ.csv","w");
 
-    P.print2csv(Pfile); 
-    Q.print2csv(Qfile); 
-    dP.print2csv(dPfile); 
-    dQ.print2csv(dQfile);
+    P.print_csv(Pfile); 
+    Q.print_csv(Qfile); 
+    dP.print_csv(dPfile); 
+    dQ.print_csv(dQfile);
 
     fclose(Pfile);
     fclose(Qfile);
