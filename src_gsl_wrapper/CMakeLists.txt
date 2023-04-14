@@ -12,4 +12,4 @@ set( header_list ../include/gsl_wrapper/core.h
 
 add_library( gsl_wrapper ${source_list} ${header_list} )
 set_target_properties(gsl_wrapper PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(gsl_wrapper GSL::gsl GSL::gslcblas fmt::fmt)
+target_link_libraries(gsl_wrapper GSL::gsl GSL::gslcblas)

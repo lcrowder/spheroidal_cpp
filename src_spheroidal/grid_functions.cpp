@@ -2,7 +2,6 @@
 #include <gsl_wrapper/utils.hpp>
 #include <gsl_wrapper/core.h>
 #include <gsl/gsl_math.h>
-#include <fmt/core.h>
 
 /*!
  * \brief Computes grid size of spheroidal harmonics grid given the order.

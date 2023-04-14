@@ -262,9 +262,22 @@ TEST_CASE("gsl::cvector element access", "[gsl::cvector]")
 TEST_CASE("gsl::vector print", "[gsl::vector][gsl::cector][gsl::matrix][gsl::cmatrix]")
 {
     gsl::vector v(5);
+    for (size_t i = 0; i < v.size(); i++)
+        v(i) = i;
+
     gsl::cvector cv(5);
+    for (size_t i = 0; i < cv.size(); i++)
+        cv.set(i, gsl_complex_rect(i, i));
+
     gsl::matrix m(2, 3);
+    for (size_t i = 0; i < m.nrows(); i++)
+        for (size_t j = 0; j < m.ncols(); j++)
+            m(i, j) = i + j;
+
     gsl::cmatrix cm(2, 3);
+    for (size_t i = 0; i < cm.nrows(); i++)
+        for (size_t j = 0; j < cm.ncols(); j++)
+            cm.set(i, j, gsl_complex_rect(i + j, i + j));
 
     v.print();
     cv.print();

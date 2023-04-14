@@ -6,4 +6,4 @@ set( header_list ../include/spheroidal/grid_functions.h
 
 add_library( spheroidal ${source_list} ${header_list} )
 set_target_properties(spheroidal PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(spheroidal gsl_wrapper GSL::gsl GSL::gslcblas fmt::fmt)
+target_link_libraries(spheroidal gsl_wrapper GSL::gsl GSL::gslcblas)

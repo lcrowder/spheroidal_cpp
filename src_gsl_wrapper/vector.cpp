@@ -1,7 +1,7 @@
 #include <gsl_wrapper/core.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
-#include <fmt/core.h>
+#include <utility>
 
 /*------ Public Methods for gsl::vector ------*/
 //! \brief Default constructor
@@ -122,12 +122,12 @@ void gsl::vector::clear()
 }
 
 //! \brief Print the vector to stdout
-void gsl::vector::print() const
+void gsl::vector::print(FILE * out) const
 {
-    fmt::print("[");
+    fprintf(out, "[");
     for (int i = 0; i < gvec->size; ++i)
-        fmt::print((i == 0) ? "{:g}" : ", {:g}", gsl_vector_get(gvec, i));
-    fmt::print("]\n");
+        fprintf(out, "%s%g", (i == 0) ? "" : ", ", gsl_vector_get(gvec, i));
+    fprintf(out, "]\n");
 }
 
 /*------ Protected Methods for gsl::vector ------*/

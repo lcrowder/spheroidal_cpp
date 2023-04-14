@@ -22,7 +22,7 @@ set( gsl_wrapper_test_list gsl_wrapper/test_wrapper.cpp
 
 # Add an executable (but not a ctest) to run all tests
 add_executable( all_gsl_wrapper_tests ${gsl_wrapper_test_list} )
-target_link_libraries(all_gsl_wrapper_tests gsl_wrapper Catch2::Catch2WithMain fmt::fmt )
+target_link_libraries(all_gsl_wrapper_tests gsl_wrapper Catch2::Catch2WithMain )
                           
 # Add the executable and `add_test` for each individual test file
 set( all_tests ${gsl_wrapper_test_list} )
@@ -30,7 +30,7 @@ foreach( test ${all_tests} )
     get_filename_component( test_name ${test} NAME_WE )
 
     add_executable( ${test_name} ${test} )
-    target_link_libraries( ${test_name} spheroidal gsl_wrapper Catch2::Catch2WithMain fmt::fmt )
+    target_link_libraries( ${test_name} spheroidal gsl_wrapper Catch2::Catch2WithMain )
     
     add_test( NAME ${test_name} COMMAND ${test_name} )
 endforeach()

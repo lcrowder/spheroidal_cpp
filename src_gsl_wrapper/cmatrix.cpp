@@ -1,7 +1,7 @@
 #include <gsl_wrapper/core.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_complex.h>
-#include <fmt/core.h>
+#include <stdio.h>
 
 //! \brief Default constructor
 gsl::cmatrix::cmatrix() : gmat(nullptr) {}
@@ -137,17 +137,17 @@ void gsl::cmatrix::clear()
 }
 
 //! \brief Print the cmatrix to stdout
-void gsl::cmatrix::print() const
+void gsl::cmatrix::print(FILE *out) const
 {
     for (int i = 0; i < gmat->size1; ++i)
     {
-        fmt::print((i == 0) ? "[" : " ");
+        fprintf(out, (i == 0) ? "[" : " ");
         for (int j = 0; j < gmat->size2; ++j)
         {
             auto x = gsl_matrix_complex_get(gmat, i, j);
-            fmt::print((j == 0) ? "{: 9g}{:+9g}j" : " {: 9g}{:+9g}j", GSL_REAL(x), GSL_IMAG(x));
+            fprintf(out, "%s% 9g%+9gj", ((j == 0) ? "" : ", "), GSL_REAL(x), GSL_IMAG(x));
         }
-        fmt::print((i == (gmat->size1 - 1) ? "]\n" : "\n"));
+        fprintf(out, (i == (gmat->size1 - 1) ? "]\n" : ",\n"));
     }
 }
 

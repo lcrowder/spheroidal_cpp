@@ -5,8 +5,7 @@
 #include <stdio.h>
 #include <gsl_wrapper/utils.hpp>
 #include <gsl_wrapper/core.h>
-#include <fmt/core.h>
-#include <gsl/gsl_math.h>
+#include <gsl/gsl_math.h> 
 #include <gsl/gsl_sf_gamma.h>
 using namespace std;
 
