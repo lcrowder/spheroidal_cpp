@@ -1,27 +1,42 @@
-#include <gsl_wrapper/core.h>
-#include <gsl_wrapper/utils.hpp>
-#include <gsl_wrapper/fft.h>
+#include <yawg/core.h>
+#include <yawg/utils.hpp>
+#include <yawg/fft.h>
+#include <gsl/gsl_blas.h>
 
 int main()
 {
-    //gsl_vector * v = gsl_vector_alloc(10);
-    gsl::cmatrix x(3, 4);
-    for (size_t i = 0; i < 3; i++)
-        for (size_t j = 0; j < 4; j++)
-            x.set(i, j, gsl::complex(0.5 * i + 0.25 * j, 0.25 * i + 0.5 * j));
-
-    gsl::cmatrix y = gsl::fft( x, 2 );
-    y.print();
-
-    gsl::cvector z = gsl::linspace(0, 1, 5);
-    z.print();
-    using namespace gsl::complex_literals;
-    z(1) = gsl::complex( 1, 2 );
-    z.print();
-
-
-    gsl::complex z1 = z(1);
-    printf( "%f + %fi\n", z(1).real(), z(1).imag() );
-    return 0;
+    gsl::matrix M(9, 9);
+    for (int i = 0; i < 9; i++)
+        for (int j = 0; j < 9; j++)
+            M(i, j) = i + j;
     
+    gsl::matrix N(3, 3);
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            N(i, j) = i + j;
+
+    gsl::matrix M2(3, 3);
+    
+    M.print();
+    // Loop over each column of M, reshape it to a 3x3 array, and multiply it by N
+    for (int i = 0; i < 9; i++)
+    {
+        // Get **Reference** to row i
+        gsl::row_view row = M.row(i);
+
+        // Reshape row to 3x3 matrix.
+        //  Note: This only works for "Row Views" (i.e. not "Column Views")
+        //   or vector_views that have stride 1. This is due to irreconcilable memory
+        //   storage differences. Apologies
+        gsl::matrix_view row_reshaped( row.reshape( 3, 3 ) );
+
+        // Multiply row_reshaped by N.
+        //  Another note: Keep in mind that matrix multiplication can't be done in place,
+        //  so there is a temp created here. All in all, these views may not be super useful
+        //  in every case. Consider carefully if it'd be simpler just to copy the column
+        row_reshaped = row_reshaped * N;
+    }
+    M.print();
+
+    return 0; 
 }
