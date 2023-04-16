@@ -1,4 +1,5 @@
-#include <gsl_wrapper/core.h>
+#include <yawg/matrix.h>
+#include <yawg/complex.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_complex.h>
 #include <stdio.h>
@@ -76,14 +77,22 @@ void gsl::cmatrix::set(size_t i, size_t j, gsl::complex val)
 {
     GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), val.real(), val.imag());
 }
-// gsl_complex &gsl::cmatrix::operator()(size_t i, size_t j) { return *gsl_matrix_complex_ptr(gmat, i, j); }
 
 //! \brief Element getter
 gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
 {
     return gsl::complex(gsl_matrix_complex_get(gmat, i, j));
 }
-// const gsl::complex &gsl::cmatrix::operator()(size_t i, size_t j) const { return *gsl_matrix_complex_ptr(gmat, i, j); }
+
+gsl::complex_ref gsl::cmatrix::operator()(size_t i, size_t j)
+{
+    return gsl::complex_ref( gsl_matrix_complex_ptr(gmat, i, j) ); 
+}
+
+const gsl::complex_ref gsl::cmatrix::operator()(size_t i, size_t j) const
+{
+     return gsl::complex_ref( gsl_matrix_complex_ptr(gmat, i, j) );
+}
 
 //! \brief Size accessor
 size_t gsl::cmatrix::size() const

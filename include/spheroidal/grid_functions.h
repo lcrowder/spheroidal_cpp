@@ -1,7 +1,7 @@
 #ifndef GRID_FUNCTIONS_H_
 #define GRID_FUNCTIONS_H_
 
-#include <gsl_wrapper/core.h>
+#include <yawg/matrix.h>
 
 //! \brief Computes grid size of spheroidal harmonics grid given the order.
 int spharm_grid_size_ord( int p, int& nu, int& nv );

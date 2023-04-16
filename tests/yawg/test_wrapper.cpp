@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include <gsl_wrapper/core.h>
+#include <yawg/core.h>
 #include <catch2/catch_test_macros.hpp>
 
 // Use Catch2 to test the various constructors for gsl::vector
@@ -34,32 +34,32 @@ TEST_CASE("gsl::complex constructors", "[gsl::complex]")
 {
     // Default constructor
     gsl::complex c1;
-    REQUIRE(c1.get_gsl_data().dat[0] == 0.0);
-    REQUIRE(c1.get_gsl_data().dat[1] == 0.0);
+    REQUIRE(c1.dat[0] == 0.0);
+    REQUIRE(c1.dat[1] == 0.0);
 
     // Constructor with real and imaginary parts
     gsl::complex c2(1.0, 2.0);
-    REQUIRE(c2.get_gsl_data().dat[0] == 1.0);
-    REQUIRE(c2.get_gsl_data().dat[1] == 2.0);
+    REQUIRE(c2.dat[0] == 1.0);
+    REQUIRE(c2.dat[1] == 2.0);
 
     // Constructor with one parameter
     gsl::complex c3(1.0);
-    REQUIRE(c3.get_gsl_data().dat[0] == 1.0);
-    REQUIRE(c3.get_gsl_data().dat[1] == 0.0);
+    REQUIRE(c3.dat[0] == 1.0);
+    REQUIRE(c3.dat[1] == 0.0);
 
     // Copy constructor
     gsl::complex c4(c3);
-    REQUIRE(c3.get_gsl_data().dat[0] == 1.0);
-    REQUIRE(c3.get_gsl_data().dat[1] == 0.0);
-    REQUIRE(c4.get_gsl_data().dat[0] == 1.0);
-    REQUIRE(c4.get_gsl_data().dat[1] == 0.0);
+    REQUIRE(c3.dat[0] == 1.0);
+    REQUIRE(c3.dat[1] == 0.0);
+    REQUIRE(c4.dat[0] == 1.0);
+    REQUIRE(c4.dat[1] == 0.0);
 
     // Test that copy is deep
     c3.set(2.0, 3.0);
-    REQUIRE(c3.get_gsl_data().dat[0] == 2.0);
-    REQUIRE(c3.get_gsl_data().dat[1] == 3.0);
-    REQUIRE(c4.get_gsl_data().dat[0] == 1.0);
-    REQUIRE(c4.get_gsl_data().dat[1] == 0.0);
+    REQUIRE(c3.dat[0] == 2.0);
+    REQUIRE(c3.dat[1] == 3.0);
+    REQUIRE(c4.dat[0] == 1.0);
+    REQUIRE(c4.dat[1] == 0.0);
 }
 
 // Use Catch2 to test the various constructors for gsl::cvector
@@ -246,15 +246,12 @@ TEST_CASE("gsl::cvector element access", "[gsl::cvector]")
 {
     gsl::cvector v(10);
     for (size_t i = 0; i < v.size(); i++)
-        // v(i) = gsl_complex_rect(i, i); // Desired usage
-        v.set(i, gsl_complex_rect(i, i)); // Current usage
+        v(i) = gsl_complex_rect(i, i); // Desired usage
 
     for (size_t i = 0; i < v.size(); i++)
     {
-        // REQUIRE(v(i).real() == i); // Desired usage
-        // REQUIRE(v(i).imag() == i);
-        REQUIRE(v.get(i).real() == i); // Current usage
-        REQUIRE(v.get(i).imag() == i); // Current usage
+        REQUIRE(v(i).real() == i); // Desired usage
+        REQUIRE(v(i).imag() == i);
     }
 }
 
@@ -267,7 +264,7 @@ TEST_CASE("gsl::vector print", "[gsl::vector][gsl::cector][gsl::matrix][gsl::cma
 
     gsl::cvector cv(5);
     for (size_t i = 0; i < cv.size(); i++)
-        cv.set(i, gsl_complex_rect(i, i));
+        cv(1) = gsl_complex_rect(i, i);
 
     gsl::matrix m(2, 3);
     for (size_t i = 0; i < m.nrows(); i++)
@@ -277,7 +274,7 @@ TEST_CASE("gsl::vector print", "[gsl::vector][gsl::cector][gsl::matrix][gsl::cma
     gsl::cmatrix cm(2, 3);
     for (size_t i = 0; i < cm.nrows(); i++)
         for (size_t j = 0; j < cm.ncols(); j++)
-            cm.set(i, j, gsl_complex_rect(i + j, i + j));
+            cm(i, j) = gsl_complex_rect(i + j, i + j);
 
     v.print();
     cv.print();
@@ -431,7 +428,6 @@ TEST_CASE("gsl::cmatrix assignment operators", "[gsl::cmatrix]")
     REQUIRE(m2.get_gsl_ptr() != nullptr);
 }
 
-
 // Use Catch2 to test the element accessors of gsl::matrix
 TEST_CASE("gsl::matrix element access", "[gsl::matrix]")
 {
@@ -452,16 +448,13 @@ TEST_CASE("gsl::cmatrix element access", "[gsl::cmatrix]")
 
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
-            m.set(i, j, gsl_complex_rect(i, j));
-    // m(i, j) = gsl::complex(i, j);
+            m(i, j) = gsl::complex(i, j);
 
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
         {
-            REQUIRE(m.get(i, j).real() == i);
-            REQUIRE(m.get(i, j).imag() == j);
-            // REQUIRE(m(i, j).real() == i);
-            // REQUIRE(m(i, j).imag() == j);
+            REQUIRE(m(i, j).real() == i);
+            REQUIRE(m(i, j).imag() == j);
         }
 }
 

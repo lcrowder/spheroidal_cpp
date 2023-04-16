@@ -1,7 +1,7 @@
 #ifndef GSL_WRAPPER_UTILS_HPP_
 #define GSL_WRAPPER_UTILS_HPP_
 
-#include <gsl_wrapper/core.h>
+#include <yawg/core.h>
 #include <utility>
 
 namespace gsl

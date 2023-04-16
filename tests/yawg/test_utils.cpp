@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
-#include <gsl_wrapper/core.h>
-#include <gsl_wrapper/utils.hpp>
+#include <yawg/core.h>
+#include <yawg/utils.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <gsl/gsl_math.h>

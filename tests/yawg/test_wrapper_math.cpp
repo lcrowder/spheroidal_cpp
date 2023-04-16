@@ -1,6 +1,6 @@
 #define CATCH_CONFIG_MAIN
-#include <gsl_wrapper/core.h>
-#include <gsl_wrapper/utils.hpp>
+#include <yawg/core.h>
+#include <yawg/utils.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <cmath>
@@ -25,62 +25,62 @@ TEST_CASE("gsl::complex assignment operators", "[gsl::complex]")
     SECTION("Test += operator")
     {
         c1 += c2;
-        REQUIRE(c1.get_gsl_data().dat[0] == 4.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 6.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c1.dat[0] == 4.0);
+        REQUIRE(c1.dat[1] == 6.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test -=
     SECTION("Test -= operator")
     {
         c1 -= c2;
-        REQUIRE(c1.get_gsl_data().dat[0] == -2.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == -2.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c1.dat[0] == -2.0);
+        REQUIRE(c1.dat[1] == -2.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test *=
     SECTION("Test *= operator")
     {
         c1 *= c2;
-        REQUIRE(c1.get_gsl_data().dat[0] == -5.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 10.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c1.dat[0] == -5.0);
+        REQUIRE(c1.dat[1] == 10.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test /=
     SECTION("Test /= operator")
     {
         c1 /= c2;
-        REQUIRE_THAT(c1.get_gsl_data().dat[0], Catch::Matchers::WithinAbs(0.44, 1e-12));
-        REQUIRE_THAT(c1.get_gsl_data().dat[1], Catch::Matchers::WithinAbs(0.08, 1e-12));
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE_THAT(c1.dat[0], Catch::Matchers::WithinAbs(0.44, 1e-12));
+        REQUIRE_THAT(c1.dat[1], Catch::Matchers::WithinAbs(0.08, 1e-12));
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test =
     SECTION("Test = operator")
     {
         c1 = c2;
-        REQUIRE(c1.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 4.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c1.dat[0] == 3.0);
+        REQUIRE(c1.dat[1] == 4.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test nested assignment
     SECTION("Test nested = operator")
     {
         c1 = c2 = c3;
-        REQUIRE(c1.get_gsl_data().dat[0] == 5.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 6.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 5.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 6.0);
-        REQUIRE(c3.get_gsl_data().dat[0] == 5.0);
-        REQUIRE(c3.get_gsl_data().dat[1] == 6.0);
+        REQUIRE(c1.dat[0] == 5.0);
+        REQUIRE(c1.dat[1] == 6.0);
+        REQUIRE(c2.dat[0] == 5.0);
+        REQUIRE(c2.dat[1] == 6.0);
+        REQUIRE(c3.dat[0] == 5.0);
+        REQUIRE(c3.dat[1] == 6.0);
     }
 
     // Test literal operator
@@ -88,20 +88,20 @@ TEST_CASE("gsl::complex assignment operators", "[gsl::complex]")
     {
         using namespace gsl::complex_literals;
         c1 = 1.0;
-        REQUIRE(c1.get_gsl_data().dat[0] == 1.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 0.0);
+        REQUIRE(c1.dat[0] == 1.0);
+        REQUIRE(c1.dat[1] == 0.0);
 
         c2 = 2.0_i;
-        REQUIRE(c2.get_gsl_data().dat[0] == 0.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 2.0);
+        REQUIRE(c2.dat[0] == 0.0);
+        REQUIRE(c2.dat[1] == 2.0);
 
         c3 = 3.0 + 4.0_i;
-        REQUIRE(c3.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c3.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c3.dat[0] == 3.0);
+        REQUIRE(c3.dat[1] == 4.0);
 
         c4 = 5.0 - 6.0_i;
-        REQUIRE(c4.get_gsl_data().dat[0] == 5.0);
-        REQUIRE(c4.get_gsl_data().dat[1] == -6.0);
+        REQUIRE(c4.dat[0] == 5.0);
+        REQUIRE(c4.dat[1] == -6.0);
     }
 }
 
@@ -114,48 +114,48 @@ TEST_CASE("gsl::complex operators", "[gsl::complex]")
     SECTION("Test + operator")
     {
         gsl::complex c3 = c1 + c2;
-        REQUIRE(c3.get_gsl_data().dat[0] == 4.0);
-        REQUIRE(c3.get_gsl_data().dat[1] == 6.0);
-        REQUIRE(c1.get_gsl_data().dat[0] == 1.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 2.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c3.dat[0] == 4.0);
+        REQUIRE(c3.dat[1] == 6.0);
+        REQUIRE(c1.dat[0] == 1.0);
+        REQUIRE(c1.dat[1] == 2.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test -
     SECTION("Test - operator")
     {
         gsl::complex c3 = c1 - c2;
-        REQUIRE(c3.get_gsl_data().dat[0] == -2.0);
-        REQUIRE(c3.get_gsl_data().dat[1] == -2.0);
-        REQUIRE(c1.get_gsl_data().dat[0] == 1.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 2.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c3.dat[0] == -2.0);
+        REQUIRE(c3.dat[1] == -2.0);
+        REQUIRE(c1.dat[0] == 1.0);
+        REQUIRE(c1.dat[1] == 2.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test *
     SECTION("Test * operator")
     {
         gsl::complex c3 = c1 * c2;
-        REQUIRE(c3.get_gsl_data().dat[0] == -5.0);
-        REQUIRE(c3.get_gsl_data().dat[1] == 10.0);
-        REQUIRE(c1.get_gsl_data().dat[0] == 1.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 2.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE(c3.dat[0] == -5.0);
+        REQUIRE(c3.dat[1] == 10.0);
+        REQUIRE(c1.dat[0] == 1.0);
+        REQUIRE(c1.dat[1] == 2.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test /
     SECTION("Test / operator")
     {
         gsl::complex c3 = c1 / c2;
-        REQUIRE_THAT(c3.get_gsl_data().dat[0], Catch::Matchers::WithinAbs(0.44, 1e-12));
-        REQUIRE_THAT(c3.get_gsl_data().dat[1], Catch::Matchers::WithinAbs(0.08, 1e-12));
-        REQUIRE(c1.get_gsl_data().dat[0] == 1.0);
-        REQUIRE(c1.get_gsl_data().dat[1] == 2.0);
-        REQUIRE(c2.get_gsl_data().dat[0] == 3.0);
-        REQUIRE(c2.get_gsl_data().dat[1] == 4.0);
+        REQUIRE_THAT(c3.dat[0], Catch::Matchers::WithinAbs(0.44, 1e-12));
+        REQUIRE_THAT(c3.dat[1], Catch::Matchers::WithinAbs(0.08, 1e-12));
+        REQUIRE(c1.dat[0] == 1.0);
+        REQUIRE(c1.dat[1] == 2.0);
+        REQUIRE(c2.dat[0] == 3.0);
+        REQUIRE(c2.dat[1] == 4.0);
     }
 
     // Test ==s

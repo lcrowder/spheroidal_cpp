@@ -1,5 +1,5 @@
-#include <gsl_wrapper/core.h>
-#include <gsl_wrapper/utils.hpp>
+#include <yawg/core.h>
+#include <yawg/utils.hpp>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_complex_math.h>

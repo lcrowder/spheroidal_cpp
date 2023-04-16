@@ -1,4 +1,4 @@
-#include <gsl_wrapper/core.h>
+#include <yawg/core.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <stdio.h>

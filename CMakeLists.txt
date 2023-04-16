@@ -26,7 +26,7 @@ find_package(GSL REQUIRED)
 include_directories( PRIVATE ${CMAKE_SOURCE_DIR}/include )
 
 # Add source file subdirectories
-add_subdirectory(src_gsl_wrapper)
+add_subdirectory(src_yawg)
 add_subdirectory(src_spheroidal)
 
 # Add example file subdirectories

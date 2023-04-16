@@ -1,7 +1,7 @@
 #ifndef GSL_WRAPPER_FFT_H_
 #define GSL_WRAPPER_FFT_H_
 
-#include <gsl_wrapper/core.h>
+#include <yawg/core.h>
 
 namespace gsl
 {

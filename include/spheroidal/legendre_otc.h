@@ -1,8 +1,8 @@
 #ifndef LEGENDRE_OTC_H_
 #define LEGENDRE_OTC_H_
 
-#include <vector>
-#include <gsl_wrapper/core.h>
+#include <yawg/vector.h>
+#include <yawg/matrix.h>
 using namespace std;
 
 gsl::vector  cont_frac(int n, int m, gsl::vector  u);

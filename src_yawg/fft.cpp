@@ -1,5 +1,5 @@
-#include <gsl_wrapper/core.h>
-#include <gsl_wrapper/fft.h>
+#include <yawg/core.h>
+#include <yawg/fft.h>
 #include <gsl/gsl_fft_complex.h>
 
 /*! \brief Compute fft of a gsl::(c)vector */

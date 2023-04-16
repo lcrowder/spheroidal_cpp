@@ -1,4 +1,4 @@
-#include <gsl_wrapper/core.h>
+#include <yawg/core.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_complex.h>
 #include <stdio.h>
@@ -95,20 +95,22 @@ void gsl::cvector::set(size_t i, gsl::complex val)
 {
     GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
 }
-// const gsl_complex & gsl::cvector::operator()(size_t i) const
-// {
-//     return *gsl_vector_complex_ptr(gvec, i);
-// }
 
 //! \brief Element setter (the nice C++ versions don't work)
 gsl::complex gsl::cvector::get(size_t i) const
 {
     return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
 }
-// gsl_complex &gsl::cvector::operator()(size_t i)
-// {
-//     return *gsl_vector_complex_ptr(gvec, i);
-// }
+
+gsl::complex_ref gsl::cvector::operator()(size_t i)
+{
+    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
+}
+
+const gsl::complex_ref gsl::cvector::operator()(size_t i) const
+{
+    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
+}
 
 //! \brief Size accessor
 size_t gsl::cvector::size() const
@@ -145,7 +147,7 @@ void gsl::cvector::clear()
 }
 
 //! \brief Print the cvector to stdout
-void gsl::cvector::print(FILE* out) const
+void gsl::cvector::print(FILE *out) const
 {
     fprintf(out, "[");
     for (int i = 0; i < gvec->size; ++i)
@@ -175,27 +177,27 @@ void gsl::cvector::calloc(size_t n) { gvec = gsl_vector_complex_calloc(n); }
 /*------ friend operators ------*/
 namespace gsl
 {
-    cvector operator*(complex a, const cvector &v)
+    cvector operator*(complex z, const cvector &v)
     {
         cvector result(v);
-        gsl_vector_complex_scale(v.gvec, a.get_gsl_data());
+        gsl_vector_complex_scale(v.gvec, z);
         return result;
     }
 
-    cvector operator*(complex a, cvector &&v)
+    cvector operator*(complex z, cvector &&v)
     {
-        gsl_vector_complex_scale(v.gvec, a.get_gsl_data());
+        gsl_vector_complex_scale(v.gvec, z);
         return v;
     }
 
-    cvector operator*(const cvector &v, complex a)
+    cvector operator*(const cvector &v, complex z)
     {
-        return a * v;
+        return z * v;
     }
 
-    cvector operator*(cvector &&v, complex a)
+    cvector operator*(cvector &&v, complex z)
     {
-        return a * std::move( v );
+        return z * std::move(v);
     }
 
     cvector operator+(const cvector &v1, const cvector &v2)
@@ -221,7 +223,7 @@ namespace gsl
     {
         v1 += v2;
         return v1;
-    }    
+    }
 
     cvector operator-(const cvector &v1, const cvector &v2)
     {
@@ -247,9 +249,9 @@ namespace gsl
         v1 -= v2;
         return v1;
     }
-    
+
     bool operator==(const cvector &v1, const cvector &v2)
     {
-        return gsl_vector_complex_equal( v1.gvec, v2.gvec );
+        return gsl_vector_complex_equal(v1.gvec, v2.gvec);
     }
 }

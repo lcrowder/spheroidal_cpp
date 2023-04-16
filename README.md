@@ -1,4 +1,4 @@
-# Spheroidal Library {#mainpage}
+# Spheroidal Library
 
 This repository contains a library for working with spheroidal harmonics, as well as example files and test files.
 
@@ -32,6 +32,7 @@ Requires the following prerequisitres
 ## Authors
 
 [@jcs15c](Jacob Spainhour)
+
 [@lcrowder](Leo Crowder)
 
 ## Version History
@@ -48,3 +49,9 @@ This project is licensed under the [NAME HERE] License - see the LICENSE.md file
 ## Acknowledgments
 
 chatGPT for helping me figure out how CMake works
+
+The following are existing C++ gsl wrapper classes we have found. 
+* GSLwrap: https://gslwrap.sourceforge.net/
+* ccgsl: https://ccgsl.sourceforge.net/
+* GSL-lib: https://github.com/johanjoensson/GSL-lib
+* ROOT: https://root.cern/root/html606/index.html

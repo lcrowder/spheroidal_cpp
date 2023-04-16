@@ -1,6 +1,6 @@
 #include <spheroidal/grid_functions.h>
-#include <gsl_wrapper/utils.hpp>
-#include <gsl_wrapper/core.h>
+#include <yawg/utils.hpp>
+#include <yawg/core.h>
 #include <gsl/gsl_math.h>
 
 /*!
