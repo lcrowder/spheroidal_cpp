@@ -7,12 +7,29 @@
 namespace gsl
 {
     // Forward Declarations
+    class vector_view;
+    class row_view;
+    class column_view;
+
+    class cvector_view;
+    class crow_view;
+    class ccolumn_view;
+
+    class matrix_view;
+    class cmatrix_view;
+
     class cvector;
+
     class complex;
     class complex_ref;
 
     class vector
     {
+        friend class vector_view;
+        friend class row_view;
+        friend class cvector;
+        friend class matrix;
+
     public:
         // Ordinary constructors
         vector();
@@ -23,7 +40,7 @@ namespace gsl
         vector(vector &&gvec_other);
 
         // Conversion constructors
-        explicit vector(gsl_vector *gvec_other);
+        vector(const gsl_vector *gvec_other);
         // vector( const std::vector<double>& svec );
 
         //! \brief Assignment operators
@@ -75,17 +92,66 @@ namespace gsl
 
         friend bool operator==(const vector &v1, const vector &v2);
 
+        vector_view subvector(size_t offset, size_t size);
+
     protected:
         gsl_vector *gvec;
         void free();
         void calloc(size_t n);
+    };
 
-        friend class cvector;
-        friend class matrix;
+    class vector_view
+    {
+    protected:
+        gsl_vector_view gvec_view;
+
+    public:
+        // Create a new object from a vector_view
+        operator vector() const { return vector(&gvec_view.vector); }
+
+        // Constructors
+        vector_view(gsl_vector_view gvec_view) : gvec_view(gvec_view){};
+        vector_view(const vector &v) : gvec_view(gsl_vector_subvector(v.gvec, 0, v.gvec->size)){};
+
+        vector_view &operator=(const vector &v);
+        vector_view &operator=(vector_view v);
+
+        void print(FILE *out = stdout) const;
+    };
+
+    // Because C++ is row-major, row view have stride one, and can be reshaped into matrices
+    class row_view : public vector_view
+    {
+    public:
+        row_view(gsl_vector_view gvec_view) : vector_view(gvec_view)
+        {
+            if (gvec_view.vector.stride != 1)
+                printf("Row view must have stride 1");
+        };
+
+        row_view(const vector &v) : vector_view(v)
+        {
+            if (v.gvec->stride != 1)
+                printf("Row view must have stride 1");
+        };
+
+        matrix_view reshape(size_t n, size_t m);
+    };
+
+    class column_view : public vector_view
+    {
+    public:
+        column_view(gsl_vector_view gvec_view) : vector_view(gvec_view){};
+        column_view(const vector &v) : vector_view(v){};
     };
 
     class cvector
     {
+        friend class vector;
+        friend class cvector_view;
+        friend class crow_view;
+        friend class ccolumn_view;
+
     public:
         // Ordinary constructors
         cvector();
@@ -96,7 +162,7 @@ namespace gsl
         cvector(cvector &&gvec_other);
 
         // Conversion constructors
-        explicit cvector(gsl_vector_complex *gvec_other);
+        cvector(const gsl_vector_complex *gvec_other);
         cvector(const vector &vec);
         // vector( const std::vector<double>& svec );
 
@@ -149,9 +215,54 @@ namespace gsl
         gsl_vector_complex *gvec;
         void free();
         void calloc(size_t n);
-
-        friend class vector;
     };
+
+    class cvector_view
+    {
+    protected:
+        gsl_vector_complex_view gvec_view;
+
+    public:
+        // Create a new object from a vector_view
+        operator cvector() const { return cvector(&gvec_view.vector); }
+
+        // Constructors
+        cvector_view(gsl_vector_complex_view gvec_view) : gvec_view(gvec_view){};
+        cvector_view(const cvector &v) : gvec_view(gsl_vector_complex_subvector(v.gvec, 0, v.gvec->size)){};
+
+        cvector_view &operator=(const cvector &v);
+        cvector_view &operator=(cvector_view v);
+
+        // Print method. Inefficient, but printing shouldn't be production ready
+        void print(FILE *out = stdout) const;
+    };
+
+    // Because C++ is row-major, row view have stride one, and can be reshaped into matrices
+    class crow_view : public cvector_view
+    {
+    public:
+        crow_view(gsl_vector_complex_view gvec_view) : cvector_view(gvec_view)
+        {
+            if (gvec_view.vector.stride != 1)
+                printf("Row view must have stride 1");
+        };
+
+        crow_view(const cvector &v) : cvector_view(v)
+        {
+            if (v.gvec->stride != 1)
+                printf("Row view must have stride 1");
+        };
+
+        cmatrix_view reshape(size_t n, size_t m);
+    };
+
+    class ccolumn_view : public cvector_view
+    {
+    public:
+        ccolumn_view(gsl_vector_complex_view gvec_view) : cvector_view(gvec_view){};
+        ccolumn_view(const cvector &v) : cvector_view(v){};
+    };
+
 }
 
 #endif // YAWG_VECTOR_H_

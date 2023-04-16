@@ -15,7 +15,7 @@ gsl::vector::vector(size_t n) : gvec(nullptr)
 }
 
 //! \brief Build a gsl::vector from a gsl_vector
-gsl::vector::vector(gsl_vector *gvec_other)
+gsl::vector::vector(const gsl_vector *gvec_other)
 {
     if (gvec_other == nullptr)
         return;
@@ -87,6 +87,11 @@ double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
 double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
 void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
 
+gsl::vector_view gsl::vector::subvector(size_t offset, size_t size)
+{
+    return gsl::vector_view(gsl_vector_subvector(gvec, offset, size));
+}
+
 //! \brief Size accessor
 size_t gsl::vector::size() const
 {
@@ -122,7 +127,7 @@ void gsl::vector::clear()
 }
 
 //! \brief Print the vector to stdout
-void gsl::vector::print(FILE * out) const
+void gsl::vector::print(FILE *out) const
 {
     fprintf(out, "[");
     for (int i = 0; i < gvec->size; ++i)
@@ -231,9 +236,39 @@ namespace gsl
         v1 -= v2;
         return std::move(v1);
     }
-    
+
     bool operator==(const vector &v1, const vector &v2)
     {
-        return gsl_vector_equal( v1.gvec, v2.gvec );
+        return gsl_vector_equal(v1.gvec, v2.gvec);
     }
+}
+
+// gsl::vector_view::vector_view( const gsl::vector& v)
+// {
+//     gsl::vector_view(gsl_vector_subvector(v.gvec, 0, v.gvec->size));
+// }
+
+gsl::vector_view &gsl::vector_view::operator=(const gsl::vector &v)
+{
+    gsl_vector_memcpy(&gvec_view.vector, v.gvec);
+    return *this;
+}
+
+gsl::vector_view &gsl::vector_view::operator=(vector_view v)
+{
+    gsl_vector_memcpy(&gvec_view.vector, &v.gvec_view.vector);
+    return *this;
+}
+
+void gsl::vector_view::print(FILE *out) const
+{
+    fprintf(out, "[");
+    for (int i = 0; i < gvec_view.vector.size; ++i)
+        fprintf(out, "%s%g", (i == 0) ? "" : ", ", gsl_vector_get(&gvec_view.vector, i));
+    fprintf(out, "]\n");
+}
+
+gsl::matrix_view gsl::row_view::reshape( size_t n, size_t m )
+{
+    return gsl::matrix_view(gsl_matrix_view_vector(&gvec_view.vector, n, m));
 }

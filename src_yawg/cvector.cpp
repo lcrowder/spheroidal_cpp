@@ -16,7 +16,7 @@ gsl::cvector::cvector(size_t n) : gvec(nullptr)
 }
 
 //! \brief Build a gsl::cvector from a gsl_vector_complex
-gsl::cvector::cvector(gsl_vector_complex *gvec_other)
+gsl::cvector::cvector(const gsl_vector_complex *gvec_other)
 {
     if (gvec_other == nullptr)
         return;
@@ -255,3 +255,27 @@ namespace gsl
         return gsl_vector_complex_equal(v1.gvec, v2.gvec);
     }
 }
+
+gsl::cvector_view &gsl::cvector_view::operator=(const gsl::cvector &v)
+{
+    gsl_vector_complex_memcpy(&gvec_view.vector, v.gvec);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator=(cvector_view v)
+{
+    gsl_vector_complex_memcpy(&gvec_view.vector, &v.gvec_view.vector);
+    return *this;
+}
+
+void gsl::cvector_view::print(FILE *out) const
+{
+    fprintf(out, "[");
+    for (int i = 0; i < gvec_view.vector.size; ++i)
+    {
+        auto x = gsl_vector_complex_get(&gvec_view.vector, i);
+        fprintf(out, "%s% 9g%+9gj", ((i == 0) ? "" : ", "), GSL_REAL(x), GSL_IMAG(x));
+    }
+    fprintf(out, "]\n");
+}
+

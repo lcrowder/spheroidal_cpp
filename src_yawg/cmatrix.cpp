@@ -1,7 +1,7 @@
-#include <yawg/matrix.h>
-#include <yawg/complex.h>
+#include <yawg/core.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_complex.h>
+#include <gsl/gsl_blas.h>
 #include <stdio.h>
 
 //! \brief Default constructor
@@ -16,7 +16,7 @@ gsl::cmatrix::cmatrix(size_t n, size_t m) : gmat(nullptr)
 }
 
 //! \brief Build a gsl::cmatrix from a gsl_matrix_complex
-gsl::cmatrix::cmatrix(gsl_matrix_complex *gmat_other)
+gsl::cmatrix::cmatrix(const gsl_matrix_complex *gmat_other)
 {
     this->calloc(gmat_other->size1, gmat_other->size2);
     gsl_matrix_complex_memcpy(gmat, gmat_other);
@@ -27,7 +27,7 @@ gsl::cmatrix::cmatrix(const gsl::matrix &gmat_other)
     this->calloc(gmat_other.nrows(), gmat_other.ncols());
     for (size_t i = 0; i < gmat_other.nrows(); i++)
         for (size_t j = 0; j < gmat_other.ncols(); j++)
-            GSL_SET_COMPLEX( gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(gmat_other.gmat, i, j), 0.0 );
+            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(gmat_other.gmat, i, j), 0.0);
 }
 
 //! \brief Copy constructor
@@ -86,12 +86,12 @@ gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
 
 gsl::complex_ref gsl::cmatrix::operator()(size_t i, size_t j)
 {
-    return gsl::complex_ref( gsl_matrix_complex_ptr(gmat, i, j) ); 
+    return gsl::complex_ref(gsl_matrix_complex_ptr(gmat, i, j));
 }
 
 const gsl::complex_ref gsl::cmatrix::operator()(size_t i, size_t j) const
 {
-     return gsl::complex_ref( gsl_matrix_complex_ptr(gmat, i, j) );
+    return gsl::complex_ref(gsl_matrix_complex_ptr(gmat, i, j));
 }
 
 //! \brief Size accessor
@@ -169,6 +169,17 @@ void gsl::cmatrix::print(FILE *out) const
     }
 }
 
+namespace gsl
+{
+    cmatrix operator*(const cmatrix &A, const cmatrix &B)
+    {
+        cmatrix C(A.nrows(), B.ncols());
+        gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, complex(1, 0), A.gmat, B.gmat, complex(0, 0), C.gmat);
+        return C;
+    }
+
+}
+
 /*------ Protected Methods for gsl::cmatrix ------*/
 //! \brief Free memory for underlying gsl_matrix_complex
 void gsl::cmatrix::free()
@@ -183,3 +194,30 @@ void gsl::cmatrix::free()
  *       This is slightly slower than using gsl_matrix_alloc
  */
 void gsl::cmatrix::calloc(size_t n, size_t m) { gmat = gsl_matrix_complex_calloc(n, m); }
+
+gsl::cmatrix_view &gsl::cmatrix_view::operator=(const gsl::cmatrix &m)
+{
+    gsl_matrix_complex_memcpy(&gmat_view.matrix, m.gmat);
+    return *this;
+}
+
+gsl::cmatrix_view &gsl::cmatrix_view::operator=(gsl::cmatrix_view m)
+{
+    gsl_matrix_complex_memcpy(&gmat_view.matrix, &m.gmat_view.matrix);
+    return *this;
+}
+
+gsl::cmatrix_view gsl::cmatrix::submatrix( size_t i, size_t j, size_t n, size_t m )
+{
+    return gsl::cmatrix_view( gsl_matrix_complex_submatrix( gmat, i, j, n, m ) );
+}
+
+gsl::crow_view gsl::cmatrix::row( size_t i )
+{
+    return gsl::crow_view( gsl_matrix_complex_row( gmat, i ) );
+}
+
+gsl::ccolumn_view gsl::cmatrix::column( size_t j )
+{
+    return gsl::ccolumn_view( gsl_matrix_complex_column( gmat, j ) );
+}

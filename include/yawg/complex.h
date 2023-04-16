@@ -66,11 +66,20 @@ namespace gsl
         operator complex() const { return complex(dat[0], dat[1]); };
 
         // Constructors
+        complex_ref(complex_ref& z) : dat(z.dat){};
         complex_ref(gsl_complex *z) : dat(z->dat){};
         complex_ref(complex &z) : dat(z.dat){};
 
         // Creates a reference to gsl::complex object z
-        complex_ref &operator=(const complex &z)
+        complex_ref &operator=(complex z)
+        {
+            dat[0] = z.dat[0];
+            dat[1] = z.dat[1];
+            return *this;
+        };
+
+        // For unclear reasons, the default assignment operator doesn't work.
+        complex_ref &operator=(complex_ref z)
         {
             dat[0] = z.dat[0];
             dat[1] = z.dat[1];

@@ -15,7 +15,7 @@ gsl::matrix::matrix(size_t n, size_t m) : gmat(nullptr)
 }
 
 //! \brief Build a gsl::matrix from a gsl_matrix
-gsl::matrix::matrix(gsl_matrix *gmat_other)
+gsl::matrix::matrix(const gsl_matrix *gmat_other)
 {
     this->calloc(gmat_other->size1, gmat_other->size2);
     gsl_matrix_memcpy(gmat, gmat_other);
@@ -39,7 +39,7 @@ gsl::matrix::matrix(const gsl::vector &gvec_other)
 {
     this->calloc(gvec_other.size(), 1);
     for (size_t i = 0; i < gvec_other.size(); i++)
-        gsl_matrix_set(gmat, i, 0, gsl_vector_get( gvec_other.gvec, i ) );
+        gsl_matrix_set(gmat, i, 0, gsl_vector_get(gvec_other.gvec, i));
 }
 
 //! \brief Assignment operator
@@ -123,14 +123,23 @@ void gsl::matrix::resize(size_t n, size_t m)
 }
 
 //! \brief Make a copy of the gsl::matrix by size n1 x m1 instead of n x m (note the number of elements is unchanges)
-gsl::matrix gsl::matrix::reshape( size_t n, size_t m )
+gsl::matrix gsl::matrix::reshape(size_t n, size_t m)
 {
     gsl::matrix gmat_new(n, m);
 
-    for( size_t t = 0; t < n * m; t++ )
-        gmat_new( t / m, t % m ) = this->get( t / this->ncols(), t % this->ncols() );
-    
+    for (size_t t = 0; t < n * m; t++)
+        gmat_new(t / m, t % m) = this->get(t / this->ncols(), t % this->ncols());
+
     return gmat_new;
+}
+
+gsl::matrix::matrix(const matrix &M, size_t n, size_t m)
+{
+    this->calloc(M.gmat->size1, M.gmat->size2);
+
+    for (size_t t = 0; t < n * m; t++)
+        gsl_matrix_set(gmat, t / m, t % m,
+                       gsl_matrix_get(M.gmat, t / M.gmat->size1, t % M.gmat->size2));
 }
 
 //! \brief Clear the gsl::matric and free the underlying gsl_matrix
@@ -192,6 +201,16 @@ void gsl::matrix::load_csv(FILE *in)
         }
 }
 
+namespace gsl
+{
+    matrix operator*(const matrix &A, const matrix &B)
+    {
+        matrix C(A.nrows(), B.ncols());
+        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, B.gmat, 0.0, C.gmat);
+        return C;
+    }
+}
+
 /*------ Protected Methods for gsl::matrix ------*/
 //! \brief Free memory for underlying gsl_matrix
 void gsl::matrix::free()
@@ -206,3 +225,41 @@ void gsl::matrix::free()
  *       This is slightly slower than using gsl_matrix_alloc
  */
 void gsl::matrix::calloc(size_t n, size_t m) { gmat = gsl_matrix_calloc(n, m); }
+
+gsl::matrix_view &gsl::matrix_view::operator=(const gsl::matrix &m)
+{
+    gsl_matrix_memcpy(&gmat_view.matrix, m.gmat);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator=(matrix_view m)
+{
+    gsl_matrix_memcpy(&gmat_view.matrix, &m.gmat_view.matrix);
+    return *this;
+}
+
+void gsl::matrix_view::print(FILE *out) const
+{
+    for (int i = 0; i < gmat_view.matrix.size1; ++i)
+    {
+        fprintf(out, (i == 0) ? "[" : " ");
+        for (int j = 0; j < gmat_view.matrix.size2; ++j)
+            fprintf(out, "%s% 9g", ((j == 0) ? "" : ", "), gsl_matrix_get(&gmat_view.matrix, i, j));
+        fprintf(out, (i == (gmat_view.matrix.size1 - 1) ? "]\n" : ",\n"));
+    }
+}
+
+gsl::matrix_view gsl::matrix::submatrix( size_t i, size_t j, size_t n, size_t m )
+{
+    return gsl::matrix_view( gsl_matrix_submatrix( gmat, i, j, n, m ) );
+}
+
+gsl::row_view gsl::matrix::row( size_t i )
+{
+    return gsl::row_view( gsl_matrix_row( gmat, i ) );
+}
+
+gsl::column_view gsl::matrix::column( size_t j )
+{
+    return gsl::column_view( gsl_matrix_column( gmat, j ) );
+}

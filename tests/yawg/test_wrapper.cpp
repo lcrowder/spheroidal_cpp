@@ -456,6 +456,17 @@ TEST_CASE("gsl::cmatrix element access", "[gsl::cmatrix]")
             REQUIRE(m(i, j).real() == i);
             REQUIRE(m(i, j).imag() == j);
         }
+
+    // Test nested complex assignment
+    gsl::cmatrix m1(3, 3);
+    gsl::cmatrix m2(3, 3);
+    m1(0, 0) = gsl::complex(10, 20);
+    m2(0, 0) = gsl::complex(100, 200);
+
+    m1(0, 0) = m2(0, 0) = gsl::complex(1, 2);
+
+    REQUIRE(m2(0, 0) == gsl::complex(1, 2));
+    REQUIRE(m1(0, 0) == gsl::complex(1, 2));
 }
 
 // Use Catch2 to test the resize and clear methods of gsl::matrix
