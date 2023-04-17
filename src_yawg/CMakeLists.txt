@@ -9,7 +9,9 @@ set( source_list cmatrix.cpp
 set( header_list ../include/yawg/core.h
                  ../include/yawg/complex.h
                  ../include/yawg/vector.h
+                 ../include/yawg/cvector.h
                  ../include/yawg/matrix.h
+                 ../include/yawg/cmatrix.h
                  ../include/yawg/fft.h
                  ../include/yawg/utils.hpp )
 

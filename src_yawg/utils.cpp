@@ -4,7 +4,6 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_complex_math.h>
 
-
 /*!
  * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
  * \param n Number of nodes
@@ -116,7 +115,12 @@ gsl::vector gsl::arange(double start, double stop, double step)
     return x;
 }
 
-/*! Do matlab thing */
+/*! \brief Store 2D grid coordinates based on 1D input gsl::vectors
+ * \param x 1D vector of x-coordinates
+ * \param y 1D vector of y-coordinates
+ * \param X 2D matrix of x-coordinates
+ * \param Y 2D matrix of y-coordinates
+ */
 void gsl::meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, gsl::matrix &Y)
 {
     X.resize(x.size(), y.size());
@@ -130,7 +134,12 @@ void gsl::meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, g
         }
 }
 
-/*! Complex version of gsl::meshgrid */
+/*! \brief Store 2D grid coordinates based on 1D input gsl::cvectors
+ * \param x 1D complex vector of x-coordinates
+ * \param y 1D complex vector of y-coordinates
+ * \param X 2D complex matrix of x-coordinates
+ * \param Y 2D complex matrix of y-coordinates
+ */
 void gsl::meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X, gsl::cmatrix &Y)
 {
     X.resize(x.size(), y.size());
@@ -146,7 +155,7 @@ void gsl::meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X
         }
 }
 
-/*! Return the nxn identity matrix */
+/*! \brief Return the nxn identity matrix */
 gsl::matrix gsl::eye(size_t n)
 {
     gsl::matrix I(n, n);

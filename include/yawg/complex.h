@@ -3,10 +3,14 @@
 
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
-#include <stdio.h>
 
 namespace gsl
 {
+    /*! \class complex
+     * \brief Wrapper class for gsl_complex structs
+     * 
+     * Inherits `double dat[2]` from gsl_complex and provides a number of convenience functions.
+     */
     class complex : public gsl_complex
     {
         friend class complex_ref;
@@ -37,7 +41,7 @@ namespace gsl
         inline void set(double re, double im) { GSL_SET_COMPLEX(this, re, im); };
         inline void set(complex z) { GSL_SET_COMPLEX(this, GSL_REAL(z), GSL_IMAG(z)); };
 
-        inline complex operator-() const { return complex(gsl_complex_negative(*this)); };
+        inline complex operator-() const { return gsl_complex_negative(*this); };
 
         friend inline complex operator+(complex a, complex b) { return gsl_complex_add(a, b); };
         friend inline complex operator-(complex a, complex b) { return gsl_complex_sub(a, b); };
@@ -45,16 +49,23 @@ namespace gsl
         friend inline complex operator/(complex a, complex b) { return gsl_complex_div(a, b); };
         friend inline bool operator==(complex a, complex b) { return (GSL_REAL(a) == GSL_REAL(b)) && (GSL_IMAG(a) == GSL_IMAG(b)); }
     
-        void print() const { printf("%f + %fi", GSL_REAL(*this), GSL_IMAG(*this)); };
+        void print() const;
     };
 
     inline namespace complex_literals
     {
+        //! \brief User defined literal overload for complex numbers
         inline complex operator""_i(long double y) { return complex(0.0, y); }
     }
 
-    // Class to store a reference to a gsl::complex object.
-    //  This is necessary for the () operator overloads of cvector and cmatrix to work.
+    /*! \class complex_ref
+     * \brief Stores a refernce to a gsl::complex object
+     * 
+     * This class is necessary to communicate between gsl_complex and gsl::complex
+     * so that overloads of () work gsl::cvector and gsl::cmatrix.
+     * 
+     * Implementation heavily inspired by ccgsl (https://ccgsl.sourceforge.net/)
+     */
     class complex_ref
     {
     protected:
@@ -62,15 +73,19 @@ namespace gsl
         complex_ref() : dat(nullptr){};
 
     public:
-        // Conversion from reference to own object
+        //! \brief "Dereferences" a complex_ref into independent gsl::complex object
         operator complex() const { return complex(dat[0], dat[1]); };
 
-        // Constructors
+        //! \brief Constructs a reference to another compelx_ref object
         complex_ref(complex_ref& z) : dat(z.dat){};
+
+        //! \brief Constructs a reference to a gsl_complex struct
         complex_ref(gsl_complex *z) : dat(z->dat){};
+
+        //! \brief Constructs a reference to a gsl::complex object
         complex_ref(complex &z) : dat(z.dat){};
 
-        // Creates a reference to gsl::complex object z
+        //! \brief Assigns values of gsl::complex object to the reference
         complex_ref &operator=(complex z)
         {
             dat[0] = z.dat[0];
@@ -78,7 +93,9 @@ namespace gsl
             return *this;
         };
 
-        // For unclear reasons, the default assignment operator doesn't work.
+        //! \brief Assigns values of one complex_ref object to another.
+        //! \note This is an alternative to the default assignment operator,
+        //! which does not work for unknown reasons.
         complex_ref &operator=(complex_ref z)
         {
             dat[0] = z.dat[0];
@@ -86,7 +103,6 @@ namespace gsl
             return *this;
         };
 
-        // Allows the user to get these values without dereferencing
         inline double real() const { return dat[0]; };
         inline double imag() const { return dat[1]; };
     };
