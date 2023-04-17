@@ -17,6 +17,7 @@ include(CTest)
 # Put all testing files here
 set( yawg_test_list yawg/test_wrapper.cpp
                           yawg/test_wrapper_math.cpp
+                          yawg/test_wrapper_view.cpp
                           yawg/test_utils.cpp
                           yawg/test_fft.cpp )
 
