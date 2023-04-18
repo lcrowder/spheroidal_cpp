@@ -6,7 +6,7 @@
 
 Additionally, this repository contains Yet Another Wrapper for GSL, or `yawg`. This library contains a lightweight interface for the GNU Scientific Library, or GSL. Its intentions are to simplify usage of these functions, such as with a `gsl::vector` class that automatically handles memory allocation and pointer management.
 
-The full documentation is built with `doxygen`, and can be constructed by performing the `make docs` command.
+The full documentation is built with `doxygen`, and can be constructed by performing the `make docs` command. A .pdf prototype of this documentation can be found in the `docs/` subdirectory.
 
 ## Getting Started
 
@@ -38,11 +38,11 @@ Requires the following prerequisitres, along with the version used during testin
 ## Version History
 
 * 0.1
-    * Initial Release
+    * Initial Release (Currently in developmet)
 
 ## Acknowledgments
 
-We would like to acknowledge the existance of other GSL C++ wrappers, and hope that ours is comparable in utility.
+We would like to acknowledge the existence of and demonstrate gratitude towards other GSL C++ wrappers, and hope that ours is comparable in utility.
 
 The following are existing C++ gsl wrapper classes we have found. 
 * GSLwrap: https://gslwrap.sourceforge.net/
