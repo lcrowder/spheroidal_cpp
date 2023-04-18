@@ -1,4 +1,4 @@
-# `spheroidal`
+# spheroidal_cpp
 
 ## Description
 
@@ -31,9 +31,9 @@ Requires the following prerequisitres, along with the version used during testin
 
 ## Authors
 
-[Jacob Spainhour](@jcs15c)
+[Jacob Spainhour](\@jcs15c)
 
-[Leo Crowder](@lcrowder)
+[Leo Crowder](\@lcrowder)
 
 ## Version History
 
