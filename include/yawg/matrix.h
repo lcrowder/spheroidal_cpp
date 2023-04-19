@@ -7,12 +7,18 @@
 
 namespace gsl
 {
-    class cmatrix;
+    class vector;
+    class row_view;
+    class column_view;
 
     class cvector_view;
     class crow_view;
     class ccolumn_view;
 
+    class matrix;
+    class matrix_view;
+
+    class cmatrix;
     class cmatrix_view;
     
     /*! \class matrix
@@ -36,6 +42,9 @@ namespace gsl
 
         //! \brief Construct new gsl::matrix from gsl_matrix
         matrix(const gsl_matrix *gsl_mat);
+
+        //! \brief Construct new gsl::matrix from .csv file
+        matrix(FILE *in);
 
         //! \brief Construct new n x 1 gsl::matrix from gsl::vector
         matrix(const vector &v);

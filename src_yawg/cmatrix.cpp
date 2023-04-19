@@ -30,6 +30,37 @@ gsl::cmatrix::cmatrix(const gsl::cvector &v)
         gsl_matrix_complex_set(gmat, i, 0, gsl_vector_complex_get(v.gvec, i));
 }
 
+//! \brief Construct new gsl::cmatrix from MATLAB's .csv file format
+gsl::cmatrix::cmatrix(FILE *in)
+{
+    // Count the number of rows and columns
+    size_t n = 0;
+    size_t m = 0;
+    char c;
+    while ((c = fgetc(in)) != EOF)
+    {
+        if (c == '\n')
+            ++n;
+        else if (c == ',')
+            ++m;
+    }
+    m = (m / n) + 1;
+    this->calloc(n, m);
+
+    // Rewind the file
+    rewind(in);
+
+    // Read the data
+    double real, imag;
+    char sep;
+    for (size_t i = 0; i < n; ++i)
+        for (size_t j = 0; j < m; ++j)
+        {
+            fscanf(in, "%lf%lfi,", &real, &imag);
+            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), real, imag);
+        }
+}
+
 /*! \brief Copy constructor creating n x m matrix
  * \param M gsl::matrix to copy
  * \param n Number of rows
@@ -210,6 +241,32 @@ void gsl::cmatrix::print(FILE *out) const
         fprintf(out, (i == (gmat->size1 - 1) ? "]\n" : ",\n"));
     }
 }
+/*! \brief Print the complex matrix to file stream in MATLAB's .csv format
+ * \param out File stream to print to
+ *
+ * \note This function uses a complex valued .csv format
+ * compatible with MATLAB's load/save functions, which has the following format
+ * 1.0000+2.0000i,2.0000+3.0000i,3.0000+4.0000i
+ * 2.0000+3.0000i,4.0000+5.0000i,6.0000+7.0000i
+ */
+void gsl::cmatrix::print_csv(FILE *out) const
+{
+    for (int i = 0; i < gmat->size1; ++i)
+    {
+        for (int j = 0; j < gmat->size2; ++j)
+        {
+            auto x = gsl_matrix_complex_get(gmat, i, j);
+            fprintf(out, "%lf%+lfi%c", GSL_REAL(x), GSL_IMAG(x), ((j == gmat->size2 - 1) ? '\n' : ','));
+        }
+    }
+}
+
+//! \brief Load the complex matrix from file stream in MATLAB's .csv format
+//! \param in File stream to load from
+void gsl::cmatrix::load_csv(FILE *in)
+{
+    *this = gsl::cmatrix(in);
+}
 
 namespace gsl
 {
@@ -282,7 +339,7 @@ gsl::ccolumn_view gsl::cmatrix::column(size_t j)
 }
 
 //! \brief Pretty-print the viewed complex matrix to file stream
-void gsl::cmatrix_view::print( FILE *out ) const
+void gsl::cmatrix_view::print(FILE *out) const
 {
     for (int i = 0; i < gmat_view.matrix.size1; ++i)
     {

@@ -31,6 +31,37 @@ gsl::matrix::matrix(const gsl_matrix *gsl_mat)
     gsl_matrix_memcpy(gmat, gsl_mat);
 }
 
+//! \brief Construct new gsl::matrix from .csv file
+//! \param in stdio.h file handle
+gsl::matrix::matrix(FILE *in)
+{
+    // Count the number of rows and columns
+    size_t n = 0;
+    size_t m = 0;
+    char c;
+    while ((c = fgetc(in)) != EOF)
+    {
+        if (c == '\n')
+            ++n;
+        else if (c == ',')
+            ++m;
+    }
+    m = (m / n) + 1;
+    this->calloc(n, m);
+
+    // Rewind the file
+    rewind(in);
+
+    // Read the data
+    double val;
+    for (size_t i = 0; i < n; ++i)
+        for (size_t j = 0; j < m; ++j)
+        {
+            fscanf(in, "%lf,", &val);
+            gsl_matrix_set(gmat, i, j, val);
+        }
+}
+
 //! \brief Copy constructor
 //! \param M gsl::matrix to copy
 gsl::matrix::matrix(const gsl::matrix &M)
@@ -184,42 +215,15 @@ void gsl::matrix::print(FILE *out) const
 void gsl::matrix::print_csv(FILE *out) const
 {
     for (int i = 0; i < gmat->size1; ++i)
-    {
         for (int j = 0; j < gmat->size2; ++j)
-            fprintf(out, "%.17g,", gsl_matrix_get(gmat, i, j));
-        fprintf(out, "\n");
-    }
+            fprintf(out, "%.17g%c", gsl_matrix_get(gmat, i, j), ((j == gmat->size2 - 1) ? '\n' : ','));
 }
 
 //! \brief Load the matrix from a file stream in CSV format
 //! \param in File stream to load from
 void gsl::matrix::load_csv(FILE *in)
 {
-    // Count the number of rows and columns
-    size_t n = 0;
-    size_t m = 0;
-    char c;
-    while ((c = fgetc(in)) != EOF)
-    {
-        if (c == '\n')
-            ++n;
-        else if (c == ',')
-            ++m;
-    }
-    m = (m / n) + 1;
-    this->resize(n, m);
-
-    // Rewind the file
-    rewind(in);
-
-    // Read the data
-    double val;
-    for (size_t i = 0; i < n; ++i)
-        for (size_t j = 0; j < m; ++j)
-        {
-            fscanf(in, "%lf,", &val);
-            gsl_matrix_set(gmat, i, j, val);
-        }
+    *this = gsl::matrix( in );
 }
 
 namespace gsl

@@ -5,21 +5,19 @@ FetchContent_Declare(
   GIT_TAG v3.0.1)
 FetchContent_MakeAvailable(catch)
 
-# Uncomment this to add /extras to the Catch2 path to get access to some cmake macros
-#  such as catch_discover_tests
-#list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-#include(Catch)
-
 # Need this to ignore a lot of the default tests
 set_property(GLOBAL PROPERTY CTEST_TARGETS_ADDED 1)
 include(CTest)
 
+# Use CMake to copy all files in the data/ directory to the build directory
+file( COPY ${CMAKE_CURRENT_SOURCE_DIR}/data/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/data/ )
+
 # Put all testing files here
 set( yawg_test_list yawg/test_wrapper.cpp
-                          yawg/test_wrapper_math.cpp
-                          yawg/test_wrapper_view.cpp
-                          yawg/test_utils.cpp
-                          yawg/test_fft.cpp )
+                    yawg/test_wrapper_math.cpp
+                    yawg/test_wrapper_view.cpp
+                    yawg/test_utils.cpp
+                    yawg/test_fft.cpp )
 
 # Add an executable (but not a ctest) to run all tests
 add_executable( all_yawg_tests ${yawg_test_list} )
@@ -38,6 +36,3 @@ endforeach()
 
 # If you want to run a specific test from a set, build the file/set it's in, then
 #  execute spheroidal_cpp/build/tests/<set name> <test name>.
-
-# TODO: Maybe find a way to print the results of a test to the Doxygen? Unsure how to do that.
-# TODO: Figure out the difference between include, find_package, and FetchContent_MakeAvailable

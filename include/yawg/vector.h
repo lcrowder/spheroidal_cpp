@@ -1,6 +1,7 @@
 #ifndef YAWG_VECTOR_H_
 #define YAWG_VECTOR_H_
 
+#include <yawg/complex.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
 #include <stdio.h>

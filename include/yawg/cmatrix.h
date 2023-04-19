@@ -31,6 +31,9 @@ namespace gsl
         //! \brief Construct new gsl::matrix from gsl_matrix
         cmatrix(const gsl_matrix_complex *gmat_other);
 
+        //! \brief Construct new gsl::cmatrix from MATLAB's .csv file format
+        cmatrix(FILE *in);
+
         //! \brief Construct new n x 1 gsl::cmatrix from a gsl::cvector
         cmatrix(const cvector &v);
 
@@ -74,6 +77,12 @@ namespace gsl
 
         //! \brief Pretty-print the complex matrix to file stream
         void print(FILE *out = stdout) const;
+
+        //! \brief Print the complex matrix to file stream in MATLAB's .csv format
+        void print_csv(FILE *out = stdout) const;
+        
+        //! \brief Load the complex matrix from file stream in MATLAB's .csv format
+        void load_csv(FILE *in);
 
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
 
