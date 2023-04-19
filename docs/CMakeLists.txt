@@ -1,5 +1,7 @@
 set(DOXYGEN_EXTRACT_ALL YES)
 set(DOXYGEN_BUILTIN_STL_SUPPORT YES)
+
+# Includes to produce a latex version of the documentation.
 # set(DOXYGEN_GENERATE_LATEX YES)
 # set(DOXYGEN_GENERATE_PDF YES)
 # set(DOXYGEN_PDF_HYPERLINKS YES)
