@@ -4,18 +4,17 @@
 #include <stdio.h>
 #include <utility>
 
-/*------ Public Methods for gsl::cvector ------*/
-//! \brief Default constructor
+//! \brief Construct empty cvector
 gsl::cvector::cvector() : gvec(nullptr) {}
 
-//! \brief Constructor with size
+//! \brief Construct zero cvector of size n
 gsl::cvector::cvector(size_t n) : gvec(nullptr)
 {
     if (n != 0)
         this->calloc(n);
 }
 
-//! \brief Build a gsl::cvector from a gsl_vector_complex
+//! \brief Construct new gsl::cvector from gsl_vector_complex
 gsl::cvector::cvector(const gsl_vector_complex *gvec_other)
 {
     if (gvec_other == nullptr)
@@ -24,16 +23,17 @@ gsl::cvector::cvector(const gsl_vector_complex *gvec_other)
     gsl_vector_complex_memcpy(gvec, gvec_other);
 }
 
-//! \brief Copy constructor
 gsl::cvector::cvector(const gsl::cvector &gvec_other)
 {
     this->calloc(gvec_other.size());
     gsl_vector_complex_memcpy(gvec, gvec_other.gvec);
 }
 
-//! \brief Conversion constructor from gsl::vector
-//! \note Move constructor isn't useful,
-//   since contiguous memory can't be reclaimed
+/*! \brief Construct new gsl::cmatrix from gsl::matrix
+ *
+ *  Copy the values from a real matrix into a complex matrix, setting
+ *  the imaginary part to zero.
+ */
 gsl::cvector::cvector(const gsl::vector &gvec_other)
 {
     this->calloc(gvec_other.size());
@@ -41,13 +41,11 @@ gsl::cvector::cvector(const gsl::vector &gvec_other)
         GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(gvec_other.gvec, i), 0.0);
 }
 
-//! \brief Move constructor
 gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
 {
     gvec_other.gvec = nullptr;
 }
 
-//! \brief Assignment operator
 gsl::cvector &gsl::cvector::operator=(const gsl::cvector &gvec_other)
 {
     if (this == &gvec_other)
@@ -57,7 +55,6 @@ gsl::cvector &gsl::cvector::operator=(const gsl::cvector &gvec_other)
     return *this;
 }
 
-//! \brief Move assignment operator
 gsl::cvector &gsl::cvector::operator=(gsl::cvector &&gvec_other)
 {
     if (this == &gvec_other)
@@ -68,21 +65,18 @@ gsl::cvector &gsl::cvector::operator=(gsl::cvector &&gvec_other)
     return *this;
 }
 
-//! \brief Addition assignment operator
 gsl::cvector &gsl::cvector::operator+=(const gsl::cvector &gvec_other)
 {
     gsl_vector_complex_add(gvec, gvec_other.gvec);
     return *this;
 }
 
-//! \brief Subtraction assignment operator
 gsl::cvector &gsl::cvector::operator-=(const gsl::cvector &gvec_other)
 {
     gsl_vector_complex_sub(gvec, gvec_other.gvec);
     return *this;
 }
 
-//! \brief Destructor
 gsl::cvector::~cvector()
 {
     if (gvec == nullptr)
@@ -102,17 +96,26 @@ gsl::complex gsl::cvector::get(size_t i) const
     return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
 }
 
+/*! \brief Return a reference to the element at position (i,j)
+ *
+ *  This function returns a complex_ref to the element
+ *  at position (i,j) in the matrix. Allows setting.
+ */
 gsl::complex_ref gsl::cvector::operator()(size_t i)
 {
     return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
 
+/*! \brief Return a const reference to the element at position (i,j)
+ *
+ *  This function returns a constant complex_ref to the element
+ *  at position (i,j) in the matrix. Allows getting.
+ */
 const gsl::complex_ref gsl::cvector::operator()(size_t i) const
 {
     return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
 
-//! \brief Size accessor
 size_t gsl::cvector::size() const
 {
     if (gvec == nullptr)
@@ -120,8 +123,12 @@ size_t gsl::cvector::size() const
     return gvec->size;
 };
 
-//! \brief Resize the gsl::cvector
-//! \note If n == 0, the cvector is cleared
+/*! \brief Resize the gsl::cvector, setting elements to zero
+ * \param n Number of elements
+ *
+ * \note This function will always free and reallocate memory,
+ *  setting the elements to zero.
+ */
 void gsl::cvector::resize(size_t n)
 {
     if (n == 0)
@@ -138,7 +145,7 @@ void gsl::cvector::resize(size_t n)
     this->calloc(n);
 }
 
-//! \brief Clear the cvector and free the underlying gsl_vector_complex
+//! \brief Clear the gsl::vector, free underlying memory
 void gsl::cvector::clear()
 {
     if (gvec == nullptr)
@@ -146,7 +153,8 @@ void gsl::cvector::clear()
     this->free();
 }
 
-//! \brief Print the cvector to stdout
+//! \brief Pretty-print the vector to file stream
+//! \param out File stream to print to
 void gsl::cvector::print(FILE *out) const
 {
     fprintf(out, "[");
@@ -158,9 +166,7 @@ void gsl::cvector::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
-/*------ Protected Methods for gsl::cvector ------*/
-
-//! \brief Free memory for underlying gsl_vector
+//! \brief Private function to free allocated memory
 void gsl::cvector::free()
 {
     gsl_vector_complex_free(gvec);
@@ -168,13 +174,13 @@ void gsl::cvector::free()
 }
 
 /*!
- * \brief Allocate memory for underlying gsl_vector
- * \nocomplexte This method allocates contiguous, zero-initialized memory.
- *         This is slightly slower than using gsl_vector_alloc
+ * \brief Private function to (continuously) allocate memory
+ * \note This method allocates contiguous, zero-initialized memory.
+ *       This is slightly slower than using gsl_vector_complex_alloc, but allows
+ *       for intuitive usage of row views.
  */
 void gsl::cvector::calloc(size_t n) { gvec = gsl_vector_complex_calloc(n); }
 
-/*------ friend operators ------*/
 namespace gsl
 {
     cvector operator*(complex z, const cvector &v)
@@ -256,18 +262,39 @@ namespace gsl
     }
 }
 
+/*! \brief Return a view to a subvector of the cvector
+ * \param offset Offset of the subvector
+ * \param size Size of the subvector
+ *
+ * \note \return A gsl::cvector_view to the subvector
+ */
+gsl::cvector_view gsl::cvector::subvector(size_t offset, size_t size)
+{
+    return gsl::cvector_view(gsl_vector_complex_subvector(gvec, offset, size));
+}
+
+//! \brief Return a view to the entire cvector
+gsl::cvector_view gsl::cvector::view()
+{
+    return gsl::cvector_view(gsl_vector_complex_subvector(gvec, 0, gvec->size));
+}
+
+//! \brief Assignment to a cvector view from a cvector
 gsl::cvector_view &gsl::cvector_view::operator=(const gsl::cvector &v)
 {
     gsl_vector_complex_memcpy(&gvec_view.vector, v.gvec);
     return *this;
 }
 
+//! \brief Assignment to a cvector view from a cvector view
 gsl::cvector_view &gsl::cvector_view::operator=(cvector_view v)
 {
     gsl_vector_complex_memcpy(&gvec_view.vector, &v.gvec_view.vector);
     return *this;
 }
 
+//! \brief Pretty-print the viewed vvector to file stream
+//! \param out File stream to print to
 void gsl::cvector_view::print(FILE *out) const
 {
     fprintf(out, "[");
@@ -279,3 +306,8 @@ void gsl::cvector_view::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
+//! \brief Return a cmatrix view out of the elements of the row
+gsl::cmatrix_view gsl::crow_view::reshape(size_t n, size_t m)
+{
+    return gsl::cmatrix_view(gsl_matrix_complex_view_vector(&gvec_view.vector, n, m));
+}

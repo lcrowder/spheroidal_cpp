@@ -2,12 +2,19 @@
 #include <yawg/fft.h>
 #include <gsl/gsl_fft_complex.h>
 
-/*! \brief Compute fft of a gsl::(c)vector */
-//! \note If x has only real data, using gsl_fft_real_* methods would be faster.
-//!   A more efficient implementation would cache the wavetable and workspace
+/*! \brief Compute in-place fft of a gsl::(c)vector
+ * Computes the in-place complex Fast Fourier Transform of the data in x.
+ * \param x The cvector to be transformed.
+ *
+ * \note More efficient implementations of this function (and the others in this file)
+ * would use gsl_fft_real_* functions for real arguments, or cache the wavetable
+ * and workspace for repeated calls in different parts of execution.
+ *
+ * \return The transformed vector, reclaiming the memory of the original vector.
+ */
 gsl::cvector gsl::fft(gsl::cvector &&x)
 {
-    gsl_vector_complex *xp = x.get_gsl_ptr();
+    const gsl_vector_complex *xp = x.get_gsl_ptr();
 
     // evil floating point bit level hacking
     if ((xp->size & (xp->size - 1)) == 0)
@@ -24,16 +31,27 @@ gsl::cvector gsl::fft(gsl::cvector &&x)
     return std::move(x);
 }
 
+/*! \brief Compute fft of a gsl::(c)vector
+ * Computes the complex Fast Fourier Transform of the data in x.
+ * \param x The cvector to be transformed.
+ *
+ * \return The transformed vector
+ */
 gsl::cvector gsl::fft(const gsl::cvector &x)
 {
     gsl::cvector y(x);
     return gsl::fft(std::move(y));
 }
 
-/*! \brief Compute ifft of a gsl::(c)vector */
+/*! \brief Compute in-place inverse fft of a gsl::(c)vector
+ * Computes the in-place complex Inverse Fast Fourier Transform of the data in x.
+ * \param x The cvector to be transformed.
+ *
+ * \return The transformed vector, reclaiming the memory of the original vector.
+ */
 gsl::cvector gsl::ifft(gsl::cvector &&x)
 {
-    gsl_vector_complex *xp = x.get_gsl_ptr();
+    const gsl_vector_complex *xp = x.get_gsl_ptr();
 
     // evil floating point bit level hacking
     if ((xp->size & (xp->size - 1)) == 0)
@@ -50,16 +68,29 @@ gsl::cvector gsl::ifft(gsl::cvector &&x)
     return std::move(x);
 }
 
+/*! \brief Compute inverse fft of a gsl::(c)vector
+ * Computes the complex inverse Fast Fourier Transform of the data in x.
+ * \param x The cvector to be transformed.
+ *
+ * \return The transformed vector
+ */
 gsl::cvector gsl::ifft(const gsl::cvector &x)
 {
     gsl::cvector y(x);
     return gsl::ifft(std::move(y));
 }
 
-/*! \brief Compute fft of each row (dim=1) / column (dim=2) of a gsl::(c)matrix */
+/*! \brief Compute in-place 1D fft of each column/row of a gsl::(c)matrix
+ * Computes the 1D complex Fast Fourier Transform of each row (dim=1) or column (dim=2)
+ * of the data in x.
+ * \param x The cmatrix to be transformed.
+ * \param dim The dimension to transform. 1 for columns, 2 for rows.
+ *
+ * \return The transformed matrix, reclaiming memory of the original matrix
+ */
 gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
 {
-    gsl_matrix_complex *xp = x.get_gsl_ptr();
+    const gsl_matrix_complex *xp = x.get_gsl_ptr();
 
     // If operating on rows and length of row is power of 2, use radix2 method
     if (dim == 2 && ((x.ncols() & (x.ncols() - 1)) == 0))
@@ -109,13 +140,29 @@ gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
     return std::move(x);
 }
 
+/*! \brief Compute 1D fft of each column/row of a gsl::(c)matrix
+ * Computes the 1D complex Fast Fourier Transform of each row (dim=1) or column (dim=2)
+ * of the data in x.
+ * \param x The cmatrix to be transformed.
+ * \param dim The dimension to transform. 1 for columns, 2 for rows.
+ *
+ * \return The transformed matrix
+ */
 gsl::cmatrix gsl::fft(const gsl::cmatrix &x, int dim)
 {
     gsl::cmatrix y(x);
     return gsl::fft(std::move(y), dim);
 }
 
-gsl::cmatrix gsl::ifft( gsl::cmatrix&& x, int dim )
+/*! \brief Compute in-place 1D inverse fft of each column/row of a gsl::(c)matrix
+ * Computes the 1D complex inverse Fast Fourier Transform of each row (dim=1) or column (dim=2)
+ * of the data in x.
+ * \param x The cmatrix to be transformed.
+ * \param dim The dimension to transform. 1 for columns, 2 for rows.
+ *
+ * \return The transformed matrix, reclaiming memory of the original matrix
+ */
+gsl::cmatrix gsl::ifft(gsl::cmatrix &&x, int dim)
 {
     gsl_matrix_complex *xp = x.get_gsl_ptr();
 
@@ -167,7 +214,15 @@ gsl::cmatrix gsl::ifft( gsl::cmatrix&& x, int dim )
     return std::move(x);
 }
 
-gsl::cmatrix gsl::ifft( const gsl::cmatrix& x, int dim )
+/*! \brief Compute 1D inverse fft of each column/row of a gsl::(c)matrix
+ * Computes the 1D complex inverse Fast Fourier Transform of each row (dim=1) or column (dim=2)
+ * of the data in x.
+ * \param x The cmatrix to be transformed.
+ * \param dim The dimension to transform. 1 for columns, 2 for rows.
+ *
+ * \return The transformed matrix
+ */
+gsl::cmatrix gsl::ifft(const gsl::cmatrix &x, int dim)
 {
     gsl::cmatrix y(x);
     return gsl::ifft(std::move(y), dim);

@@ -2,186 +2,147 @@
 #define YAWG_MATRIX_H_
 
 #include <gsl/gsl_matrix.h>
+#include <gsl/gsl_blas.h>
 #include <stdio.h>
 
 namespace gsl
 {
-    // Forward Declarations
-    class matrix;
     class vector;
-    class complex;
-    class complex_ref;
-
-    class matrix_view;
     class row_view;
     class column_view;
 
-    class cmatrix_view;
+    class cvector_view;
     class crow_view;
     class ccolumn_view;
 
+    class matrix;
+    class matrix_view;
 
+    class cmatrix;
+    class cmatrix_view;
+    
+    /*! \class matrix
+     *  \brief A wrapper class for gsl_matrix
+     *
+     *  Stores and operates on a pointer to a gsl_matrix.
+     */
     class matrix
     {
-        friend class matrix_view;
-
-        friend class vector_view;
-        friend class row_view;
-        friend class column_view;
-     
         friend class cmatrix;
 
+        friend class matrix_view;
+        friend class row_view;
+        friend class column_view;
+
     public:
-        // Ordinary constructors
+        //! \brief Construct empty matrix
         matrix();
+        //! \brief Construct zero matrix of size n x m
         matrix(size_t n, size_t m);
 
-        // Conversion constructors
-        matrix(const gsl_matrix *gmat_other);
+        //! \brief Construct new gsl::matrix from gsl_matrix
+        matrix(const gsl_matrix *gsl_mat);
+
+        //! \brief Construct new gsl::matrix from .csv file
+        matrix(FILE *in);
+
+        //! \brief Construct new n x 1 gsl::matrix from gsl::vector
         matrix(const vector &v);
-        // matrix( const std::vector<std::vector<double>>& smat );
 
-        // Copy and move constructors
-        matrix(const matrix &gmat_other);
-        matrix(matrix &&gmat_other);
+        //! \brief Copy constructor creating n x m matrix
+        matrix(const matrix &M, size_t n, size_t m);
 
-        //! \brief Assignment operators
-        matrix &operator=(const matrix &gmat_other);
-        matrix &operator=(matrix &&gmat_other);
+        matrix(const matrix &M);
+        matrix(matrix &&M);
 
-        //! \brief Destructor
+        matrix &operator=(const matrix &M);
+        matrix &operator=(matrix &&M);
+
         ~matrix();
 
-        //! \brief Element access
-        double &operator()(size_t i, size_t j); // Setters
+        double &operator()(size_t i, size_t j);
         void set(size_t i, size_t j, double val);
 
-        double operator()(size_t i, size_t j) const; // Getters
+        double operator()(size_t i, size_t j) const;
         double get(size_t i, size_t j) const;
 
         size_t size() const;
         size_t nrows() const;
         size_t ncols() const;
 
+        //! \brief Access the pointer to the underlying gsl_matrix
         gsl_matrix *get_gsl_ptr() const { return gmat; }
 
+        //! \brief Resize the gsl::matrix, setting elements to zero
         void resize(size_t n, size_t m);
+
+        //! \brief CLear the gsl::matrix, free underlying memory
         void clear();
 
-        matrix reshape(size_t n, size_t m);
-        matrix(const matrix &gmat_other, size_t n, size_t m);
+        //! \brief Return a new n x m gsl::matrix with same elements
+        matrix reshape(size_t n, size_t m) const;
 
+        //! \brief Pretty-print the matrix to file stream
         void print(FILE *out = stdout) const;
+
+        //! \brief Print the matrix to file stream in CSV format
         void print_csv(FILE *out = stdout) const;
+
+        //! \brief Load the matrix from a file stream in CSV format
         void load_csv(FILE *in = stdin);
 
-        // Matrix multiplication can't be done in place
         friend matrix operator*(const matrix &A, const matrix &B);
 
-        matrix_view submatrix( size_t i, size_t j, size_t n, size_t m );
-        row_view row( size_t i );
-        column_view column( size_t j );
+        //! \brief Return a view to a submatrix of the matrix
+        matrix_view submatrix(size_t i, size_t j, size_t n, size_t m);
+
+        //! \brief Return a view to a row of the matrix
+        row_view row(size_t i);
+
+        //! \brief Return a view to a column of the matrix
+        column_view column(size_t j);
 
     protected:
         gsl_matrix *gmat;
+
+        //! \brief Private function to free allocated memory
         void free();
+
+        //! \brief Private function to (continuously) allocate memory
         void calloc(size_t n, size_t m);
     };
 
+    /*! \class matrix_view
+     *  \brief A wrapper class for gsl_matrix_view
+     *
+     * Stores a gsl_matrix_view and uses it to access original member data.
+     */
     class matrix_view
     {
     protected:
         gsl_matrix_view gmat_view;
 
     public:
-        // Create a new object from a vector_view
+        //! \brief "Dereferences" a matrix_view into independent gsl::matrix object
         operator matrix() const { return matrix(&gmat_view.matrix); }
 
-        // Constructors
+        //! \brief Construct a view of a gsl::matrix through another matrix_view
         matrix_view(gsl_matrix_view gmat_view) : gmat_view(gmat_view){};
-        matrix_view(const matrix &m) : gmat_view(gsl_matrix_submatrix( m.gmat, 0, 0, m.gmat->size1, m.gmat->size2)) {}
 
-        matrix_view &operator=(const matrix &v);
-        matrix_view &operator=(matrix_view v);
+        //! \brief Construct a view of the given gsl::matrix
+        matrix_view(const matrix &m) : gmat_view(gsl_matrix_submatrix(m.gmat, 0, 0, m.gmat->size1, m.gmat->size2)) {}
 
-        void print(FILE *out = stdout) const;
-    };
+        //! \brief Assignment to a matrix view from a matrix
+        matrix_view &operator=(const matrix &M);
 
-    class cmatrix
-    {
-        friend class cmatrix_view;
-        friend class matrix;
+        //! \brief Assignment to a matrix view from another matrix view
+        matrix_view &operator=(matrix_view Mv);
 
-    public:
-        // Ordinary constructors
-        cmatrix();
-        explicit cmatrix(size_t n, size_t m);
-
-        // Copy and move constructors
-        cmatrix(const cmatrix &gvec_other);
-        cmatrix(cmatrix &&gvec_other);
-
-        // Conversion constructors
-        cmatrix(const gsl_matrix_complex *gvec_other);
-        cmatrix(const matrix &mat);
-        // vector( const std::vector<double>& svec );
-
-        //! \brief Assignment operators
-        cmatrix &operator=(const cmatrix &gvec_other);
-        cmatrix &operator=(cmatrix &&gvec_other);
-
-        // Destructor
-        ~cmatrix();
-
-        // Element access
-        void set(size_t i, size_t j, complex z);
-        complex get(size_t i, size_t j) const;
-
-        complex_ref operator()(size_t i, size_t j);             // Setter
-        const complex_ref operator()(size_t i, size_t j) const; // Getter
-
-        size_t size() const;
-        size_t nrows() const;
-        size_t ncols() const;
-
-        gsl_matrix_complex *get_gsl_ptr() const { return gmat; }
-
-        void resize(size_t n, size_t m);
-        void reshape(size_t n, size_t m);
-
-        void clear();
-
+        //! \brief Pretty-print the viewed matrix to file stream
         void print(FILE *out = stdout) const;
 
-        friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
-
-        cmatrix_view submatrix( size_t i, size_t j, size_t n, size_t m );
-        crow_view row( size_t i );
-        ccolumn_view column( size_t j );
-
-    protected:
-        gsl_matrix_complex *gmat;
-        void free();
-        void calloc(size_t n, size_t m);
-    };
-
-    class cmatrix_view
-    {
-    protected:
-        gsl_matrix_complex_view gmat_view;
-
-    public:
-        // Create a new object from a vector_view
-        operator cmatrix() const { return cmatrix(&gmat_view.matrix); }
-
-        // Constructors
-        cmatrix_view(gsl_matrix_complex_view gmat_view) : gmat_view(gmat_view){};
-        cmatrix_view(const cmatrix &m) : gmat_view(gsl_matrix_complex_submatrix( m.gmat, 0, 0, m.gmat->size1, m.gmat->size2)) {}
-
-        cmatrix_view &operator=(const cmatrix &v);
-        cmatrix_view &operator=(cmatrix_view v);
-
-        void print(FILE *out = stdout) const;
+        //! \brief Return a constant pointer to the underlying gsl_matrix
+        const gsl_matrix *get_gsl_ptr() const { return &gmat_view.matrix; }
     };
 
 } // namespace gsl

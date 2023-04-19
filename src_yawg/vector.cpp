@@ -3,18 +3,17 @@
 #include <gsl/gsl_blas.h>
 #include <utility>
 
-/*------ Public Methods for gsl::vector ------*/
-//! \brief Default constructor
+//! \brief Construct empty vector
 gsl::vector::vector() : gvec(nullptr) {}
 
-//! \brief Constructor with size
+//! \brief Construct zero vector of size n
 gsl::vector::vector(size_t n) : gvec(nullptr)
 {
     if (n != 0)
         this->calloc(n);
 }
 
-//! \brief Build a gsl::vector from a gsl_vector
+//! \brief Construct new gsl::vector from gsl_vector
 gsl::vector::vector(const gsl_vector *gvec_other)
 {
     if (gvec_other == nullptr)
@@ -23,20 +22,17 @@ gsl::vector::vector(const gsl_vector *gvec_other)
     gsl_vector_memcpy(gvec, gvec_other);
 }
 
-//! \brief Copy constructor
 gsl::vector::vector(const gsl::vector &gvec_other)
 {
     this->calloc(gvec_other.size());
     gsl_vector_memcpy(gvec, gvec_other.gvec);
 }
 
-//! \brief Move constructor
 gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
 {
     gvec_other.gvec = nullptr;
 }
 
-//! \brief Assignment operator
 gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
 {
     if (this == &gvec_other)
@@ -46,7 +42,6 @@ gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
     return *this;
 }
 
-//! \brief Move assignment operator
 gsl::vector &gsl::vector::operator=(gsl::vector &&gvec_other)
 {
     if (this == &gvec_other)
@@ -57,21 +52,18 @@ gsl::vector &gsl::vector::operator=(gsl::vector &&gvec_other)
     return *this;
 }
 
-//! \brief Addition assignment operator
 gsl::vector &gsl::vector::operator+=(const gsl::vector &gvec_other)
 {
     gsl_vector_add(gvec, gvec_other.gvec);
     return *this;
 }
 
-//! \brief Subtraction assignment operator
 gsl::vector &gsl::vector::operator-=(const gsl::vector &gvec_other)
 {
     gsl_vector_sub(gvec, gvec_other.gvec);
     return *this;
 }
 
-//! \brief Destructor
 gsl::vector::~vector()
 {
     if (gvec == nullptr)
@@ -79,20 +71,14 @@ gsl::vector::~vector()
     gsl_vector_free(gvec);
 }
 
-//! \brief Element getter
-double gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i); }
-double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
-
-//! \brief Element setter
-double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
 void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
 
-gsl::vector_view gsl::vector::subvector(size_t offset, size_t size)
-{
-    return gsl::vector_view(gsl_vector_subvector(gvec, offset, size));
-}
+double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
 
-//! \brief Size accessor
+double gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i); }
+
+double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
+
 size_t gsl::vector::size() const
 {
     if (gvec == nullptr)
@@ -100,8 +86,12 @@ size_t gsl::vector::size() const
     return gvec->size;
 };
 
-//! \brief Resize the gsl::vector
-//! \note If n == 0, the vector is cleared
+/*! \brief Resize the gsl::vector, setting elements to zero
+ * \param n Number of elements
+ *
+ * \note This function will always free and reallocate memory,
+ *  setting the elements to zero.
+ */
 void gsl::vector::resize(size_t n)
 {
     if (n == 0)
@@ -118,7 +108,7 @@ void gsl::vector::resize(size_t n)
     this->calloc(n);
 }
 
-//! \brief Clear the vector and free the underlying gsl_vector
+//! \brief Clear the gsl::vector, free underlying memory
 void gsl::vector::clear()
 {
     if (gvec == nullptr)
@@ -126,7 +116,8 @@ void gsl::vector::clear()
     this->free();
 }
 
-//! \brief Print the vector to stdout
+//! \brief Pretty-print the vector to file stream
+//! \param out File stream to print to
 void gsl::vector::print(FILE *out) const
 {
     fprintf(out, "[");
@@ -135,9 +126,7 @@ void gsl::vector::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
-/*------ Protected Methods for gsl::vector ------*/
-
-//! \brief Free memory for underlying gsl_vector
+//! \brief Private function to free allocated memory
 void gsl::vector::free()
 {
     gsl_vector_free(gvec);
@@ -145,13 +134,13 @@ void gsl::vector::free()
 }
 
 /*!
- * \brief Allocate memory for underlying gsl_vector
+ * \brief Private function to (continuously) allocate memory
  * \note This method allocates contiguous, zero-initialized memory.
- *         This is slightly slower than using gsl_vector_alloc
+ *       This is slightly slower than using gsl_vector_alloc, but allows
+ *       for intuitive usage of row views.
  */
 void gsl::vector::calloc(size_t n) { gvec = gsl_vector_calloc(n); }
 
-/*------ friend operators ------*/
 namespace gsl
 {
     vector operator*(double a, const vector &v)
@@ -243,23 +232,39 @@ namespace gsl
     }
 }
 
-// gsl::vector_view::vector_view( const gsl::vector& v)
-// {
-//     gsl::vector_view(gsl_vector_subvector(v.gvec, 0, v.gvec->size));
-// }
+/*! \brief Return a view to a subvector of the vector
+ * \param offset Offset of the subvector
+ * \param size Size of the subvector
+ *
+ * \note \return A gsl::vector_view to the subvector
+ */
+gsl::vector_view gsl::vector::subvector(size_t offset, size_t size)
+{
+    return gsl::vector_view(gsl_vector_subvector(gvec, offset, size));
+}
 
+//! \brief Return a view to the entire vector
+gsl::vector_view gsl::vector::view()
+{
+    return gsl::vector_view(gsl_vector_subvector(gvec, 0, gvec->size));
+}
+
+//! \brief Assignment to a vector view from a vector
 gsl::vector_view &gsl::vector_view::operator=(const gsl::vector &v)
 {
     gsl_vector_memcpy(&gvec_view.vector, v.gvec);
     return *this;
 }
 
+//! \brief Assignment to a vector view from a vector view
 gsl::vector_view &gsl::vector_view::operator=(vector_view v)
 {
     gsl_vector_memcpy(&gvec_view.vector, &v.gvec_view.vector);
     return *this;
 }
 
+//! \brief Pretty-print the viewed vector to file stream
+//! \param out File stream to print to
 void gsl::vector_view::print(FILE *out) const
 {
     fprintf(out, "[");
@@ -268,7 +273,8 @@ void gsl::vector_view::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
-gsl::matrix_view gsl::row_view::reshape( size_t n, size_t m )
+//! \brief Return a matrix view out of the elements of the row
+gsl::matrix_view gsl::row_view::reshape(size_t n, size_t m)
 {
     return gsl::matrix_view(gsl_matrix_view_vector(&gvec_view.vector, n, m));
 }
