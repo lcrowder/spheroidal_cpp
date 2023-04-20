@@ -175,6 +175,12 @@ gsl::matrix gsl::matrix::reshape(size_t n, size_t m) const
     return gmat_new;
 }
 
+gsl::matrix & gsl::matrix::T()
+{
+    gsl_matrix_transpose(gmat);
+    return *this;
+}
+
 /*! \brief Copy constructor creating n x m matrix
  * \param M gsl::matrix to copy
  * \param n Number of rows

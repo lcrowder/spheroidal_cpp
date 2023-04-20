@@ -226,6 +226,29 @@ gsl::cmatrix gsl::cmatrix::reshape(size_t n, size_t m) const
     return M_new;
 }
 
+//! \brief Replace the complex matrix with its transpose
+gsl::cmatrix &gsl::cmatrix::T()
+{
+    gsl_matrix_complex_transpose(gmat);
+    return *this;
+}
+
+//! \brief Replace the complex matrix with its conjugate transpose
+gsl::cmatrix & gsl::cmatrix::H()
+{
+    return this->T().conj();
+}
+
+//! \brief Replace the matrix with its conjugate
+gsl::cmatrix & gsl::cmatrix::conj()
+{
+    // Replace each element with its conjugate
+    for (size_t i = 0; i < this->nrows(); i++)
+        for (size_t j = 0; j < this->ncols(); j++)
+            gsl_matrix_complex_set(gmat, i, j, gsl_complex_conjugate(gsl_matrix_complex_get(gmat, i, j)));
+    return *this;
+}
+
 //! \brief Pretty-print the complex matrix to file stream
 //! \param out File stream to print to
 void gsl::cmatrix::print(FILE *out) const

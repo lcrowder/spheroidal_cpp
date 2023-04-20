@@ -75,6 +75,15 @@ namespace gsl
         //! \brief Return a new n x m gsl::cmatrix with same elements
         cmatrix reshape(size_t n, size_t m) const;
 
+        //! \brief Replace the complex matrix with its transpose
+        cmatrix &T();
+
+        //! \brief Replace the complex matrix with its conjugate transpose
+        cmatrix &H();
+
+        //! \brief Return the conjugate of the complex matrix
+        cmatrix &conj();
+
         //! \brief Pretty-print the complex matrix to file stream
         void print(FILE *out = stdout) const;
 

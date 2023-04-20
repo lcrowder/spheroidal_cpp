@@ -82,6 +82,9 @@ namespace gsl
         //! \brief Return a new n x m gsl::matrix with same elements
         matrix reshape(size_t n, size_t m) const;
 
+        //! \brief Replace the matrix with its transpose
+        matrix &T();
+        
         //! \brief Pretty-print the matrix to file stream
         void print(FILE *out = stdout) const;
 
