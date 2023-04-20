@@ -83,7 +83,14 @@ int geti(int n, int m)
 
 
 
-// Computes associated legendre functions off the cut of the first kind, P_n^m(u), u>1
+/*!
+ * \brief Computes associated legendre functions off the cut of the first kind, $$P_n^m(u)$$, $$u>1$$.
+ * \param p The order of the spheroidal harmonics
+ * \param u The u-values at which to compute the associated legendre functions
+ * \param P Matrix of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ *
+ * \note Will cause an error if any u-value is less than or equal to 1.
+ */
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 {
 
@@ -198,7 +205,14 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 
 
 
-
+/*!
+ * \brief Computes associated legendre functions off the cut of the first and second kind, $$P_n^m(u)$$ and $$Q_n^m(u)$$, for $$u>1$$.
+ * \param p The order of the spheroidal harmonics
+ * \param u The u-values at which to compute the associated legendre functions
+ * \param P Matrix of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param Q Matrix of associated legendre functions off the cut of the second kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \note Will cause an error if any u-value is less than or equal to 1.
+ */
 void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 {
     FILE *logfile = fopen("../../legendre_otc.log", "w");
@@ -398,7 +412,14 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
 
 
-
+/*!
+ * \brief Computes associated legendre functions off the cut of the first kind, $$P_n^m(u)$$ and their derivatives.
+ * \param p The order of the spheroidal harmonics
+ * \param u The u-values at which to compute the associated legendre functions
+ * \param P Matrix of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param dP Matrix of derivatives of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \note Will cause an error if any u-value is less than or equal to 1.
+ */
 void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &dP)
 {
     FILE* logfile= fopen("../../Dlegendre_otc.log","w");
@@ -447,7 +468,16 @@ void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &dP)
 }
 
 
-
+/*!
+ * \brief Computes associated legendre functions off the cut of the first and second kind, $$P_n^m(u)$$ and $$Q_n^m(u)$$, and their derivatives, for $$u>1$$.
+ * \param p The order of the spheroidal harmonics
+ * \param u The u-values at which to compute the associated legendre functions
+ * \param P Matrix of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param Q Matrix of associated legendre functions off the cut of the second kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param dP Matrix of derivatives of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param dQ Matrix of derivatives of associated legendre functions off the cut of the second kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \note Will cause an error if any u-value is less than or equal to 1.
+ */
 void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q, gsl::matrix &dP, gsl::matrix &dQ)
 {
     FILE* logfile= fopen("../../Dlegendre_otc.log","w");
