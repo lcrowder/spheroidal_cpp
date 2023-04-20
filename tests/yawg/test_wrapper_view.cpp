@@ -509,3 +509,32 @@ TEST_CASE("gsl::cmatrix view edge cases", "[gsl::cmatrix][gsl::cmatrix_view]")
                 REQUIRE(m1(i, j) == gsl::complex(10 * (i - 3) + (j - 3), 20 * (i - 3) + (j - 3)));
     }
 }
+
+// Use Catch2 to catch the vector space operations
+TEST_CASE("gsl::vector vector space operations", "[gsl::vector_view]")
+{
+    gsl::vector u_vec(3);
+    gsl::vector v_vec(3);
+
+    // Populate the vectors in a for loop
+    for (int i = 0; i < 3; ++i)
+    {
+        u_vec(i) = i;
+        v_vec(i) = 2 * i;
+    }
+
+    // Generate a view of each vector
+    gsl::vector_view u = u_vec.subvector(0, 3);
+    gsl::vector_view v = v_vec.subvector(0, 3);
+
+    // Test vector_view addition in a sum
+    SECTION("Test vector_view addition in a sum")
+    {
+        gsl::vector w = u_vec + v;
+
+        for (int i = 0; i < 3; ++i)
+        {
+            REQUIRE(w(i) == 3 * i);
+        }
+    }
+}

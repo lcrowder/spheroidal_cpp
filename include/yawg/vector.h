@@ -14,6 +14,8 @@ namespace gsl
     class row_view;
     class column_view;
 
+    class cvector_view;
+
     class matrix_view;
 
     /*! \class vector
@@ -31,9 +33,85 @@ namespace gsl
 
         friend class matrix;
 
+        // Scalar multiplication
+        friend vector operator*(double a, const vector &v);
+        friend vector operator*(double a, vector &&v);
+        friend vector operator*(const vector &v, double a);
+        friend vector operator*(vector &&v, double a);
+
+        friend cvector operator*(complex a, const vector &v);
+        friend cvector operator*(const vector &v, complex a);
+
+        // Add vectors to vectors
+        friend vector operator+(const vector &v1, const vector &v2);
+        friend vector operator+(vector &&v1, const vector &v2);
+        friend vector operator+(const vector &v1, vector &&v2);
+        friend vector operator+(vector &&v1, vector &&v2);
+
+        // Add vector views to vectors
+        friend vector operator+(const vector &v1, const vector_view &v2);
+        friend vector operator+(const vector_view &v1, const vector &v2);
+        friend vector operator+(vector &&v1, const vector_view &v2);
+        friend vector operator+(const vector_view &v1, vector &&v2);
+
+        // Add vectors to complex vectors
+        friend cvector operator+(const vector &v1, const cvector &v2);
+        friend cvector operator+(const vector &v1, cvector &&v2);
+        friend cvector operator+(const cvector &v1, const vector &v2);
+        friend cvector operator+(cvector &&v1, const vector &v2);
+
+        // Add vectors to complex vector views
+        friend cvector operator+(const vector &v1, const cvector_view &v2);
+        friend cvector operator+(const cvector_view &v1, const vector &v2);
+
+        // Subtract vectors from vectors
+        friend vector operator-(const vector &v1, const vector &v2);
+        friend vector operator-(vector &&v1, const vector &v2);
+        friend vector operator-(const vector &v1, vector &&v2);
+        friend vector operator-(vector &&v1, vector &&v2);
+
+        // Subtract vector views from vectors
+        friend vector operator-(const vector &v1, const vector_view &v2);
+        friend vector operator-(const vector_view &v1, const vector &v2);
+        friend vector operator-(vector &&v1, const vector_view &v2);
+        friend vector operator-(const vector_view &v1, vector &&v2);
+
+        // Subtract vectors from complex vectors
+        friend cvector operator-(const vector &v1, const cvector &v2);
+        friend cvector operator-(const vector &v1, cvector &&v2);
+        friend cvector operator-(const cvector &v1, const vector &v2);
+        friend cvector operator-(cvector &&v1, const vector &v2);
+
+        // Subtract vectors from complex vector views
+        friend cvector operator-(const vector &v1, const cvector_view &v2);
+        friend cvector operator-(const cvector_view &v1, const vector &v2);
+
+        // Compare vectors to vectors
+        friend bool operator==(const vector &v1, const vector &v2);
+        friend bool operator!=(const vector &v1, const vector &v2);
+
+        // Compare vectors to vector views
+        friend bool operator==(const vector_view &v1, const vector &v2);
+        friend bool operator==(const vector &v1, const vector_view &v2);
+        friend bool operator!=(const vector_view &v1, const vector &v2);
+        friend bool operator!=(const vector &v1, const vector_view &v2);
+
+        // Compare vectors to complex vectors
+        friend bool operator==(const vector &v1, const cvector &v2);
+        friend bool operator!=(const vector &v1, const cvector &v2);
+        friend bool operator==(const cvector &v1, const vector &v2);
+        friend bool operator!=(const cvector &v1, const vector &v2);
+
+        // Compare vectors to complex vector views
+        friend bool operator==(const vector &v1, const cvector_view &v2);
+        friend bool operator!=(const vector &v1, const cvector_view &v2);
+        friend bool operator==(const cvector_view &v1, const vector &v2);
+        friend bool operator!=(const cvector_view &v1, const vector &v2);
+
     public:
         //! \brief Construct empty vector
         vector();
+
         //! \brief Construct zero vector of size n
         explicit vector(size_t n);
 
@@ -71,28 +149,15 @@ namespace gsl
         //! \brief Return the 2-norm of the vector
         double norm() const { return gsl_blas_dnrm2(gvec); }
 
-        vector &operator+=(const vector &gvec_other);
-        vector &operator-=(const vector &gvec_other);
+        vector &operator+=(const vector &v);
+        vector &operator+=(const vector_view &vv);
 
-        friend vector operator*(double a, const vector &v);
-        friend vector operator*(double a, vector &&v);
-        friend vector operator*(const vector &v, double a);
-        friend vector operator*(vector &&v, double a);
+        vector &operator-=(const vector &v);
+        vector &operator-=(const vector_view &vv);
 
-        friend cvector operator*(complex a, const vector &v);
-        friend cvector operator*(const vector &v, complex a);
-
-        friend vector operator+(const vector &v1, const vector &v2);
-        friend vector operator+(vector &&v1, const vector &v2);
-        friend vector operator+(const vector &v1, vector &&v2);
-        friend vector operator+(vector &&v1, vector &&v2);
-
-        friend vector operator-(const vector &v1, const vector &v2);
-        friend vector operator-(vector &&v1, const vector &v2);
-        friend vector operator-(const vector &v1, vector &&v2);
-        friend vector operator-(vector &&v1, vector &&v2);
-
-        friend bool operator==(const vector &v1, const vector &v2);
+        vector &operator*=(double a);
+        vector &operator/=(double a);
+        vector operator-() const;
 
         //! \brief Return a view to a subvector of the vector
         vector_view subvector(size_t offset, size_t size);
@@ -117,6 +182,69 @@ namespace gsl
      */
     class vector_view
     {
+        friend class vector;
+        friend class cvector;
+
+        // Add vector views to vector views
+        friend vector operator+(const vector_view &v1, const vector_view &v2);
+
+        // Add vector view to complex vector view
+        friend cvector operator+(const vector_view &v1, const cvector_view &v2);
+        friend cvector operator+(const cvector_view &v1, const vector_view &v2);
+
+        // Add vector views to vectors
+        friend vector operator+(const vector &v1, const vector_view &v2);
+        friend vector operator+(const vector_view &v1, const vector &v2);
+        friend vector operator+(vector &&v1, const vector_view &v2);
+        friend vector operator+(const vector_view &v1, vector &&v2);
+
+        // Add vector views to complex vectors
+        friend cvector operator+(const vector_view &v1, const cvector &v2);
+        friend cvector operator+(const vector_view &v1, cvector &&v2);
+        friend cvector operator+(const cvector &v1, const vector_view &v2);
+        friend cvector operator+(cvector &&v1, const vector_view &v2);
+
+        // Subtract vector views from vector views
+        friend vector operator-(const vector_view &v1, const vector_view &v2);
+
+        // Subtract vector view from complex vector view
+        friend cvector operator-(const vector_view &v1, const cvector_view &v2);
+        friend cvector operator-(const cvector_view &v1, const vector_view &v2);
+
+        // Subtract vector views from vectors
+        friend vector operator-(const vector &v1, const vector_view &v2);
+        friend vector operator-(const vector_view &v1, const vector &v2);
+        friend vector operator-(vector &&v1, const vector_view &v2);
+        friend vector operator-(const vector_view &v1, vector &&v2);
+
+        // Subtract vector views from complex vectors
+        friend cvector operator-(const vector_view &v1, const cvector &v2);
+        friend cvector operator-(const vector_view &v1, cvector &&v2);
+        friend cvector operator-(const cvector &v1, const vector_view &v2);
+        friend cvector operator-(cvector &&v1, const vector_view &v2);
+
+        // Compare vector views to vector views
+        friend bool operator==(const vector_view &v1, const vector_view &v2);
+        friend bool operator!=(const vector_view &v1, const vector_view &v2);
+
+        // Compare vector views to complex vector views
+        friend bool operator==(const vector_view &v1, const cvector_view &v2);
+        friend bool operator!=(const vector_view &v1, const cvector_view &v2);
+        friend bool operator==(const cvector_view &v1, const vector_view &v2);
+        friend bool operator!=(const cvector_view &v1, const vector_view &v2);
+
+        // Compare vector views to vectors
+        friend bool operator==(const vector_view &v1, const vector &v2);
+        friend bool operator!=(const vector_view &v1, const vector &v2);
+        friend bool operator==(const vector &v1, const vector_view &v2);
+        friend bool operator!=(const vector &v1, const vector_view &v2);
+
+        // Compare vector views to complex vectors
+        friend bool operator==(const vector_view &v1, const cvector &v2);
+        friend bool operator!=(const vector_view &v1, const cvector &v2);
+        friend bool operator==(const cvector &v1, const vector_view &v2);
+        friend bool operator!=(const cvector &v1, const vector_view &v2);
+
     protected:
         gsl_vector_view gvec_view;
 
@@ -135,6 +263,21 @@ namespace gsl
 
         //! \brief Assignment to a vector view from a vector view
         vector_view &operator=(vector_view v);
+
+        vector_view &operator+=(const vector_view &vv);
+        vector_view &operator+=(const vector &v);
+
+        vector_view &operator-=(const vector_view &vv);
+        vector_view &operator-=(const vector &v);
+        
+        vector_view &operator*=(double x);
+        vector_view &operator/=(double x);
+        
+        double &operator()(size_t i);
+        void set(size_t i, double val);
+
+        double operator()(size_t i) const;
+        double get(size_t i) const;
 
         //! \brief Pretty-print the viewed vector to file stream
         void print(FILE *out = stdout) const;
