@@ -99,7 +99,15 @@ gsl::cvector gsl::linspace(gsl::complex a, gsl::complex b, size_t n)
     return x;
 }
 
-//! \brief Return evenly spaced values within a given interval.
+/*! \brief Get a gsl::vector of \p step spaced points on the interval [ \p a, \p b )
+ *  \param a Lower bound of the interval
+ *  \param b Upper bound of the interval
+ *  \param step Spacing between points
+ *
+ *  \note Will return an empty vector if \p b cannot be reached by steping from \p a by \p step.
+ *
+ *  \return gsl::vector of points
+ */
 gsl::vector gsl::arange(double start, double stop, double step)
 {
     if (step == 0)
@@ -113,6 +121,29 @@ gsl::vector gsl::arange(double start, double stop, double step)
     for (int i = 0; i < n; ++i)
         x(i) = start + i * step;
     return x;
+}
+
+/*! \brief Perform a circular shift of the elements of a gsl::vector
+ *  \param x Input vector
+ *  \param k Number of positions to shift
+ *
+ *  \return Shifted vector
+ */
+gsl::vector gsl::circshift(const gsl::vector &x, int k)
+{
+    gsl::vector y(x);
+
+    // If k is zero, don't shift
+    if (k == 0)
+        return x;
+
+    // Negative shifts are equivalent to positive shifts in the opposite direction
+    if (k < 0)
+        k = k * (1 - x.size());
+
+    for (int i = 0; i < x.size(); ++i)
+        y((i + k) % x.size()) = x(i);
+    return y;
 }
 
 /*! \brief Store 2D grid coordinates based on 1D input gsl::vectors
