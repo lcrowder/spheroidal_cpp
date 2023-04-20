@@ -356,3 +356,82 @@ TEST_CASE("arrayfun matrix", "[arrayfun]")
     REQUIRE(x3(2, 1) == tan(9.0));
     REQUIRE(x3(2, 2) == tan(10.0));
 }
+
+// Use Catch2 to test the gsl::circshift function for vectors
+TEST_CASE("circshift vector", "[circshift]")
+{
+    gsl::vector x = gsl::linspace(0, 1, 5);
+
+    // Test circshift with k = 0
+    SECTION("circshift k = 0")
+    {
+        gsl::vector y = gsl::circshift(x, 0);
+        for (size_t i = 0; i < 5; i++)
+        {
+            REQUIRE(y(i) == x(i));
+        }
+    }
+
+    // Test circshift with k = 2
+    SECTION("circshift k = 2")
+    {
+        gsl::vector y = gsl::circshift(x, 2);
+        REQUIRE(y(0) == x(3));
+        REQUIRE(y(1) == x(4));
+        REQUIRE(y(2) == x(0));
+        REQUIRE(y(3) == x(1));
+        REQUIRE(y(4) == x(2));
+    }
+
+    // Test circshift with k = -1
+    SECTION("circshift k = -1")
+    {
+        x.print();
+        gsl::vector y = gsl::circshift(x, -1);
+        y.print();
+        REQUIRE(y(0) == x(1));
+        REQUIRE(y(1) == x(2));
+        REQUIRE(y(2) == x(3));
+        REQUIRE(y(3) == x(4));
+        REQUIRE(y(4) == x(0));
+    }
+
+    // Test circshift with k = 52
+    SECTION("circshift k = 52")
+    {
+        gsl::vector y = gsl::circshift(x, 52);
+        REQUIRE(y(0) == x(3));
+        REQUIRE(y(1) == x(4));
+        REQUIRE(y(2) == x(0));
+        REQUIRE(y(3) == x(1));
+        REQUIRE(y(4) == x(2));
+    }
+
+    // Test circshift with k = -52
+    SECTION("circshift k = -52")
+    {
+        gsl::vector y = gsl::circshift(x, -52);
+        REQUIRE(y(0) == x(2));
+        REQUIRE(y(1) == x(3));
+        REQUIRE(y(2) == x(4));
+        REQUIRE(y(3) == x(0));
+        REQUIRE(y(4) == x(1));
+    }
+}
+
+
+// Use Catch2 to test a thing
+TEST_CASE("gsl::vector view edge cases", "[gsl::vector][gsl::vector_view]")
+{
+    gsl::matrix M = gsl::eye(10);
+    gsl::vector v = gsl::linspace(0, 10, 10);
+
+    gsl::vector_view u = M.column(0);
+    // u(1) = 10;
+    
+    // // Require u and M.column(0) to have different addresses
+    // REQUIRE(u.get_gsl_ptr() != M.column(0).get_gsl_ptr());
+
+    // M.print();
+    // M.print();
+}

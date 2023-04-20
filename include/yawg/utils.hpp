@@ -18,15 +18,19 @@ namespace gsl
     //! \brief Complex version of linspace
     gsl::cvector linspace(gsl::complex a, gsl::complex b, size_t n);
 
+    //! \brief Get a gsl::vector of \p step spaced points on the interval [ \p a, \p b )
     gsl::vector arange(double a, double b, double step = 1.0);
 
-    /*! \brief Store 2D grid coordinates based on 1D input gsl::vectors */
+    //! \brief Perform a circular shift of the elements of a gsl::vector
+    gsl::vector circshift(const gsl::vector & x, int k);
+    
+    //! \brief Store 2D grid coordinates based on 1D input gsl::vectors
     void meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, gsl::matrix &Y);
 
-    /*! Complex version of gsl::meshgrid */
+    //! Complex version of gsl::meshgrid
     void meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X, gsl::cmatrix &Y);
 
-    /*! \brief Return the nxn identity matrix */
+    //! \brief Return the nxn identity matrix
     gsl::matrix eye(size_t n);
 
     /*! \brief Apply lambda function to each element of a gsl::vector, akin to MATLAB arrayfun
@@ -62,7 +66,6 @@ namespace gsl
     {
         gsl::cvector y(x.size());
         for (int i = 0; i < x.size(); ++i)
-            //y(i) = func(x(i)); // Desired usage
             y.set( func(x.get(i)), i );
         return y;
     }
@@ -72,7 +75,6 @@ namespace gsl
     gsl::cvector arrayfun(Lambda &&func, gsl::cvector &&x)
     {
         for (int i = 0; i < x.size(); ++i)
-            //x(i) = func(x(i)); // Desired usage
             x.set( func(x.get(i)), i );
         return std::move(x);
     }
@@ -113,7 +115,6 @@ namespace gsl
         gsl::cmatrix y(x.nrows(), x.ncols());
         for (int i = 0; i < x.nrows(); ++i)
             for (int j = 0; j < x.ncols(); ++j)
-                //y(i, j) = func(x(i, j)); // Desired usage
                 y.set( func(x.get(i, j)), i, j );
         return y;
     }
@@ -124,7 +125,6 @@ namespace gsl
     {
         for (int i = 0; i < x.nrows(); ++i)
             for (int j = 0; j < x.ncols(); ++j)
-                //x(i, j) = func(x(i, j));// Desired usage
                 x.set( func(x.get(i, j)), i, j );
         return std::move(x);
     }
