@@ -2,6 +2,7 @@
 #include <yawg/core.h>
 #include <yawg/utils.hpp>
 #include <yawg/fft.h>
+#include <yawg/legendre.h>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -346,4 +347,13 @@ TEST_CASE("gsl::ifft on 3x4 matrix", "[gsl::ifft]")
         REQUIRE_THAT(y.get(2, 3).real(), Catch::Matchers::WithinAbs(-0.3750000000, 1e-10));
         REQUIRE_THAT(y.get(2, 3).imag(), Catch::Matchers::WithinAbs(-0.1250000000, 1e-10));
     }
+}
+
+// Use Catch2 to test legendre_P
+TEST_CASE("legendre_P", "[legendre_P]")
+{
+    gsl::vector x = gsl::linspace(-0.9, 0.9, 10);
+    gsl::vector y = gsl::legendre_P(2, x);
+    
+    y.print();
 }

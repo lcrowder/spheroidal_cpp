@@ -51,6 +51,8 @@ void gl_grid(size_t p, gsl::matrix &U, gsl::matrix &V)
     spharm_grid_size_ord(p, nu, nv);
 
     gsl::vector lambda = gsl::linspace(0, 2 * M_PI, nv);
-    gsl::vector theta = gsl::arrayfun([](double x) { return acos(x); }, gsl::leggauss(nu));
+    gsl::vector theta = gsl::arrayfun([](double x)
+                                      { return acos(x); },
+                                      gsl::leggauss(nu));
     gsl::meshgrid(theta, lambda, U, V);
 }

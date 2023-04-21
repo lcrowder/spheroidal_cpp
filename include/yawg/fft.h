@@ -1,5 +1,5 @@
-#ifndef GSL_WRAPPER_FFT_H_
-#define GSL_WRAPPER_FFT_H_
+#ifndef YAWG_FFT_H_
+#define YAWG_FFT_H_
 
 #include <yawg/core.h>
 
@@ -30,4 +30,4 @@ namespace gsl
     gsl::cmatrix ifft(const gsl::cmatrix &x, int dim = 1);
 }
 
-#endif // GSL_WRAPPER_FFT_H_
+#endif // YAWG_FFT_H_

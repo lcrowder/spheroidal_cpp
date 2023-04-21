@@ -54,6 +54,9 @@ gsl::vector gsl::leggauss(size_t n, double a, double b)
     return x;
 }
 
+
+
+
 /*!
  * \brief Computes \p n evenly spaced points on the interval [\p a, \p b] (inclusive)
  * \param a Lower bound of the interval
