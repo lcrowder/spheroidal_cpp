@@ -14,7 +14,12 @@ namespace gsl
         full = GSL_SF_LEGENDRE_FULL
     };
     
-    vector legendre_P(size_t lmax, const vector& x, legendre_norm mode = legendre_norm::none );
+    vector legendre_P(size_t nmax, const vector& x, legendre_norm mode = legendre_norm::none );
+
+    double spherical_harmonic( int n, int m, double x );
+
+    complex spherical_harmonic(int n, int m, double theta, double phi);
+    
 }
 
 #endif // YAWG_LEGENDRE_H_
