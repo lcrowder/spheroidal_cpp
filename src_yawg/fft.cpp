@@ -14,7 +14,7 @@
  */
 gsl::cvector gsl::fft(gsl::cvector &&x)
 {
-    const gsl_vector_complex *xp = x.get_gsl_ptr();
+    const gsl_vector_complex *xp = x.get();
 
     // evil floating point bit level hacking
     if ((xp->size & (xp->size - 1)) == 0)
@@ -51,7 +51,7 @@ gsl::cvector gsl::fft(const gsl::cvector &x)
  */
 gsl::cvector gsl::ifft(gsl::cvector &&x)
 {
-    const gsl_vector_complex *xp = x.get_gsl_ptr();
+    const gsl_vector_complex *xp = x.get();
 
     // evil floating point bit level hacking
     if ((xp->size & (xp->size - 1)) == 0)
@@ -90,14 +90,14 @@ gsl::cvector gsl::ifft(const gsl::cvector &x)
  */
 gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
 {
-    const gsl_matrix_complex *xp = x.get_gsl_ptr();
+    const gsl_matrix_complex *xp = x.get();
 
     // If operating on rows and length of row is power of 2, use radix2 method
     if (dim == 2 && ((x.ncols() & (x.ncols() - 1)) == 0))
     {
         for (int i = 0; i < x.nrows(); ++i)
         {
-            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get_gsl_ptr(), i);
+            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get(), i);
             gsl_fft_complex_radix2_forward((&row.vector)->data, (&row.vector)->stride, (&row.vector)->size);
         }
     }
@@ -106,7 +106,7 @@ gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
     {
         for (int j = 0; j < x.ncols(); ++j)
         {
-            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get_gsl_ptr(), j);
+            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get(), j);
             gsl_fft_complex_radix2_forward((&col.vector)->data, (&col.vector)->stride, (&col.vector)->size);
         }
     }
@@ -117,7 +117,7 @@ gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
         gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(x.nrows());
         for (int j = 0; j < x.ncols(); ++j)
         {
-            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get_gsl_ptr(), j);
+            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get(), j);
             gsl_fft_complex_forward((&col.vector)->data, (&col.vector)->stride, (&col.vector)->size, wavetable, workspace);
         }
         gsl_fft_complex_wavetable_free(wavetable);
@@ -130,7 +130,7 @@ gsl::cmatrix gsl::fft(gsl::cmatrix &&x, int dim)
         gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(x.ncols());
         for (int i = 0; i < x.nrows(); ++i)
         {
-            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get_gsl_ptr(), i);
+            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get(), i);
             gsl_fft_complex_forward((&row.vector)->data, (&row.vector)->stride, (&row.vector)->size, wavetable, workspace);
         }
         gsl_fft_complex_wavetable_free(wavetable);
@@ -164,14 +164,14 @@ gsl::cmatrix gsl::fft(const gsl::cmatrix &x, int dim)
  */
 gsl::cmatrix gsl::ifft(gsl::cmatrix &&x, int dim)
 {
-    gsl_matrix_complex *xp = x.get_gsl_ptr();
+    gsl_matrix_complex *xp = x.get();
 
     // If operating on rows and length of row is power of 2, use radix2 method
     if (dim == 2 && ((x.ncols() & (x.ncols() - 1)) == 0))
     {
         for (int i = 0; i < x.nrows(); ++i)
         {
-            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get_gsl_ptr(), i);
+            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get(), i);
             gsl_fft_complex_radix2_inverse((&row.vector)->data, (&row.vector)->stride, (&row.vector)->size);
         }
     }
@@ -180,7 +180,7 @@ gsl::cmatrix gsl::ifft(gsl::cmatrix &&x, int dim)
     {
         for (int j = 0; j < x.ncols(); ++j)
         {
-            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get_gsl_ptr(), j);
+            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get(), j);
             gsl_fft_complex_radix2_inverse((&col.vector)->data, (&col.vector)->stride, (&col.vector)->size);
         }
     }
@@ -191,7 +191,7 @@ gsl::cmatrix gsl::ifft(gsl::cmatrix &&x, int dim)
         gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(x.nrows());
         for (int j = 0; j < x.ncols(); ++j)
         {
-            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get_gsl_ptr(), j);
+            gsl_vector_complex_view col = gsl_matrix_complex_column(x.get(), j);
             gsl_fft_complex_inverse((&col.vector)->data, (&col.vector)->stride, (&col.vector)->size, wavetable, workspace);
         }
         gsl_fft_complex_wavetable_free(wavetable);
@@ -204,7 +204,7 @@ gsl::cmatrix gsl::ifft(gsl::cmatrix &&x, int dim)
         gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc(x.ncols());
         for (int i = 0; i < x.nrows(); ++i)
         {
-            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get_gsl_ptr(), i);
+            gsl_vector_complex_view row = gsl_matrix_complex_row(x.get(), i);
             gsl_fft_complex_inverse((&row.vector)->data, (&row.vector)->stride, (&row.vector)->size, wavetable, workspace);
         }
         gsl_fft_complex_wavetable_free(wavetable);

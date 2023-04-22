@@ -128,7 +128,7 @@ namespace gsl
         size_t size() const;
 
         //! \brief Access the pointer to the underlying gsl_vector_complex
-        gsl_vector_complex *get_gsl_ptr() const { return gvec; }
+        gsl_vector_complex *get() const { return gvec; }
 
         //! \brief Resize the gsl::cvector, setting elements to zero
         void resize(size_t n);

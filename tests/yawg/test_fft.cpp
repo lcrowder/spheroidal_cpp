@@ -17,8 +17,8 @@ TEST_CASE("gsl::fft", "[gsl::fft]")
     {
         gsl::cvector y = gsl::fft(x);
 
-        REQUIRE(x.get_gsl_ptr() != nullptr);
-        REQUIRE(x.get_gsl_ptr() != y.get_gsl_ptr());
+        REQUIRE(x.get() != nullptr);
+        REQUIRE(x.get() != y.get());
         REQUIRE_THAT(y.get(0).real(), Catch::Matchers::WithinAbs(2.0, 1e-15));
         REQUIRE_THAT(y.get(0).imag(), Catch::Matchers::WithinAbs(2.0, 1e-15));
 
@@ -36,8 +36,8 @@ TEST_CASE("gsl::fft", "[gsl::fft]")
     {
         gsl::cvector y = gsl::ifft(x);
 
-        REQUIRE(x.get_gsl_ptr() != nullptr);
-        REQUIRE(x.get_gsl_ptr() != y.get_gsl_ptr());
+        REQUIRE(x.get() != nullptr);
+        REQUIRE(x.get() != y.get());
         REQUIRE_THAT(y.get(0).real(), Catch::Matchers::WithinAbs(0.5, 1e-15));
         REQUIRE_THAT(y.get(0).imag(), Catch::Matchers::WithinAbs(0.5, 1e-15));
 
@@ -95,7 +95,7 @@ TEST_CASE("gsl::fft with non-power-of-2 input size", "[gsl::fft]")
     {
         gsl::cvector y = gsl::fft(x);
 
-        REQUIRE(x.get_gsl_ptr() != nullptr);
+        REQUIRE(x.get() != nullptr);
         REQUIRE_THAT(y.get(0).real(), Catch::Matchers::WithinAbs(2.5, 1e-15));
         REQUIRE_THAT(y.get(0).imag(), Catch::Matchers::WithinAbs(2.5, 1e-15));
 
@@ -116,7 +116,7 @@ TEST_CASE("gsl::fft with non-power-of-2 input size", "[gsl::fft]")
     {
         gsl::cvector y = gsl::ifft(x);
 
-        REQUIRE(x.get_gsl_ptr() != nullptr);
+        REQUIRE(x.get() != nullptr);
         REQUIRE_THAT(y.get(0).real(), Catch::Matchers::WithinAbs(0.5, 1e-15));
         REQUIRE_THAT(y.get(0).imag(), Catch::Matchers::WithinAbs(0.5, 1e-15));
 

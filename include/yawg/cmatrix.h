@@ -76,7 +76,7 @@ namespace gsl
         size_t ncols() const;
 
         //! \brief Access the pointer to the underlying gsl_matrix_complex
-        gsl_matrix_complex *get_gsl_ptr() const { return gmat; }
+        gsl_matrix_complex *get() const { return gmat; }
 
         //! \brief Resize the gsl::cmatrix, setting elements to zero
         void resize(size_t n, size_t m);
