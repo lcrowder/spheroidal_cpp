@@ -4,13 +4,17 @@
 #include <utility>
 
 //! \brief Construct empty vector
-gsl::vector::vector() : gvec(nullptr) {}
+gsl::vector::vector()
+{
+    gvec = new gsl_vector;
+    gvec->size = 0;
+    gvec->data = 0;
+}
 
 //! \brief Construct zero vector of size n
-gsl::vector::vector(size_t n) : gvec(nullptr)
+gsl::vector::vector(size_t n)
 {
-    if (n != 0)
-        this->calloc(n);
+    this->alloc(n);
 }
 
 //! \brief Construct new gsl::vector from gsl_vector
@@ -18,19 +22,19 @@ gsl::vector::vector(const gsl_vector *gvec_other)
 {
     if (gvec_other == nullptr)
         return;
-    this->calloc(gvec_other->size);
+    this->alloc(gvec_other->size);
     gsl_vector_memcpy(gvec, gvec_other);
 }
 
 gsl::vector::vector(const gsl::vector &gvec_other)
 {
-    this->calloc(gvec_other.size());
+    this->alloc(gvec_other.size());
     gsl_vector_memcpy(gvec, gvec_other.gvec);
 }
 
-gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
+gsl::vector::vector(gsl::vector &&v) : gvec(v.gvec)
 {
-    gvec_other.gvec = nullptr;
+    v.gvec = nullptr;
 }
 
 gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
@@ -86,7 +90,10 @@ gsl::vector::~vector()
 {
     if (gvec == nullptr)
         return;
-    gsl_vector_free(gvec);
+    else if (gvec->size == 0)
+        delete gvec;
+    else
+        gsl_vector_free(gvec);
 }
 
 void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
@@ -123,7 +130,7 @@ void gsl::vector::resize(size_t n)
             return;
         this->free();
     }
-    this->calloc(n);
+    this->alloc(n);
 }
 
 //! \brief Clear the gsl::vector, free underlying memory
@@ -144,10 +151,23 @@ void gsl::vector::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
+//! \brief Get a reference to the original vector
+// gsl::vector gsl::vector::view() const
+// {
+//     gsl_vector* v = static_cast<gsl_vector*>(malloc(sizeof(gsl_vector)));
+//     *v = gsl_vector_subvector( get(), 0, size() ).vector;
+//     return gsl::vector( v );
+// }
+
 //! \brief Private function to free allocated memory
 void gsl::vector::free()
 {
-    gsl_vector_free(gvec);
+    if (gvec == nullptr)
+        return;
+    else if (gvec->size == 0)
+        delete gvec;
+    else
+        gsl_vector_free(gvec);
     gvec = nullptr;
 }
 
@@ -157,7 +177,17 @@ void gsl::vector::free()
  *       This is slightly slower than using gsl_vector_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::vector::calloc(size_t n) { gvec = gsl_vector_calloc(n); }
+void gsl::vector::alloc(size_t n)
+{
+    if (n == 0)
+    {
+        gvec = new gsl_vector;
+        gvec->size = 0;
+        gvec->data = 0;
+    }
+    else
+        gvec = gsl_vector_alloc(n);
+}
 
 namespace gsl
 {
@@ -213,7 +243,6 @@ namespace gsl
         return std::move(v);
     }
 
-    
     vector operator+(const vector &v1, const vector &v2)
     {
         vector result(v1);

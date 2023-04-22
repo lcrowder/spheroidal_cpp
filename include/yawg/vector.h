@@ -108,7 +108,7 @@ namespace gsl
         size_t size() const;
 
         //! \brief Access the pointer to the underlying gsl_vector
-        gsl_vector *get_gsl_ptr() const { return gvec; }
+        gsl_vector *get() const { return gvec; }
 
         //! \brief Resize the gsl::vector, setting elements to zero
         void resize(size_t n);
@@ -129,7 +129,7 @@ namespace gsl
         void free();
 
         //! \brief Private function to (continuously) allocate memory
-        void calloc(size_t n);
+        void alloc(size_t n);
     };
 
 }
