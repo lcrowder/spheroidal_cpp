@@ -46,18 +46,41 @@ gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
     gvec_other.gvec = nullptr;
 }
 
-gsl::cvector &gsl::cvector::operator=(const gsl::cvector &gvec_other)
+gsl::cvector &gsl::cvector::operator=(const gsl::cvector &v)
 {
-    if (this == &gvec_other)
+    if (gvec == v.gvec)
         return *this;
-    this->resize(gvec_other.size());
-    gsl_vector_complex_memcpy(gvec, gvec_other.gvec);
+    this->resize(v.size());
+    gsl_vector_complex_memcpy(gvec, v.gvec);
+    return *this;
+}
+
+gsl::cvector &gsl::cvector::operator=(const gsl::vector &v)
+{
+    this->resize(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(v.gvec, i), 0.0);
+    return *this;
+}
+
+gsl::cvector &gsl::cvector::operator=(const gsl::vector_view &vv)
+{
+    this->resize(vv.size());
+    for (size_t i = 0; i < vv.size(); i++)
+        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(&vv.gvec_view.vector, i), 0.0);
+    return *this;
+}
+
+gsl::cvector &gsl::cvector::operator=(const gsl::cvector_view &vv)
+{
+    this->resize(vv.size());
+    gsl_vector_complex_memcpy(gvec, &vv.gvec_view.vector);
     return *this;
 }
 
 gsl::cvector &gsl::cvector::operator=(gsl::cvector &&v)
 {
-    if (this == &v)
+    if (gvec == v.gvec)
         return *this;
     this->free();
     gvec = v.gvec;
@@ -146,12 +169,29 @@ gsl::cvector &gsl::cvector::operator*=(gsl::complex z)
     return *this;
 }
 
+gsl::cvector &gsl::cvector::operator*=(double x)
+{
+    // For each element, multiply it by x
+    for (size_t i = 0; i < gvec->size; i++)
+        gsl_vector_complex_set(gvec, i, gsl_complex_mul_real(gsl_vector_complex_get(gvec, i), x));
+
+    return *this;
+}
+
 gsl::cvector &gsl::cvector::operator/=(gsl::complex z)
 {
     gsl_vector_complex_scale(gvec, gsl_complex_inverse(z));
     return *this;
 }
 
+gsl::cvector &gsl::cvector::operator/=(double x)
+{
+    // For each element, divide it by x
+    for (size_t i = 0; i < gvec->size; i++)
+        gsl_vector_complex_set(gvec, i, gsl_complex_div_real(gsl_vector_complex_get(gvec, i), x));
+
+    return *this;
+}
 gsl::cvector gsl::cvector::operator-() const
 {
     gsl::cvector v(*this);
@@ -268,6 +308,112 @@ namespace gsl
     cvector operator*(cvector &&v, complex z)
     {
         v *= z;
+        return std::move(v);
+    }
+
+    cvector operator*(complex a, const vector &v)
+    {
+        cvector result(v);
+        result *= a;
+        return result;
+    }
+
+    cvector operator*(const vector &v, complex a)
+    {
+        cvector result(v);
+        result *= a;
+        return result;
+    }
+
+    cvector operator*(const cvector& v, double x)
+    {
+        cvector result(v);
+        result *= x;
+        return result;
+    }
+
+    cvector operator*(double x, const cvector &v)
+    {
+        cvector result(v);
+        result *= x;
+        return result;
+    }
+
+    cvector operator*(cvector &&v, double x)
+    {
+        v *= x;
+        return std::move(v);
+    }
+
+    cvector operator*(double x, cvector &&v)
+    {
+        v *= x;
+        return std::move(v);
+    }
+
+    cvector operator/(const cvector &v, complex z)
+    {
+        cvector result(v);
+        result /= z;
+        return result;
+    }
+
+    cvector operator/(cvector &&v, complex z)
+    {
+        v /= z;
+        return std::move(v);
+    }
+
+    cvector operator/(complex z, const cvector &v)
+    {
+        cvector result(v);
+        result /= z;
+        return result;
+    }
+
+    cvector operator/(complex z, cvector &&v)
+    {
+        v /= z;
+        return std::move(v);
+    }
+
+    cvector operator/(const vector &v, complex z)
+    {
+        cvector result(v);
+        result /= z;
+        return result;
+    }
+
+    cvector operator/(complex z, const vector &v)
+    {
+        cvector result(v);
+        result /= z;
+        return result;
+    }
+
+    cvector operator/(const cvector &v, double x)
+    {
+        cvector result(v);
+        result /= x;
+        return result;
+    }
+
+    cvector operator/(cvector &&v, double x)
+    {
+        v /= x;
+        return std::move(v);
+    }
+
+    cvector operator/(double x, const cvector &v)
+    {
+        cvector result(v);
+        result /= x;
+        return result;
+    }
+
+    cvector operator/(double x, cvector &&v)
+    {
+        v /= x;
         return std::move(v);
     }
 
@@ -501,9 +647,75 @@ namespace gsl
         return std::move(v2);
     }
 
+    cvector operator*(const cvector_view &vv, complex a)
+    {
+        cvector result(vv);
+        result *= a;
+        return result;
+    }
+
+    cvector operator*(complex a, const cvector_view &v)
+    {
+        cvector result(v);
+        result *= a;
+        return result;
+    }
+
+    cvector operator*(const cvector_view &v, double a)
+    {
+        cvector result(v);
+        result *= a;
+        return result;
+    }
+
+    cvector operator*(double a, const cvector_view &v)
+    {
+        cvector result(v);
+        result *= a;
+        return result;
+    }
+
+    cvector operator/(const cvector_view &v, complex a)
+    {
+        cvector result(v);
+        result /= a;
+        return result;
+    }
+
+    cvector operator/(complex a, const cvector_view &v)
+    {
+        cvector result(v);
+        result /= a;
+        return result;
+    }
+
+    cvector operator/(const cvector_view &v, double a)
+    {
+        cvector result(v);
+        result /= a;
+        return result;
+    }
+
+    cvector operator/(double a, const cvector_view &v)
+    {
+        cvector result(v);
+        result /= a;
+        return result;
+    }
+
     bool operator==(const cvector &v1, const cvector &v2)
     {
         return gsl_vector_complex_equal(v1.gvec, v2.gvec);
+    }
+
+    bool operator!=(const cvector &v1, const cvector &v2)
+    {
+        // Compare each element of v1 and v2 individually
+        for (size_t i = 0; i < v1.gvec->size; ++i)
+            if (v1(i) != v2(i))
+                return true;
+
+        return false;
     }
 
     bool operator==(const vector_view &v1, const cvector &v2)
@@ -733,9 +945,115 @@ gsl::cvector_view &gsl::cvector_view::operator=(const gsl::cvector &v)
 }
 
 //! \brief Assignment to a cvector view from a cvector view
-gsl::cvector_view &gsl::cvector_view::operator=(cvector_view v)
+gsl::cvector_view &gsl::cvector_view::operator=(const cvector_view &v)
 {
     gsl_vector_complex_memcpy(&gvec_view.vector, &v.gvec_view.vector);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator=(const vector &v)
+{
+    // Copy each element of v to the view
+    for (size_t i = 0; i < gvec_view.vector.size; ++i)
+        GSL_SET_COMPLEX(gsl_vector_complex_ptr(&gvec_view.vector, i), gsl_vector_get(v.gvec, i), 0.0);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator=(const gsl::vector_view &vv)
+{
+    // Copy each element of v to the view
+    for (size_t i = 0; i < gvec_view.vector.size; ++i)
+        GSL_SET_COMPLEX(gsl_vector_complex_ptr(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i), 0.0);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator+=(const cvector_view &vv)
+{
+    // Use gsl complex_vector_add to do the addition
+    gsl_vector_complex_add(&gvec_view.vector, &vv.gvec_view.vector);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator+=(const cvector &v)
+{
+    // Use gsl complex_vector_add to do the addition
+    gsl_vector_complex_add(&gvec_view.vector, v.gvec);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator+=(const vector_view &vv)
+{
+    // Add the elements individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_add_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i)));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator+=(const vector &v)
+{
+    // Add the elements individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_add_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(v.gvec, i)));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator-=(const cvector_view &vv)
+{
+    // Use gsl complex_vector_sub to do the subtraction
+    gsl_vector_complex_sub(&gvec_view.vector, &vv.gvec_view.vector);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator-=(const cvector &v)
+{
+    // Use gsl complex_vector_sub to do the subtraction
+    gsl_vector_complex_sub(&gvec_view.vector, v.gvec);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator-=(const vector_view &vv)
+{
+    // Subtract the elements individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_sub_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i)));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator-=(const vector &v)
+{
+    // Subtract the elements individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_sub_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(v.gvec, i)));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator*=(complex z)
+{
+    // Scale the vector using gsl function
+    gsl_vector_complex_scale(&gvec_view.vector, z);
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator*=(double x)
+{
+    // Scale each element individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_mul_real(gsl_vector_complex_get(&gvec_view.vector, i), x));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator/=(gsl::complex z)
+{
+    // Scale the vector using gsl function
+    gsl_vector_complex_scale(&gvec_view.vector, gsl_complex_inverse(z));
+    return *this;
+}
+
+gsl::cvector_view &gsl::cvector_view::operator/=(double x)
+{
+    // Scale each element individually
+    for (size_t i = 0; i < gvec_view.vector.size; i++)
+        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_div_real(gsl_vector_complex_get(&gvec_view.vector, i), x));
     return *this;
 }
 

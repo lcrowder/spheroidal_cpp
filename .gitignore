@@ -4,3 +4,4 @@ build/*
 *.out
 Makefile
 *.log
+todo.file

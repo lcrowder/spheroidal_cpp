@@ -20,7 +20,7 @@ namespace gsl
 
     class cmatrix;
     class cmatrix_view;
-    
+
     /*! \class matrix
      *  \brief A wrapper class for gsl_matrix
      *
@@ -29,10 +29,18 @@ namespace gsl
     class matrix
     {
         friend class cmatrix;
+        friend class cmatrix_view;
 
         friend class matrix_view;
         friend class row_view;
         friend class column_view;
+
+        // Matrix multiplications
+        friend matrix operator*(const matrix &A, const matrix &B);
+        friend matrix operator*(const matrix_view &A, const matrix &B);
+        friend matrix operator*(const matrix &A, const matrix_view &B);
+
+        friend matrix operator*(double a, const matrix &M);
 
     public:
         //! \brief Construct empty matrix
@@ -56,7 +64,19 @@ namespace gsl
         matrix(matrix &&M);
 
         matrix &operator=(const matrix &M);
+        matrix &operator=(const matrix_view &M);
         matrix &operator=(matrix &&M);
+
+        matrix &operator+=(const matrix &M);
+        matrix &operator+=(const matrix_view &M);
+
+        matrix &operator-=(const matrix &M);
+        matrix &operator-=(const matrix_view &M);
+
+        matrix &operator*=(double x);
+        matrix &operator/=(double x);
+
+        matrix operator-() const;
 
         ~matrix();
 
@@ -84,7 +104,7 @@ namespace gsl
 
         //! \brief Replace the matrix with its transpose
         matrix &T();
-        
+
         //! \brief Pretty-print the matrix to file stream
         void print(FILE *out = stdout) const;
 
@@ -93,8 +113,6 @@ namespace gsl
 
         //! \brief Load the matrix from a file stream in CSV format
         void load_csv(FILE *in = stdin);
-
-        friend matrix operator*(const matrix &A, const matrix &B);
 
         //! \brief Return a view to a submatrix of the matrix
         matrix_view submatrix(size_t i, size_t j, size_t n, size_t m);
@@ -122,6 +140,15 @@ namespace gsl
      */
     class matrix_view
     {
+        friend class matrix;
+        friend class cmatrix;
+        friend class cmatrix_view;
+
+        // Matrix multiplications
+        friend matrix operator*(const matrix_view &A, const matrix &B);
+        friend matrix operator*(const matrix &A, const matrix_view &B);
+        friend matrix operator*(const matrix_view &A, const matrix_view &B);
+
     protected:
         gsl_matrix_view gmat_view;
 
@@ -141,8 +168,20 @@ namespace gsl
         //! \brief Assignment to a matrix view from another matrix view
         matrix_view &operator=(matrix_view Mv);
 
+        matrix_view &operator+=(const matrix_view &M);
+        matrix_view &operator+=(const matrix &M);
+
+        matrix_view &operator-=(const matrix_view &M);
+        matrix_view &operator-=(const matrix &M);
+
+        matrix_view &operator*=(double x);
+        matrix_view &operator/=(double x);
+
         //! \brief Pretty-print the viewed matrix to file stream
         void print(FILE *out = stdout) const;
+
+        size_t nrows() const { return gmat_view.matrix.size1; }
+        size_t ncols() const { return gmat_view.matrix.size2; }
 
         //! \brief Return a constant pointer to the underlying gsl_matrix
         const gsl_matrix *get_gsl_ptr() const { return &gmat_view.matrix; }

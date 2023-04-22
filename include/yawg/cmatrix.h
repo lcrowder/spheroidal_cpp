@@ -7,7 +7,7 @@
 
 namespace gsl
 {
-    class cmatrix_view; 
+    class cmatrix_view;
     class crow_view;
     class ccolumn_view;
 
@@ -21,6 +21,10 @@ namespace gsl
         friend class cmatrix_view;
         friend class crow_view;
         friend class ccolumn_view;
+
+        friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
+        friend cmatrix operator*(const cmatrix_view &A, const cmatrix &B);
+        friend cmatrix operator*(const cmatrix &A, const cmatrix_view &B);
 
     public:
         //! \brief Construct empty matrix
@@ -46,8 +50,28 @@ namespace gsl
         //! \brief Construct new gsl::cmatrix from gsl::matrix
         cmatrix(const matrix &M);
 
-        cmatrix &operator=(const cmatrix &gvec_other);
-        cmatrix &operator=(cmatrix &&gvec_other);
+        cmatrix &operator=(const cmatrix &M);
+        cmatrix &operator=(const matrix &M);
+        cmatrix &operator=(const cmatrix_view &Mv);
+        cmatrix &operator=(const matrix_view &Mv);
+        cmatrix &operator=(cmatrix &&v);
+
+        cmatrix &operator+=(const cmatrix &M);
+        cmatrix &operator+=(const matrix &M);
+        cmatrix &operator+=(const cmatrix_view &Mv);
+        cmatrix &operator+=(const matrix_view &Mv);
+
+        cmatrix &operator-=(const cmatrix &M);
+        cmatrix &operator-=(const matrix &M);
+        cmatrix &operator-=(const cmatrix_view &Mv);
+        cmatrix &operator-=(const matrix_view &Mv);
+
+        cmatrix &operator*=(complex z);
+        cmatrix &operator/=(complex z);
+        cmatrix &operator*=(double x);
+        cmatrix &operator/=(double x);
+
+        cmatrix operator-() const;
 
         ~cmatrix();
 
@@ -89,7 +113,7 @@ namespace gsl
 
         //! \brief Print the complex matrix to file stream in MATLAB's .csv format
         void print_csv(FILE *out = stdout) const;
-        
+
         //! \brief Load the complex matrix from file stream in MATLAB's .csv format
         void load_csv(FILE *in);
 
@@ -121,12 +145,19 @@ namespace gsl
      */
     class cmatrix_view
     {
+        friend class cmatrix;
+
+        friend cmatrix operator*(const cmatrix_view &A, const cmatrix &B);
+        friend cmatrix operator*(const cmatrix &A, const cmatrix_view &B);
+        friend cmatrix operator*(const cmatrix_view &A, const cmatrix_view &B);
+
     protected:
         gsl_matrix_complex_view gmat_view;
 
     public:
         //! \brief "Dereferences" a matrix_view into independent gsl::cmatrix object
         operator cmatrix() const { return cmatrix(&gmat_view.matrix); }
+        operator const cmatrix&() const { return cmatrix(&gmat_view.matrix); }
 
         //! \brief Construct a view of a gsl::cmatrix through another cmatrix_view
         cmatrix_view(gsl_matrix_complex_view gmat_view) : gmat_view(gmat_view){};
@@ -138,10 +169,32 @@ namespace gsl
         cmatrix_view &operator=(const cmatrix &v);
 
         //! \brief Assignment to a complex matrix view from another complex matrix view
-        cmatrix_view &operator=(cmatrix_view v);
+        cmatrix_view &operator=(const cmatrix_view &Mv);
+        cmatrix_view &operator=(const matrix &M);
+        cmatrix_view &operator=(const matrix_view &Mv);
+
+        cmatrix_view &operator+=(const cmatrix &M);
+        cmatrix_view &operator+=(const matrix &M);
+        cmatrix_view &operator+=(const cmatrix_view &Mv);
+        cmatrix_view &operator+=(const matrix_view &Mv);
+
+        cmatrix_view &operator-=(const cmatrix &M);
+        cmatrix_view &operator-=(const matrix &M);
+        cmatrix_view &operator-=(const cmatrix_view &Mv);
+        cmatrix_view &operator-=(const matrix_view &Mv);
+
+        cmatrix_view &operator*=(complex z);
+        cmatrix_view &operator*=(double x);
+
+        cmatrix_view &operator/=(complex z);
+        cmatrix_view &operator/=(double x);
 
         //! \brief Pretty-print the viewed complex matrix to file stream
         void print(FILE *out = stdout) const;
+
+        size_t size() const { return gmat_view.matrix.size1 * gmat_view.matrix.size2; }
+        size_t nrows() const { return gmat_view.matrix.size1; }
+        size_t ncols() const { return gmat_view.matrix.size2; }
 
         //! \brief Return a constant pointer to the underlying gsl_matrix_complex
         const gsl_matrix_complex *get_gsl_ptr() const { return &gmat_view.matrix; }

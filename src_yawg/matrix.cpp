@@ -95,14 +95,63 @@ gsl::matrix &gsl::matrix::operator=(const gsl::matrix &gmat_other)
     return *this;
 }
 
-gsl::matrix &gsl::matrix::operator=(gsl::matrix &&gmat_other)
+gsl::matrix &gsl::matrix::operator=(const gsl::matrix_view &Mv)
 {
-    if (this == &gmat_other)
+    this->resize(Mv.nrows(), Mv.ncols());
+    gsl_matrix_memcpy(gmat, &Mv.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator=(gsl::matrix &&M)
+{
+    if (this == &M)
         return *this;
     this->free();
-    gmat = gmat_other.gmat;
-    gmat_other.gmat = nullptr;
+    gmat = M.gmat;
+    M.gmat = nullptr;
     return *this;
+}
+
+gsl::matrix &gsl::matrix::operator+=(const matrix &M)
+{
+    gsl_matrix_add(gmat, M.gmat);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator+=(const matrix_view &M)
+{
+    gsl_matrix_add(gmat, &M.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator-=(const matrix &M)
+{
+    gsl_matrix_sub(gmat, M.gmat);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator-=(const matrix_view &M)
+{
+    gsl_matrix_sub(gmat, &M.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator*=(double x)
+{
+    gsl_matrix_scale(gmat, x);
+    return *this;
+}
+
+gsl::matrix &gsl::matrix::operator/=(double x)
+{
+    gsl_matrix_scale(gmat, 1.0 / x);
+    return *this;
+}
+
+gsl::matrix gsl::matrix::operator-() const
+{
+    gsl::matrix M(*this);
+    return -1.0 * M;
 }
 
 gsl::matrix::~matrix()
@@ -175,7 +224,7 @@ gsl::matrix gsl::matrix::reshape(size_t n, size_t m) const
     return gmat_new;
 }
 
-gsl::matrix & gsl::matrix::T()
+gsl::matrix &gsl::matrix::T()
 {
     gsl_matrix_transpose(gmat);
     return *this;
@@ -229,17 +278,45 @@ void gsl::matrix::print_csv(FILE *out) const
 //! \param in File stream to load from
 void gsl::matrix::load_csv(FILE *in)
 {
-    *this = gsl::matrix( in );
+    *this = gsl::matrix(in);
 }
 
 namespace gsl
 {
+    matrix operator*(double a, const matrix &M)
+    {
+        matrix result(M);
+        result *= a;
+        return result;
+    }
+
     matrix operator*(const matrix &A, const matrix &B)
     {
-        matrix C(A.nrows(), B.ncols());
-        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, B.gmat, 0.0, C.gmat);
-        return C;
+        matrix result(A.nrows(), B.ncols());
+        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, B.gmat, 0.0, result.gmat);
+        return result;
     }
+
+    matrix operator*(const matrix_view &A, const matrix &B)
+    {
+        matrix result(A.nrows(), B.ncols());
+        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &A.gmat_view.matrix, B.gmat, 0.0, result.gmat);
+        return result;
+    }
+
+    matrix operator*(const matrix &A, const matrix_view &B)
+    {
+        matrix result(A.nrows(), B.ncols());
+        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, &B.gmat_view.matrix, 0.0, result.gmat);
+        return result;
+    }
+
+    // matrix operator*(const matrix_view& A, const matrix_view& B)
+    // {
+    //     matrix result(A.nrows(), B.ncols());
+    //     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &A.gmat_view.matrix, &B.gmat_view.matrix, 0.0, result.gmat);
+    //     return result;
+    // }
 }
 
 //! \brief Private function to free allocated memory
@@ -268,6 +345,42 @@ gsl::matrix_view &gsl::matrix_view::operator=(const gsl::matrix &m)
 gsl::matrix_view &gsl::matrix_view::operator=(matrix_view Mv)
 {
     gsl_matrix_memcpy(&gmat_view.matrix, &Mv.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator+=(const gsl::matrix_view &Mv)
+{
+    gsl_matrix_add(&gmat_view.matrix, &Mv.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator+=(const gsl::matrix &M)
+{
+    gsl_matrix_add(&gmat_view.matrix, M.gmat);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator-=(const gsl::matrix_view &Mv)
+{
+    gsl_matrix_sub(&gmat_view.matrix, &Mv.gmat_view.matrix);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator-=(const gsl::matrix &M)
+{
+    gsl_matrix_sub(&gmat_view.matrix, M.gmat);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator*=(double x)
+{
+    gsl_matrix_scale(&gmat_view.matrix, x);
+    return *this;
+}
+
+gsl::matrix_view &gsl::matrix_view::operator/=(double x)
+{
+    gsl_matrix_scale(&gmat_view.matrix, 1.0 / x);
     return *this;
 }
 
