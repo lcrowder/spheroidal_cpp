@@ -116,24 +116,6 @@ gsl::cmatrix &gsl::cmatrix::operator=(const gsl::matrix &M)
     return *this;
 }
 
-gsl::cmatrix &gsl::cmatrix::operator=(const gsl::cmatrix_view &Mv)
-{
-    this->resize(Mv.nrows(), Mv.ncols());
-    for (size_t i = 0; i < Mv.nrows(); i++)
-        for (size_t j = 0; j < Mv.ncols(); j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_matrix_complex_get(&Mv.gmat_view.matrix, i, j));
-    return *this;
-}
-
-gsl::cmatrix &gsl::cmatrix::operator=(const gsl::matrix_view &Mv)
-{
-    this->resize(Mv.nrows(), Mv.ncols());
-    for (size_t i = 0; i < Mv.nrows(); i++)
-        for (size_t j = 0; j < Mv.ncols(); j++)
-            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(&Mv.gmat_view.matrix, i, j), 0.0);
-    return *this;
-}
-
 gsl::cmatrix &gsl::cmatrix::operator=(gsl::cmatrix &&gmat_other)
 {
     if (this == &gmat_other)
@@ -159,21 +141,6 @@ gsl::cmatrix &gsl::cmatrix::operator+=(const gsl::matrix &M)
 
     return *this;
 }
-gsl::cmatrix &gsl::cmatrix::operator+=(const gsl::cmatrix_view &Mv)
-{
-    gsl_matrix_complex_add(gmat, &Mv.gmat_view.matrix);
-    return *this;
-}
-
-gsl::cmatrix &gsl::cmatrix::operator+=(const gsl::matrix_view &Mv)
-{
-    // Add the real element of M to the complex element of this
-    for (size_t i = 0; i < Mv.nrows(); i++)
-        for (size_t j = 0; j < Mv.ncols(); j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_complex_add_real(gsl_matrix_complex_get(gmat, i, j), gsl_matrix_get(&Mv.gmat_view.matrix, i, j)));
-
-    return *this;
-}
 
 gsl::cmatrix &gsl::cmatrix::operator-=(const gsl::cmatrix &M)
 {
@@ -187,22 +154,6 @@ gsl::cmatrix &gsl::cmatrix::operator-=(const gsl::matrix &M)
     for (size_t i = 0; i < M.nrows(); i++)
         for (size_t j = 0; j < M.ncols(); j++)
             gsl_matrix_complex_set(gmat, i, j, gsl_complex_sub_real(gsl_matrix_complex_get(gmat, i, j), gsl_matrix_get(M.gmat, i, j)));
-
-    return *this;
-}
-
-gsl::cmatrix &gsl::cmatrix::operator-=(const gsl::cmatrix_view &Mv)
-{
-    gsl_matrix_complex_sub(gmat, &Mv.gmat_view.matrix);
-    return *this;
-}
-
-gsl::cmatrix &gsl::cmatrix::operator-=(const gsl::matrix_view &Mv)
-{
-    // Subtract the real element of M from the complex element of this
-    for (size_t i = 0; i < Mv.nrows(); i++)
-        for (size_t j = 0; j < Mv.ncols(); j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_complex_sub_real(gsl_matrix_complex_get(gmat, i, j), gsl_matrix_get(&Mv.gmat_view.matrix, i, j)));
 
     return *this;
 }
@@ -427,28 +378,6 @@ namespace gsl
         gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, A.gmat, B.gmat, GSL_COMPLEX_ZERO, C.gmat);
         return C;
     }
-
-    cmatrix operator*(const cmatrix_view& A, const cmatrix& B)
-    {
-        cmatrix C(A.nrows(), B.ncols());
-        gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, &A.gmat_view.matrix, B.gmat, GSL_COMPLEX_ZERO, C.gmat);
-        return C;
-    }
-
-    cmatrix operator*(const cmatrix& A, const cmatrix_view& B)
-    {
-        cmatrix C(A.nrows(), B.ncols());
-        gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, A.gmat, &B.gmat_view.matrix, GSL_COMPLEX_ZERO, C.gmat);
-        return C;
-    }
-
-    // cmatrix operator*(const cmatrix_view& A, const cmatrix_view& B)
-    // {
-    //     cmatrix C(A.nrows(), B.ncols());
-    //     gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, &A.gmat_view.matrix, &B.gmat_view.matrix, GSL_COMPLEX_ZERO, C.gmat);
-    //     return C;
-    // }
-
 }
 
 /*------ Protected Methods for gsl::cmatrix ------*/
@@ -466,110 +395,3 @@ void gsl::cmatrix::free()
  *       for intuitive usage of row views.
  */
 void gsl::cmatrix::calloc(size_t n, size_t m) { gmat = gsl_matrix_complex_calloc(n, m); }
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator=(const gsl::cmatrix &m)
-{
-    gsl_matrix_complex_memcpy(&gmat_view.matrix, m.gmat);
-    return *this;
-}
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator=(const gsl::cmatrix_view &m)
-{
-    gsl_matrix_complex_memcpy(&gmat_view.matrix, &m.gmat_view.matrix);
-    return *this;
-}
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator=(const matrix &M )
-{
-    // Copy over each element individually
-    for( size_t i = 0; i < nrows(); ++i )
-        for( size_t j = 0; j < ncols(); ++j )
-            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(&gmat_view.matrix, i, j), gsl_matrix_get(M.gmat, i, j), 0.0);
-    return *this;
-}
-
-// gsl::cmatrix_view &gsl::cmatrix_view::operator=(const matrix_view& Mv)
-// {
-//     // Copy over each element individually
-//     for( size_t i = 0; i < nrows(); ++i )
-//         for( size_t j = 0; j < ncols(); ++j )
-//             GSL_SET_COMPLEX(gsl_matrix_complex_ptr(&gmat_view.matrix, i, j), gsl_matrix_get(Mv.gmat_view.matrix, i, j), 0.0);
-//     return *this;
-// }
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator+=(const cmatrix &M)
-{
-    gsl_matrix_complex_add(&gmat_view.matrix, M.gmat);
-    return *this;
-}
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator+=(const cmatrix_view &M)
-{
-    gsl_matrix_complex_add(&gmat_view.matrix, &M.gmat_view.matrix);
-    return *this;
-}
-
-gsl::cmatrix_view &gsl::cmatrix_view::operator+=(const matrix &M)
-{
-    // Add each element individually
-    for( size_t i = 0; i < nrows(); ++i )
-        for( size_t j = 0; j < ncols(); ++j )
-            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(&gmat_view.matrix, i, j), GSL_REAL(gsl_matrix_complex_get(&gmat_view.matrix, i, j)) + gsl_matrix_get(M.gmat, i, j), GSL_IMAG(gsl_matrix_complex_get(&gmat_view.matrix, i, j)));
-    return *this;
-}
-
-// gsl::cmatrix_view &gsl::cmatrix_view::operator+=(const matrix_view &M)
-// {
-//     // Add each element individually
-//     for( size_t i = 0; i < nrows(); ++i )
-//         for( size_t j = 0; j < ncols(); ++j )
-//             GSL_SET_COMPLEX(gsl_matrix_complex_ptr(&gmat_view.matrix, i, j), GSL_REAL(gsl_matrix_complex_get(&gmat_view.matrix, i, j)) + gsl_matrix_get(M.gmat_view.matrix, i, j), GSL_IMAG(gsl_matrix_complex_get(&gmat_view.matrix, i, j)));
-//     return *this;
-// }
-
-
-/*! \brief Return a view to a submatrix of the matrix
- * \param i Starting row index
- * \param j Starting column index
- * \param n Number of rows
- * \param m Number of columns
- *
- * \return Matrix view to submatrix
- */
-gsl::cmatrix_view gsl::cmatrix::submatrix(size_t i, size_t j, size_t n, size_t m)
-{
-    return gsl::cmatrix_view(gsl_matrix_complex_submatrix(gmat, i, j, n, m));
-}
-
-/*! \brief Return a view to a row of the matrix
- *  \param i Row index
- *  \return Row view
- */
-gsl::crow_view gsl::cmatrix::row(size_t i)
-{
-    return gsl::crow_view(gsl_matrix_complex_row(gmat, i));
-}
-
-/*! \brief Return a view to a column of the matrix
- *  \param j Column index
- *  \return Column view
- */
-gsl::ccolumn_view gsl::cmatrix::column(size_t j)
-{
-    return gsl::ccolumn_view(gsl_matrix_complex_column(gmat, j));
-}
-
-//! \brief Pretty-print the viewed complex matrix to file stream
-void gsl::cmatrix_view::print(FILE *out) const
-{
-    for (int i = 0; i < gmat_view.matrix.size1; ++i)
-    {
-        fprintf(out, (i == 0) ? "[" : " ");
-        for (int j = 0; j < gmat_view.matrix.size2; ++j)
-        {
-            auto x = gsl_matrix_complex_get(&gmat_view.matrix, i, j);
-            fprintf(out, "%s% 9g%+9gj", ((j == 0) ? "" : ", "), GSL_REAL(x), GSL_IMAG(x));
-        }
-        fprintf(out, (i == (gmat_view.matrix.size1 - 1) ? "]\n" : ",\n"));
-    }
-}

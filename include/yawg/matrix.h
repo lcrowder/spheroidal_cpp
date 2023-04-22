@@ -8,18 +8,8 @@
 namespace gsl
 {
     class vector;
-    class row_view;
-    class column_view;
-
-    class cvector_view;
-    class crow_view;
-    class ccolumn_view;
-
     class matrix;
-    class matrix_view;
-
     class cmatrix;
-    class cmatrix_view;
 
     /*! \class matrix
      *  \brief A wrapper class for gsl_matrix
@@ -29,16 +19,9 @@ namespace gsl
     class matrix
     {
         friend class cmatrix;
-        friend class cmatrix_view;
-
-        friend class matrix_view;
-        friend class row_view;
-        friend class column_view;
 
         // Matrix multiplications
         friend matrix operator*(const matrix &A, const matrix &B);
-        friend matrix operator*(const matrix_view &A, const matrix &B);
-        friend matrix operator*(const matrix &A, const matrix_view &B);
 
         friend matrix operator*(double a, const matrix &M);
 
@@ -64,14 +47,11 @@ namespace gsl
         matrix(matrix &&M);
 
         matrix &operator=(const matrix &M);
-        matrix &operator=(const matrix_view &M);
         matrix &operator=(matrix &&M);
 
         matrix &operator+=(const matrix &M);
-        matrix &operator+=(const matrix_view &M);
 
         matrix &operator-=(const matrix &M);
-        matrix &operator-=(const matrix_view &M);
 
         matrix &operator*=(double x);
         matrix &operator/=(double x);
@@ -114,15 +94,6 @@ namespace gsl
         //! \brief Load the matrix from a file stream in CSV format
         void load_csv(FILE *in = stdin);
 
-        //! \brief Return a view to a submatrix of the matrix
-        matrix_view submatrix(size_t i, size_t j, size_t n, size_t m);
-
-        //! \brief Return a view to a row of the matrix
-        row_view row(size_t i);
-
-        //! \brief Return a view to a column of the matrix
-        column_view column(size_t j);
-
     protected:
         gsl_matrix *gmat;
 
@@ -131,60 +102,6 @@ namespace gsl
 
         //! \brief Private function to (continuously) allocate memory
         void calloc(size_t n, size_t m);
-    };
-
-    /*! \class matrix_view
-     *  \brief A wrapper class for gsl_matrix_view
-     *
-     * Stores a gsl_matrix_view and uses it to access original member data.
-     */
-    class matrix_view
-    {
-        friend class matrix;
-        friend class cmatrix;
-        friend class cmatrix_view;
-
-        // Matrix multiplications
-        friend matrix operator*(const matrix_view &A, const matrix &B);
-        friend matrix operator*(const matrix &A, const matrix_view &B);
-        friend matrix operator*(const matrix_view &A, const matrix_view &B);
-
-    protected:
-        gsl_matrix_view gmat_view;
-
-    public:
-        //! \brief "Dereferences" a matrix_view into independent gsl::matrix object
-        operator matrix() const { return matrix(&gmat_view.matrix); }
-
-        //! \brief Construct a view of a gsl::matrix through another matrix_view
-        matrix_view(gsl_matrix_view gmat_view) : gmat_view(gmat_view){};
-
-        //! \brief Construct a view of the given gsl::matrix
-        matrix_view(const matrix &m) : gmat_view(gsl_matrix_submatrix(m.gmat, 0, 0, m.gmat->size1, m.gmat->size2)) {}
-
-        //! \brief Assignment to a matrix view from a matrix
-        matrix_view &operator=(const matrix &M);
-
-        //! \brief Assignment to a matrix view from another matrix view
-        matrix_view &operator=(matrix_view Mv);
-
-        matrix_view &operator+=(const matrix_view &M);
-        matrix_view &operator+=(const matrix &M);
-
-        matrix_view &operator-=(const matrix_view &M);
-        matrix_view &operator-=(const matrix &M);
-
-        matrix_view &operator*=(double x);
-        matrix_view &operator/=(double x);
-
-        //! \brief Pretty-print the viewed matrix to file stream
-        void print(FILE *out = stdout) const;
-
-        size_t nrows() const { return gmat_view.matrix.size1; }
-        size_t ncols() const { return gmat_view.matrix.size2; }
-
-        //! \brief Return a constant pointer to the underlying gsl_matrix
-        const gsl_matrix *get_gsl_ptr() const { return &gmat_view.matrix; }
     };
 
 } // namespace gsl

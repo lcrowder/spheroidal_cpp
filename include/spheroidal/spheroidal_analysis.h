@@ -1,9 +1,7 @@
 #ifndef LEGENDRE_OTC_H_
 #define LEGENDRE_OTC_H_
 
-#include <vector>
-#include <gsl_wrapper/core.h>
-using namespace std;
+#include <yawg/core.h>
 
 gsl::vector spheroidal_analysis(gsl::vector f);
 

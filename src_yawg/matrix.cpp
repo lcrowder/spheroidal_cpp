@@ -95,13 +95,6 @@ gsl::matrix &gsl::matrix::operator=(const gsl::matrix &gmat_other)
     return *this;
 }
 
-gsl::matrix &gsl::matrix::operator=(const gsl::matrix_view &Mv)
-{
-    this->resize(Mv.nrows(), Mv.ncols());
-    gsl_matrix_memcpy(gmat, &Mv.gmat_view.matrix);
-    return *this;
-}
-
 gsl::matrix &gsl::matrix::operator=(gsl::matrix &&M)
 {
     if (this == &M)
@@ -118,21 +111,9 @@ gsl::matrix &gsl::matrix::operator+=(const matrix &M)
     return *this;
 }
 
-gsl::matrix &gsl::matrix::operator+=(const matrix_view &M)
-{
-    gsl_matrix_add(gmat, &M.gmat_view.matrix);
-    return *this;
-}
-
 gsl::matrix &gsl::matrix::operator-=(const matrix &M)
 {
     gsl_matrix_sub(gmat, M.gmat);
-    return *this;
-}
-
-gsl::matrix &gsl::matrix::operator-=(const matrix_view &M)
-{
-    gsl_matrix_sub(gmat, &M.gmat_view.matrix);
     return *this;
 }
 
@@ -296,27 +277,6 @@ namespace gsl
         gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, B.gmat, 0.0, result.gmat);
         return result;
     }
-
-    matrix operator*(const matrix_view &A, const matrix &B)
-    {
-        matrix result(A.nrows(), B.ncols());
-        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &A.gmat_view.matrix, B.gmat, 0.0, result.gmat);
-        return result;
-    }
-
-    matrix operator*(const matrix &A, const matrix_view &B)
-    {
-        matrix result(A.nrows(), B.ncols());
-        gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, &B.gmat_view.matrix, 0.0, result.gmat);
-        return result;
-    }
-
-    // matrix operator*(const matrix_view& A, const matrix_view& B)
-    // {
-    //     matrix result(A.nrows(), B.ncols());
-    //     gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &A.gmat_view.matrix, &B.gmat_view.matrix, 0.0, result.gmat);
-    //     return result;
-    // }
 }
 
 //! \brief Private function to free allocated memory
@@ -333,96 +293,3 @@ void gsl::matrix::free()
  *       for intuitive usage of row views.
  */
 void gsl::matrix::calloc(size_t n, size_t m) { gmat = gsl_matrix_calloc(n, m); }
-
-//! \brief Assignment to a matrix view from a matrix
-gsl::matrix_view &gsl::matrix_view::operator=(const gsl::matrix &m)
-{
-    gsl_matrix_memcpy(&gmat_view.matrix, m.gmat);
-    return *this;
-}
-
-//! \brief Assignment to a matrix view from another matrix view
-gsl::matrix_view &gsl::matrix_view::operator=(matrix_view Mv)
-{
-    gsl_matrix_memcpy(&gmat_view.matrix, &Mv.gmat_view.matrix);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator+=(const gsl::matrix_view &Mv)
-{
-    gsl_matrix_add(&gmat_view.matrix, &Mv.gmat_view.matrix);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator+=(const gsl::matrix &M)
-{
-    gsl_matrix_add(&gmat_view.matrix, M.gmat);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator-=(const gsl::matrix_view &Mv)
-{
-    gsl_matrix_sub(&gmat_view.matrix, &Mv.gmat_view.matrix);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator-=(const gsl::matrix &M)
-{
-    gsl_matrix_sub(&gmat_view.matrix, M.gmat);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator*=(double x)
-{
-    gsl_matrix_scale(&gmat_view.matrix, x);
-    return *this;
-}
-
-gsl::matrix_view &gsl::matrix_view::operator/=(double x)
-{
-    gsl_matrix_scale(&gmat_view.matrix, 1.0 / x);
-    return *this;
-}
-
-//! \brief Pretty-print the matrix to file stream
-void gsl::matrix_view::print(FILE *out) const
-{
-    for (int i = 0; i < gmat_view.matrix.size1; ++i)
-    {
-        fprintf(out, (i == 0) ? "[" : " ");
-        for (int j = 0; j < gmat_view.matrix.size2; ++j)
-            fprintf(out, "%s% 9g", ((j == 0) ? "" : ", "), gsl_matrix_get(&gmat_view.matrix, i, j));
-        fprintf(out, (i == (gmat_view.matrix.size1 - 1) ? "]\n" : ",\n"));
-    }
-}
-
-/*! \brief Return a view to a submatrix of the matrix
- * \param i Starting row index
- * \param j Starting column index
- * \param n Number of rows
- * \param m Number of columns
- *
- * \return Matrix view to submatrix
- */
-gsl::matrix_view gsl::matrix::submatrix(size_t i, size_t j, size_t n, size_t m)
-{
-    return gsl::matrix_view(gsl_matrix_submatrix(gmat, i, j, n, m));
-}
-
-/*! \brief Return a view to a row of the matrix
- *  \param i Row index
- *  \return Row view
- */
-gsl::row_view gsl::matrix::row(size_t i)
-{
-    return gsl::row_view(gsl_matrix_row(gmat, i));
-}
-
-/*! \brief Return a view to a column of the matrix
- *  \param j Column index
- *  \return Column view
- */
-gsl::column_view gsl::matrix::column(size_t j)
-{
-    return gsl::column_view(gsl_matrix_column(gmat, j));
-}

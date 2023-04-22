@@ -7,10 +7,6 @@
 
 namespace gsl
 {
-    class cmatrix_view;
-    class crow_view;
-    class ccolumn_view;
-
     class cvector;
     class matrix;
 
@@ -18,14 +14,8 @@ namespace gsl
     {
         friend class matrix;
 
-        friend class cmatrix_view;
-        friend class crow_view;
-        friend class ccolumn_view;
-
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
-        friend cmatrix operator*(const cmatrix_view &A, const cmatrix &B);
-        friend cmatrix operator*(const cmatrix &A, const cmatrix_view &B);
-
+       
     public:
         //! \brief Construct empty matrix
         cmatrix();
@@ -52,19 +42,13 @@ namespace gsl
 
         cmatrix &operator=(const cmatrix &M);
         cmatrix &operator=(const matrix &M);
-        cmatrix &operator=(const cmatrix_view &Mv);
-        cmatrix &operator=(const matrix_view &Mv);
         cmatrix &operator=(cmatrix &&v);
 
         cmatrix &operator+=(const cmatrix &M);
         cmatrix &operator+=(const matrix &M);
-        cmatrix &operator+=(const cmatrix_view &Mv);
-        cmatrix &operator+=(const matrix_view &Mv);
 
         cmatrix &operator-=(const cmatrix &M);
         cmatrix &operator-=(const matrix &M);
-        cmatrix &operator-=(const cmatrix_view &Mv);
-        cmatrix &operator-=(const matrix_view &Mv);
 
         cmatrix &operator*=(complex z);
         cmatrix &operator/=(complex z);
@@ -119,15 +103,6 @@ namespace gsl
 
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
 
-        //! \brief Return a view to a submatrix of the complex matrix
-        cmatrix_view submatrix(size_t i, size_t j, size_t n, size_t m);
-
-        //! \brief Return a view to a row of the complex matrix
-        crow_view row(size_t i);
-
-        //! \brief Return a view to a column of the complex matrix
-        ccolumn_view column(size_t j);
-
     protected:
         gsl_matrix_complex *gmat;
 
@@ -136,68 +111,6 @@ namespace gsl
 
         //! \brief Private function to (continuously) allocate memory
         void calloc(size_t n, size_t m);
-    };
-
-    /*! \class cmatrix_view
-     *  \brief A wrapper class for gsl_matrix_complex_view
-     *
-     * Stores a gsl_matrix_complex_view and uses it to access original member data.
-     */
-    class cmatrix_view
-    {
-        friend class cmatrix;
-
-        friend cmatrix operator*(const cmatrix_view &A, const cmatrix &B);
-        friend cmatrix operator*(const cmatrix &A, const cmatrix_view &B);
-        friend cmatrix operator*(const cmatrix_view &A, const cmatrix_view &B);
-
-    protected:
-        gsl_matrix_complex_view gmat_view;
-
-    public:
-        //! \brief "Dereferences" a matrix_view into independent gsl::cmatrix object
-        operator cmatrix() const { return cmatrix(&gmat_view.matrix); }
-        operator const cmatrix&() const { return cmatrix(&gmat_view.matrix); }
-
-        //! \brief Construct a view of a gsl::cmatrix through another cmatrix_view
-        cmatrix_view(gsl_matrix_complex_view gmat_view) : gmat_view(gmat_view){};
-
-        //! \brief Construct a view of the given gsl::cmatrix
-        cmatrix_view(const cmatrix &m) : gmat_view(gsl_matrix_complex_submatrix(m.gmat, 0, 0, m.gmat->size1, m.gmat->size2)) {}
-
-        //! \brief Assignment to a complex matrix view from a complex matrix
-        cmatrix_view &operator=(const cmatrix &v);
-
-        //! \brief Assignment to a complex matrix view from another complex matrix view
-        cmatrix_view &operator=(const cmatrix_view &Mv);
-        cmatrix_view &operator=(const matrix &M);
-        cmatrix_view &operator=(const matrix_view &Mv);
-
-        cmatrix_view &operator+=(const cmatrix &M);
-        cmatrix_view &operator+=(const matrix &M);
-        cmatrix_view &operator+=(const cmatrix_view &Mv);
-        cmatrix_view &operator+=(const matrix_view &Mv);
-
-        cmatrix_view &operator-=(const cmatrix &M);
-        cmatrix_view &operator-=(const matrix &M);
-        cmatrix_view &operator-=(const cmatrix_view &Mv);
-        cmatrix_view &operator-=(const matrix_view &Mv);
-
-        cmatrix_view &operator*=(complex z);
-        cmatrix_view &operator*=(double x);
-
-        cmatrix_view &operator/=(complex z);
-        cmatrix_view &operator/=(double x);
-
-        //! \brief Pretty-print the viewed complex matrix to file stream
-        void print(FILE *out = stdout) const;
-
-        size_t size() const { return gmat_view.matrix.size1 * gmat_view.matrix.size2; }
-        size_t nrows() const { return gmat_view.matrix.size1; }
-        size_t ncols() const { return gmat_view.matrix.size2; }
-
-        //! \brief Return a constant pointer to the underlying gsl_matrix_complex
-        const gsl_matrix_complex *get_gsl_ptr() const { return &gmat_view.matrix; }
     };
 
 } // namespace gsl
