@@ -418,20 +418,3 @@ TEST_CASE("circshift vector", "[circshift]")
         REQUIRE(y(4) == x(1));
     }
 }
-
-
-// Use Catch2 to test a thing
-TEST_CASE("gsl::vector view edge cases", "[gsl::vector][gsl::vector_view]")
-{
-    gsl::matrix M = gsl::eye(10);
-    gsl::vector v = gsl::linspace(0, 10, 10);
-
-    gsl::vector_view u = M.column(0);
-    // u(1) = 10;
-    
-    // // Require u and M.column(0) to have different addresses
-    // REQUIRE(u.get_gsl_ptr() != M.column(0).get_gsl_ptr());
-
-    // M.print();
-    // M.print();
-}
