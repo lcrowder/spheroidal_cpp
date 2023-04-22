@@ -281,6 +281,13 @@ size_t gsl::cmatrix::ncols() const
     return gmat->size2;
 }
 
+bool gsl::cmatrix::is_square() const
+{
+    if (gmat == nullptr)
+        return false;
+    return gmat->size1 == gmat->size2;
+}
+
 /*! \brief Resize the gsl::cmatrix, setting elements to zero
  * \param n Number of rows
  * \param m Number of columns
@@ -330,9 +337,19 @@ gsl::cmatrix gsl::cmatrix::reshape(size_t n, size_t m) const
 }
 
 //! \brief Replace the complex matrix with its transpose
+//! \note If the matrix is not square, the transpose is not in-place
 gsl::cmatrix &gsl::cmatrix::T()
 {
-    gsl_matrix_complex_transpose(gmat);
+    if (is_square())
+        gsl_matrix_complex_transpose(gmat);
+    else
+    {
+        gsl::cmatrix M_new(this->ncols(), this->nrows());
+        for (size_t i = 0; i < this->nrows(); i++)
+            for (size_t j = 0; j < this->ncols(); j++)
+                M_new(j, i) = this->get(i, j);
+        *this = M_new;
+    }
     return *this;
 }
 
@@ -396,11 +413,301 @@ void gsl::cmatrix::load_csv(FILE *in)
 
 namespace gsl
 {
+    cmatrix operator*(double a, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
+    cmatrix operator*(const cmatrix &M, double a)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
+    cmatrix operator*(double a, cmatrix &&M)
+    {
+        M *= a;
+        return M;
+    }
+
+    cmatrix operator*(cmatrix &&M, double a)
+    {
+        M *= a;
+        return M;
+    }
+
+    cmatrix operator*(const cmatrix &M, const complex &a)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
+    cmatrix operator*(const complex &a, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
+    cmatrix operator*(complex z, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= z;
+        return result;
+    }
+
+    cmatrix operator*(const cmatrix &M, complex z)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= z;
+        return result;
+    }
+
+    cmatrix operator*(cmatrix &&M, complex z)
+    {
+        M *= z;
+        return M;
+    }
+
+    cmatrix operator*(complex z, cmatrix &&M)
+    {
+        M *= z;
+        return M;
+    }
+
+    cmatrix operator/(double a, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= a;
+        return result;
+    }
+
+    cmatrix operator/(const cmatrix &M, double a)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= a;
+        return result;
+    }
+
+    cmatrix operator/(double a, cmatrix &&M)
+    {
+        M /= a;
+        return M;
+    }
+
+    cmatrix operator/(cmatrix &&M, double a)
+    {
+        M /= a;
+        return M;
+    }
+
+    cmatrix operator/(const cmatrix &M, const complex &a)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= a;
+        return result;
+    }
+
+    cmatrix operator/(const complex &a, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= a;
+        return result;
+    }
+
+    cmatrix operator/(complex z, const cmatrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= z;
+        return result;
+    }
+
+    cmatrix operator/(const cmatrix &M, complex z)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= z;
+        return result;
+    }
+
+    cmatrix operator/(cmatrix &&M, complex z)
+    {
+        M /= z;
+        return M;
+    }
+
+    cmatrix operator/(complex z, cmatrix &&M)
+    {
+        M /= z;
+        return M;
+    }
+
+    cmatrix operator+(const cmatrix &M1, const cmatrix &M2)
+    {
+        cmatrix result(M1.nrows(), M1.ncols());
+        result += M2;
+        return result;
+    }
+
+    cmatrix operator+(cmatrix &&M1, const cmatrix &M2)
+    {
+        M1 += M2;
+        return M1;
+    }
+
+    cmatrix operator+(const cmatrix &M1, cmatrix &&M2)
+    {
+        M2 += M1;
+        return M2;
+    }
+
+    cmatrix operator+(cmatrix &&M1, cmatrix &&M2)
+    {
+        M1 += M2;
+        return M1;
+    }
+
+    cmatrix operator+(const cmatrix &M1, const matrix &M2)
+    {
+        cmatrix result(M1.nrows(), M1.ncols());
+        result += M2;
+        return result;
+    }
+
+    cmatrix operator+(cmatrix &&M1, const matrix &M2)
+    {
+        M1 += M2;
+        return M1;
+    }
+
+    cmatrix operator+(const matrix &M1, const cmatrix &M2)
+    {
+        cmatrix result(M2.nrows(), M2.ncols());
+        result += M1;
+        return result;
+    }
+
+    cmatrix operator+(const matrix &M1, cmatrix &&M2)
+    {
+        M2 += M1;
+        return M2;
+    }
+
+    cmatrix operator-(const cmatrix &M1, const cmatrix &M2)
+    {
+        cmatrix result(M1.nrows(), M1.ncols());
+        result -= M2;
+        return result;
+    }
+
+    cmatrix operator-(cmatrix &&M1, const cmatrix &M2)
+    {
+        M1 -= M2;
+        return M1;
+    }
+
+    cmatrix operator-(const cmatrix &M1, cmatrix &&M2)
+    {
+        M2 -= M1;
+        return M2;
+    }
+
+    cmatrix operator-(cmatrix &&M1, cmatrix &&M2)
+    {
+        M1 -= M2;
+        return M1;
+    }
+
+    cmatrix operator-(const cmatrix &M1, const matrix &M2)
+    {
+        cmatrix result(M1.nrows(), M1.ncols());
+        result -= M2;
+        return result;
+    }
+
+    cmatrix operator-(cmatrix &&M1, const matrix &M2)
+    {
+        M1 -= M2;
+        return M1;
+    }
+
+    cmatrix operator-(const matrix &M1, const cmatrix &M2)
+    {
+        cmatrix result(M2.nrows(), M2.ncols());
+        result -= M1;
+        return result;
+    }
+
+    cmatrix operator-(const matrix &M1, cmatrix &&M2)
+    {
+        M2 -= M1;
+        return M2;
+    }
+
     cmatrix operator*(const cmatrix &A, const cmatrix &B)
     {
         cmatrix C(A.nrows(), B.ncols());
         gsl_blas_zgemm(CblasNoTrans, CblasNoTrans, GSL_COMPLEX_ONE, A.gmat, B.gmat, GSL_COMPLEX_ZERO, C.gmat);
         return C;
+    }
+
+    bool operator==(const cmatrix &M1, const cmatrix &M2)
+    {
+        // Compare using gsl_function
+        return gsl_matrix_complex_equal(M1.gmat, M2.gmat);
+    }
+
+    bool operator!=(const cmatrix &M1, const cmatrix &M2)
+    {
+        // Compare individual elements
+        for (size_t i = 0; i < M1.nrows(); ++i)
+            for (size_t j = 0; j < M1.ncols(); ++j)
+                if (M1(i, j) != M2(i, j))
+                    return true;
+        return false;
+    }
+
+    bool operator==(const cmatrix &M1, const matrix &M2)
+    {
+        // Compare individual elements
+        for (size_t i = 0; i < M1.nrows(); ++i)
+            for (size_t j = 0; j < M1.ncols(); ++j)
+                if (M1(i, j) != M2(i, j))
+                    return false;
+        return true;
+    }
+
+    bool operator!=(const cmatrix &M1, const matrix &M2)
+    {
+        // Compare individual elements
+        for (size_t i = 0; i < M1.nrows(); ++i)
+            for (size_t j = 0; j < M1.ncols(); ++j)
+                if (M1(i, j) != M2(i, j))
+                    return true;
+        return false;
+    }
+
+    bool operator==(const matrix &M1, const cmatrix &M2)
+    {
+        // Compare individual elements
+        for (size_t i = 0; i < M1.nrows(); ++i)
+            for (size_t j = 0; j < M1.ncols(); ++j)
+                if (M1(i, j) != M2(i, j))
+                    return false;
+        return true;
+    }
+
+    bool operator!=(const matrix &M1, const cmatrix &M2)
+    {
+        // Compare individual elements
+        for (size_t i = 0; i < M1.nrows(); ++i)
+            for (size_t j = 0; j < M1.ncols(); ++j)
+                if (M1(i, j) != M2(i, j))
+                    return true;
+        return false;
     }
 }
 

@@ -14,8 +14,66 @@ namespace gsl
     {
         friend class matrix;
 
+        // Scalar multiplication
+        friend cmatrix operator*(double a, const cmatrix &M);
+        friend cmatrix operator*(double a, cmatrix &&M);
+        friend cmatrix operator*(const cmatrix &M, double a);
+        friend cmatrix operator*(cmatrix &&M, double a);
+
+        friend cmatrix operator*(complex z, const cmatrix &M);
+        friend cmatrix operator*(const cmatrix &M, complex z);
+        friend cmatrix operator*(cmatrix &&M, complex z);
+        friend cmatrix operator*(complex z, cmatrix &&M);
+
+        // Scalar multiplication
+        friend cmatrix operator/(double a, const cmatrix &M);
+        friend cmatrix operator/(double a, cmatrix &&M);
+        friend cmatrix operator/(const cmatrix &M, double a);
+        friend cmatrix operator/(cmatrix &&M, double a);
+
+        friend cmatrix operator/(complex z, const cmatrix &M);
+        friend cmatrix operator/(const cmatrix &M, complex z);
+        friend cmatrix operator/(cmatrix &&M, complex z);
+        friend cmatrix operator/(complex z, cmatrix &&M);
+
+        // Add complex matrices to complex matrices
+        friend cmatrix operator+(const cmatrix &M1, const cmatrix &M2);
+        friend cmatrix operator+(cmatrix &&M1, const cmatrix &M2);
+        friend cmatrix operator+(const cmatrix &M1, cmatrix &&M2);
+        friend cmatrix operator+(cmatrix &&M1, cmatrix &&M2);
+
+        // Add complex matrices to matrices
+        friend cmatrix operator+(const cmatrix &M1, const matrix &M2);
+        friend cmatrix operator+(cmatrix &&M1, const matrix &M2);
+        friend cmatrix operator+(const matrix &M1, const cmatrix &M2);
+        friend cmatrix operator+(const matrix &M1, cmatrix &&M2);
+
+        // Subtract complex matrices and complex matrices
+        friend cmatrix operator-(const cmatrix &M1, const cmatrix &M2);
+        friend cmatrix operator-(cmatrix &&M1, const cmatrix &M2);
+        friend cmatrix operator-(const cmatrix &M1, cmatrix &&M2);
+        friend cmatrix operator-(cmatrix &&M1, cmatrix &&M2);
+
+        // Subtract complex matrices from matrices
+        friend cmatrix operator-(const cmatrix &M1, const matrix &M2);
+        friend cmatrix operator-(cmatrix &&M1, const matrix &M2);
+        friend cmatrix operator-(const matrix &M1, const cmatrix &M2);
+        friend cmatrix operator-(const matrix &M1, cmatrix &&M2);
+
+        // Multiply complex matrices
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
-       
+
+        // Compare complex matrices to complex matrices
+        friend bool operator==(const cmatrix &M1, const cmatrix &M2);
+        friend bool operator!=(const cmatrix &M1, const cmatrix &M2);
+
+        // Compare complex matrices to matrices
+        friend bool operator==(const cmatrix &M1, const matrix &M2);
+        friend bool operator==(const matrix &M1, const cmatrix &M2);
+
+        friend bool operator!=(const cmatrix &M1, const matrix &M2);
+        friend bool operator!=(const matrix &M1, const cmatrix &M2);
+
     public:
         //! \brief Construct empty matrix
         cmatrix();
@@ -51,8 +109,9 @@ namespace gsl
         cmatrix &operator-=(const matrix &M);
 
         cmatrix &operator*=(complex z);
-        cmatrix &operator/=(complex z);
         cmatrix &operator*=(double x);
+
+        cmatrix &operator/=(complex z);
         cmatrix &operator/=(double x);
 
         cmatrix operator-() const;
@@ -74,6 +133,8 @@ namespace gsl
         size_t size() const;
         size_t nrows() const;
         size_t ncols() const;
+
+        bool is_square() const;
 
         //! \brief Access the pointer to the underlying gsl_matrix_complex
         gsl_matrix_complex *get() const { return gmat; }

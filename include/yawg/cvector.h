@@ -67,12 +67,6 @@ namespace gsl
         friend cvector operator-(const cvector &v1, const vector &v2);
         friend cvector operator-(cvector &&v1, const vector &v2);
 
-        // Subtract vectors from complex vectors
-        friend cvector operator-(const vector &v1, const cvector &v2);
-        friend cvector operator-(const vector &v1, cvector &&v2);
-        friend cvector operator-(const cvector &v1, const vector &v2);
-        friend cvector operator-(cvector &&v1, const vector &v2);
-
         // Compare complex vectors to complex vectors
         friend bool operator==(const cvector &v1, const cvector &v2);
         friend bool operator!=(const cvector &v1, const cvector &v2);

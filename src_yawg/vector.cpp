@@ -2,6 +2,7 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
 #include <utility>
+#include <stdlib.h>
 
 //! \brief Construct empty vector
 gsl::vector::vector()
@@ -14,21 +15,14 @@ gsl::vector::vector()
 //! \brief Construct zero vector of size n
 gsl::vector::vector(size_t n)
 {
-    this->alloc(n);
+    this->galloc(n);
 }
 
-//! \brief Construct new gsl::vector from gsl_vector
-gsl::vector::vector(const gsl_vector *gvec_other)
-{
-    if (gvec_other == nullptr)
-        return;
-    this->alloc(gvec_other->size);
-    gsl_vector_memcpy(gvec, gvec_other);
-}
+gsl::vector::vector(gsl_vector *gvec_other) : gvec(gvec_other) {}
 
 gsl::vector::vector(const gsl::vector &gvec_other)
 {
-    this->alloc(gvec_other.size());
+    this->galloc(gvec_other.size());
     gsl_vector_memcpy(gvec, gvec_other.gvec);
 }
 
@@ -50,7 +44,7 @@ gsl::vector &gsl::vector::operator=(gsl::vector &&v)
 {
     if (gvec == v.gvec)
         return *this;
-    this->free();
+    this->gfree();
     gvec = v.gvec;
     v.gvec = nullptr;
     return *this;
@@ -88,12 +82,7 @@ gsl::vector gsl::vector::operator-() const
 
 gsl::vector::~vector()
 {
-    if (gvec == nullptr)
-        return;
-    else if (gvec->size == 0)
-        delete gvec;
-    else
-        gsl_vector_free(gvec);
+    this->gfree();
 }
 
 void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
@@ -128,9 +117,9 @@ void gsl::vector::resize(size_t n)
     {
         if (gvec->size == n)
             return;
-        this->free();
+        this->gfree();
     }
-    this->alloc(n);
+    this->galloc(n);
 }
 
 //! \brief Clear the gsl::vector, free underlying memory
@@ -138,7 +127,7 @@ void gsl::vector::clear()
 {
     if (gvec == nullptr)
         return;
-    this->free();
+    this->gfree();
 }
 
 //! \brief Pretty-print the vector to file stream
@@ -151,16 +140,8 @@ void gsl::vector::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
-//! \brief Get a reference to the original vector
-// gsl::vector gsl::vector::view() const
-// {
-//     gsl_vector* v = static_cast<gsl_vector*>(malloc(sizeof(gsl_vector)));
-//     *v = gsl_vector_subvector( get(), 0, size() ).vector;
-//     return gsl::vector( v );
-// }
-
 //! \brief Private function to free allocated memory
-void gsl::vector::free()
+void gsl::vector::gfree()
 {
     if (gvec == nullptr)
         return;
@@ -177,18 +158,17 @@ void gsl::vector::free()
  *       This is slightly slower than using gsl_vector_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::vector::alloc(size_t n)
+void gsl::vector::galloc(size_t n)
 {
-    if (n == 0)
+    if (n >= 0)
+        gvec = gsl_vector_alloc(n);
+    else
     {
         gvec = new gsl_vector;
         gvec->size = 0;
         gvec->data = 0;
     }
-    else
-        gvec = gsl_vector_alloc(n);
 }
-
 namespace gsl
 {
     vector operator*(double a, const vector &v)
@@ -333,4 +313,23 @@ namespace gsl
                 return true;
         return false;
     }
+}
+
+gsl::vector_view gsl::vector::view() const
+{
+    gsl_vector *v = static_cast<gsl_vector *>(malloc(sizeof(gsl_vector)));
+    *v = gsl_vector_subvector(get(), 0, size()).vector;
+    return gsl::vector_view(v);
+}
+
+//! \brief Construct new gsl::vector from gsl_vector
+gsl::vector_view::vector_view(gsl_vector *gvec_other) : vector(gvec_other) {}
+
+// Vector views should never own their memory, so we don't need to free it
+// We only need to delete the pointer, since it was created on the heap
+gsl::vector_view::~vector_view()
+{
+    if (gvec != nullptr)
+        free(gvec);
+    gvec = nullptr;
 }

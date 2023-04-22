@@ -193,6 +193,13 @@ size_t gsl::matrix::ncols() const
     return gmat->size2;
 }
 
+bool gsl::matrix::is_square() const
+{
+    if (gmat == nullptr)
+        return false;
+    return (this->nrows() == this->ncols());
+}
+
 /*! \brief Resize the gsl::matrix, setting elements to zero
  * \param n Number of rows
  * \param m Number of columns
@@ -229,9 +236,19 @@ gsl::matrix gsl::matrix::reshape(size_t n, size_t m) const
     return gmat_new;
 }
 
+//! \brief Compute the matrix transpose, in-place if square
 gsl::matrix &gsl::matrix::T()
 {
-    gsl_matrix_transpose(gmat);
+    if (this->is_square())
+        gsl_matrix_transpose_memcpy(gmat, gmat);
+    else
+    {
+        gsl::matrix M_new(this->nrows(), this->ncols());
+        for (size_t i = 0; i < this->nrows(); i++)
+            for (size_t j = 0; j < this->ncols(); j++)
+                M_new(j, i) = this->get(i, j);
+        *this = M_new;
+    }
     return *this;
 }
 
@@ -295,11 +312,122 @@ namespace gsl
         return result;
     }
 
+    matrix operator*(double a, matrix &&M)
+    {
+        M *= a;
+        return M;
+    }
+
+    matrix operator*(const matrix &M, double a)
+    {
+        matrix result(M);
+        result *= a;
+        return result;
+    }
+
+    matrix operator*(matrix &&M, double a)
+    {
+        M *= a;
+        return M;
+    }
+
+    matrix operator/(double a, const matrix &M)
+    {
+        matrix result(M);
+        result /= a;
+        return result;
+    }
+
+    matrix operator/(double a, matrix &&M)
+    {
+        M /= a;
+        return M;
+    }
+
+    matrix operator/(const matrix &M, double a)
+    {
+        matrix result(M);
+        result /= a;
+        return result;
+    }
+
+    matrix operator/(matrix &&M, double a)
+    {
+        M /= a;
+        return M;
+    }
+
+    matrix operator+(const matrix &M1, const matrix &M2)
+    {
+        matrix result(M1);
+        result += M2;
+        return result;
+    }
+
+    matrix operator+(const matrix &M1, matrix &&M2)
+    {
+        M2 += M1;
+        return M2;
+    }
+
+    matrix operator+(matrix &&M1, const matrix &M2)
+    {
+        M1 += M2;
+        return M1;
+    }
+
+    matrix operator+(matrix &&M1, matrix &&M2)
+    {
+        M1 += M2;
+        return M1;
+    }
+
+    matrix operator-(const matrix &M1, const matrix &M2)
+    {
+        matrix result(M1);
+        result -= M2;
+        return result;
+    }
+
+    matrix operator-(const matrix &M1, matrix &&M2)
+    {
+        M2 -= M1;
+        M2 *= -1.0;
+        return M2;
+    }
+
+    matrix operator-(matrix &&M1, const matrix &M2)
+    {
+        M1 -= M2;
+        return M1;
+    }
+
+    matrix operator-(matrix &&M1, matrix &&M2)
+    {
+        M1 -= M2;
+        return M1;
+    }
+
     matrix operator*(const matrix &A, const matrix &B)
     {
         matrix result(A.nrows(), B.ncols());
         gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, A.gmat, B.gmat, 0.0, result.gmat);
         return result;
+    }
+
+    bool operator==(const matrix &M1, const matrix &M2)
+    {
+        return gsl_matrix_equal(M1.gmat, M2.gmat);
+    }
+
+    bool operator!=(const matrix &M1, const matrix &M2)
+    {
+        // Compare each element, returning true if any are not equal
+        for (size_t i = 0; i < M1.nrows(); i++)
+            for (size_t j = 0; j < M1.ncols(); j++)
+                if (M1.get(i, j) != M2.get(i, j))
+                    return true;
+        return false;
     }
 }
 
