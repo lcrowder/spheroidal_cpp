@@ -62,10 +62,14 @@ namespace gsl
         //! \brief Return a reference to the element at position (i,j)
         complex_ref operator()(size_t i, size_t j);
         void set(size_t i, size_t j, complex z);
+        void set_col(size_t j, const cvector &v);
+        void set_row(size_t i, const cvector &v);
 
         //! \brief Return a const reference to the element at position (i,j)
-        complex get(size_t i, size_t j) const;
         const complex_ref operator()(size_t i, size_t j) const;
+        complex get(size_t i, size_t j) const;
+        cvector get_col(size_t j) const;
+        cvector get_row(size_t i) const;
 
         size_t size() const;
         size_t nrows() const;

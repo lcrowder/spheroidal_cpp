@@ -62,9 +62,13 @@ namespace gsl
 
         double &operator()(size_t i, size_t j);
         void set(size_t i, size_t j, double val);
+        void set_col(size_t j, const vector &v);
+        void set_row(size_t i, const vector &v);
 
         double operator()(size_t i, size_t j) const;
         double get(size_t i, size_t j) const;
+        vector get_col(size_t j) const;
+        vector get_row(size_t i) const;
 
         size_t size() const;
         size_t nrows() const;

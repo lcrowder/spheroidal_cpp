@@ -208,9 +208,33 @@ void gsl::cmatrix::set(size_t i, size_t j, gsl::complex val)
     GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), val.real(), val.imag());
 }
 
+void gsl::cmatrix::set_col(size_t j, const gsl::cvector &v)
+{
+    gsl_matrix_complex_set_col(gmat, j, v.gvec);
+}
+
+void gsl::cmatrix::set_row(size_t i, const gsl::cvector &v)
+{
+    gsl_matrix_complex_set_row(gmat, i, v.gvec);
+}
+
 gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
 {
     return gsl::complex(gsl_matrix_complex_get(gmat, i, j));
+}
+
+gsl::cvector gsl::cmatrix::get_col(size_t j) const
+{
+    gsl::cvector result(gmat->size1);
+    gsl_matrix_complex_get_col(result.gvec, gmat, j);
+    return result;
+}
+
+gsl::cvector gsl::cmatrix::get_row(size_t i) const
+{
+    gsl::cvector result(gmat->size2);
+    gsl_matrix_complex_get_row(result.gvec, gmat, i);
+    return result;
 }
 
 /*! \brief Return a reference to the element at position (i,j)

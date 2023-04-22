@@ -145,8 +145,32 @@ gsl::matrix::~matrix()
 double &gsl::matrix::operator()(size_t i, size_t j) { return *gsl_matrix_ptr(gmat, i, j); }
 void gsl::matrix::set(size_t i, size_t j, double val) { *gsl_matrix_ptr(gmat, i, j) = val; }
 
+void gsl::matrix::set_row(size_t i, const gsl::vector &v)
+{
+    gsl_matrix_set_row(gmat, i, v.gvec);
+}
+
+void gsl::matrix::set_col(size_t j, const gsl::vector &v)
+{
+    gsl_matrix_set_col(gmat, j, v.gvec);
+}
+
 double gsl::matrix::operator()(size_t i, size_t j) const { return *gsl_matrix_ptr(gmat, i, j); }
 double gsl::matrix::get(size_t i, size_t j) const { return *gsl_matrix_ptr(gmat, i, j); }
+
+gsl::vector gsl::matrix::get_row(size_t i) const
+{
+    gsl::vector v(gmat->size2);
+    gsl_matrix_get_row(v.gvec, gmat, i);
+    return v;
+}
+
+gsl::vector gsl::matrix::get_col(size_t j) const
+{
+    gsl::vector v(gmat->size1);
+    gsl_matrix_get_col(v.gvec, gmat, j);
+    return v;
+}
 
 size_t gsl::matrix::size() const
 {
