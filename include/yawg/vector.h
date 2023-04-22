@@ -31,6 +31,8 @@ namespace gsl
         friend class row_view;
         friend class column_view;
 
+        friend class cvector_view;
+        
         friend class matrix;
 
         // Scalar multiplication
@@ -41,6 +43,15 @@ namespace gsl
 
         friend cvector operator*(complex a, const vector &v);
         friend cvector operator*(const vector &v, complex a);
+
+        // Scalar division
+        friend vector operator/(double a, const vector &v);
+        friend vector operator/(double a, vector &&v);
+        friend vector operator/(const vector &v, double a);
+        friend vector operator/(vector &&v, double a);
+
+        friend cvector operator/(complex z, const vector &v);
+        friend cvector operator/(const vector &v, complex z);
 
         // Add vectors to vectors
         friend vector operator+(const vector &v1, const vector &v2);
@@ -122,8 +133,18 @@ namespace gsl
         vector(vector &&gvec_other);
 
         vector &operator=(const vector &gvec_other);
+        vector &operator=(const vector_view &gvec_other);
         vector &operator=(vector &&gvec_other);
 
+        vector &operator+=(const vector &v);
+        vector &operator+=(const vector_view &vv);
+
+        vector &operator-=(const vector &v);
+        vector &operator-=(const vector_view &vv);
+
+        vector &operator*=(double a);
+        vector &operator/=(double a);
+        vector operator-() const;
         ~vector();
 
         double &operator()(size_t i);
@@ -149,15 +170,7 @@ namespace gsl
         //! \brief Return the 2-norm of the vector
         double norm() const { return gsl_blas_dnrm2(gvec); }
 
-        vector &operator+=(const vector &v);
-        vector &operator+=(const vector_view &vv);
 
-        vector &operator-=(const vector &v);
-        vector &operator-=(const vector_view &vv);
-
-        vector &operator*=(double a);
-        vector &operator/=(double a);
-        vector operator-() const;
 
         //! \brief Return a view to a subvector of the vector
         vector_view subvector(size_t offset, size_t size);
@@ -184,7 +197,16 @@ namespace gsl
     {
         friend class vector;
         friend class cvector;
+        friend class cvector_view;
 
+        // Scalar multiplication
+        friend vector operator*(const vector_view &v, double a);
+        friend vector operator*(double a, const vector_view &v);
+
+        // Scalar division
+        friend vector operator/(const vector_view &v, double a);
+        friend vector operator/(double a, const vector_view &v);
+        
         // Add vector views to vector views
         friend vector operator+(const vector_view &v1, const vector_view &v2);
 
@@ -278,6 +300,8 @@ namespace gsl
 
         double operator()(size_t i) const;
         double get(size_t i) const;
+
+        size_t size() const { return gvec_view.vector.size; };
 
         //! \brief Pretty-print the viewed vector to file stream
         void print(FILE *out = stdout) const;

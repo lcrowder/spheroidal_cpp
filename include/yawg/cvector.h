@@ -9,6 +9,7 @@
 namespace gsl
 {
     class vector;
+    class vector_view;
 
     class cvector_view;
     class crow_view;
@@ -33,11 +34,27 @@ namespace gsl
 
         friend class cmatrix;
 
-        // Scalar multiplication // TODO: double version
+        // Scalar multiplication
         friend cvector operator*(complex a, const cvector &v);
         friend cvector operator*(complex a, cvector &&v);
         friend cvector operator*(const cvector &v, complex a);
         friend cvector operator*(cvector &&v, complex a);
+
+        friend cvector operator*(const cvector &v, double x);
+        friend cvector operator*(double x, const cvector &v);
+        friend cvector operator*(cvector&& v, double x);
+        friend cvector operator*(double x, cvector&& v);
+
+        // Scalar division
+        friend cvector operator/(complex a, const cvector &v);
+        friend cvector operator/(complex a, cvector &&v);
+        friend cvector operator/(const cvector &v, complex a);
+        friend cvector operator/(cvector &&v, complex a);
+
+        friend cvector operator/(const cvector &v, double x);
+        friend cvector operator/(double x, const cvector &v);
+        friend cvector operator/(cvector&& v, double x);
+        friend cvector operator/(double x, cvector&& v);
 
         // Add complex vectors to complex vectors
         friend cvector operator+(const cvector &v1, const cvector &v2);
@@ -130,8 +147,27 @@ namespace gsl
         //! \brief Construct new gsl::cvector from gsl::vector
         cvector(const vector &vec);
 
-        cvector &operator=(const cvector &gvec_other);
+        cvector &operator=(const cvector &v);
+        cvector &operator=(const vector &v);
+        cvector &operator=(const vector_view &vv);
+        cvector &operator=(const cvector_view &vv);
+
         cvector &operator=(cvector &&gvec_other);
+
+        cvector &operator+=(const cvector &v);
+        cvector &operator+=(const cvector_view &vv);
+        cvector &operator+=(const vector &v);
+        cvector &operator+=(const vector_view &vv);
+
+        cvector &operator-=(const cvector &v);
+        cvector &operator-=(const cvector_view &vv);
+        cvector &operator-=(const vector &v);
+        cvector &operator-=(const vector_view &vv);
+
+        cvector &operator*=(complex a);
+        cvector &operator/=(complex a);
+        cvector &operator*=(double a);
+        cvector &operator/=(double a);
 
         ~cvector();
 
@@ -160,18 +196,6 @@ namespace gsl
         //! \brief Return the 2-norm of the vector
         double norm() const { return gsl_blas_dznrm2(gvec); }
 
-        cvector &operator+=(const cvector &v);
-        cvector &operator+=(const cvector_view &vv);
-        cvector &operator+=(const vector &v);
-        cvector &operator+=(const vector_view &vv);
-
-        cvector &operator-=(const cvector &v);
-        cvector &operator-=(const cvector_view &vv);
-        cvector &operator-=(const vector &v);
-        cvector &operator-=(const vector_view &vv);
-
-        cvector &operator*=(complex a); // TODO: double version
-        cvector &operator/=(complex a); // TODO: double version
         cvector operator-() const;
 
         //! \brief Return a view to a subvector of the vector
@@ -198,6 +222,19 @@ namespace gsl
     class cvector_view
     {
         friend class cvector;
+        friend class vector;
+
+        // Scalar multiplication
+        friend cvector operator*(const cvector_view &v, complex a);
+        friend cvector operator*(complex a, const cvector_view &v);
+        friend cvector operator*(const cvector_view &v, double a);
+        friend cvector operator*(double a, const cvector_view &v);
+
+        // Scalar division
+        friend cvector operator/(const cvector_view &v, complex a);
+        friend cvector operator/(complex a, const cvector_view &v);
+        friend cvector operator/(const cvector_view &v, double a);
+        friend cvector operator/(double a, const cvector_view &v);
 
         // Add complex vector views to complex vector views
         friend cvector operator+(const cvector_view &v1, const cvector_view &v2);
@@ -209,12 +246,15 @@ namespace gsl
         // Add complex vector views to vectors
         friend cvector operator+(const vector &v1, const cvector_view &v2);
         friend cvector operator+(const cvector_view &v1, const vector &v2);
-        
+
+        friend cvector operator-(const vector &v1, const cvector_view &v2);
+        friend cvector operator-(const cvector_view &v1, const vector &v2);
+
         // Add complex vector views to complex vectors
         friend cvector operator+(const cvector &v1, const cvector_view &v2);
         friend cvector operator+(const cvector_view &v1, const cvector &v2);
-        friend cvector operator+(cvector&& v1, const cvector_view &v2);
-        friend cvector operator+(const cvector_view &v1, cvector&& v2);
+        friend cvector operator+(cvector &&v1, const cvector_view &v2);
+        friend cvector operator+(const cvector_view &v1, cvector &&v2);
 
         // Compare complex vector views to complex vector views
         friend bool operator==(const cvector_view &v1, const cvector_view &v2);
@@ -255,7 +295,25 @@ namespace gsl
         cvector_view &operator=(const cvector &v);
 
         //! \brief Assignment to a cvector view from another cvector view
-        cvector_view &operator=(cvector_view v);
+        cvector_view &operator=(const cvector_view &vv);
+        cvector_view &operator=(const vector &v);
+        cvector_view &operator=(const vector_view &vv);
+
+        cvector_view &operator+=(const cvector_view &vv);
+        cvector_view &operator+=(const cvector &v);
+        cvector_view &operator+=(const vector_view &vv);
+        cvector_view &operator+=(const vector &v);
+
+        cvector_view &operator-=(const cvector_view &vv);
+        cvector_view &operator-=(const cvector &v);
+        cvector_view &operator-=(const vector_view &vv);
+        cvector_view &operator-=(const vector &v);
+
+        cvector_view &operator*=(complex z);
+        cvector_view &operator*=(double x);
+
+        cvector_view &operator/=(complex z);
+        cvector_view &operator/=(double x);
 
         //! \brief Return a reference to the element at position (i,j)
         complex_ref operator()(size_t i);
@@ -265,12 +323,10 @@ namespace gsl
         const complex_ref operator()(size_t i) const;
         complex get(size_t i) const;
 
+        size_t size() const { return gvec_view.vector.size; }
+
         //! \brief Pretty-print the viewed vector to file stream
         void print(FILE *out = stdout) const;
-
-        // Subtract vectors from complex vector views
-        friend cvector operator-(const vector &v1, const cvector_view &v2);
-        friend cvector operator-(const cvector_view &v1, const vector &v2);
 
         //! \brief Return a constant pointer to the underlying gsl_vector_complex
         const gsl_vector_complex *get_gsl_ptr() const { return &gvec_view.vector; };

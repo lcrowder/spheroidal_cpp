@@ -35,16 +35,25 @@ gsl::vector::vector(gsl::vector &&gvec_other) : gvec(gvec_other.gvec)
 
 gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
 {
-    if (this == &gvec_other)
+    if (gvec == gvec_other.gvec)
         return *this;
     this->resize(gvec_other.size());
     gsl_vector_memcpy(gvec, gvec_other.gvec);
     return *this;
 }
 
+gsl::vector &gsl::vector::operator=(const gsl::vector_view &vv)
+{
+    if (gvec == &vv.gvec_view.vector)
+        return *this;
+    this->resize(vv.size());
+    gsl_vector_memcpy(gvec, &vv.gvec_view.vector);
+    return *this;
+}
+
 gsl::vector &gsl::vector::operator=(gsl::vector &&v)
 {
-    if (this == &v)
+    if (gvec == v.gvec)
         return *this;
     this->free();
     gvec = v.gvec;
@@ -199,20 +208,33 @@ namespace gsl
         return std::move(v);
     }
 
-    cvector operator*(complex a, const vector &v)
+    vector operator/(double a, const vector &v)
     {
-        cvector result(v);
-        result *= a;
+        vector result(v);
+        result /= a;
         return result;
     }
 
-    cvector operator*(const vector &v, complex a)
+    vector operator/(double a, vector &&v)
     {
-        cvector result(v);
-        result *= a;
+        v /= a;
+        return std::move(v);
+    }
+
+    vector operator/(const vector &v, double a)
+    {
+        vector result(v);
+        result /= a;
         return result;
     }
 
+    vector operator/(vector &&v, double a)
+    {
+        v /= a;
+        return std::move(v);
+    }
+
+    
     vector operator+(const vector &v1, const vector &v2)
     {
         vector result(v1);
@@ -404,6 +426,34 @@ namespace gsl
             if (v1(i) != v2(i))
                 return true;
         return false;
+    }
+
+    vector operator*(const vector_view &v, double a)
+    {
+        vector result(v);
+        result *= a;
+        return result;
+    }
+
+    vector operator*(double a, const vector_view &v)
+    {
+        vector result(v);
+        result *= a;
+        return result;
+    }
+
+    vector operator/(const vector_view &v, double a)
+    {
+        vector result(v);
+        result /= a;
+        return result;
+    }
+
+    vector operator/(double a, const vector_view &v)
+    {
+        vector result(v);
+        result /= a;
+        return result;
     }
 
     // Add vector views to vector views
