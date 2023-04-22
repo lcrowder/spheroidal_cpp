@@ -23,6 +23,9 @@ namespace gsl
 
     //! \brief Perform a circular shift of the elements of a gsl::vector
     gsl::vector circshift(const gsl::vector & x, int k);
+
+    //! \brief Perform a circular shift of the elements of a gsl::cvector
+    gsl::cvector circshift(const gsl::cvector &x, int k);
     
     //! \brief Store 2D grid coordinates based on 1D input gsl::vectors
     void meshgrid(const gsl::vector &x, const gsl::vector &y, gsl::matrix &X, gsl::matrix &Y);
@@ -129,6 +132,18 @@ namespace gsl
         return std::move(x);
     }
 
+    gsl::vector diag(const gsl::matrix &A);
+
+    gsl::vector pow(const gsl::vector &x, double p);
+
+    gsl::cvector pow(const gsl::cvector &x, complex p);
+
+    gsl::matrix pow(const gsl::matrix &x, double p);
+
+    gsl::cmatrix pow(const gsl::cmatrix &x, complex p);
+
 } // namespace gsl
+
+
 
 #endif // GSL_WRAPPER_UTILS_HPP_
