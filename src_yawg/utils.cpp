@@ -3,6 +3,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_complex_math.h>
+#include <math.h>
 
 /*!
  * \brief Computes \p n Gauss-Legendre quadrature nodes and weights for the interval [a, b] (default [-1, 1])
@@ -149,6 +150,29 @@ gsl::vector gsl::circshift(const gsl::vector &x, int k)
     return y;
 }
 
+/*! \brief Perform a circular shift of the elements of a gsl::cvector
+ *  \param x Input vector
+ *  \param k Number of positions to shift
+ *
+ *  \return Shifted vector
+ */
+gsl::cvector gsl::circshift(const gsl::cvector &x, int k)
+{
+    gsl::cvector y(x);
+
+    // If k is zero, don't shift
+    if (k == 0)
+        return x;
+
+    // Negative shifts are equivalent to positive shifts in the opposite direction
+    if (k < 0)
+        k = k * (1 - x.size());
+
+    for (int i = 0; i < x.size(); ++i)
+        y((i + k) % x.size()) = x(i);
+    return y;
+}
+
 /*! \brief Store 2D grid coordinates based on 1D input gsl::vectors
  * \param x 1D vector of x-coordinates
  * \param y 1D vector of y-coordinates
@@ -197,3 +221,48 @@ gsl::matrix gsl::eye(size_t n)
         I(i, i) = 1;
     return I;
 }
+
+
+gsl::vector gsl::diag(const gsl::matrix &A)
+{
+    gsl::vector d(std::min(A.nrows(), A.ncols()));
+    for (int i = 0; i < d.size(); ++i)
+        d(i) = A(i, i);
+    return d;
+}
+
+gsl::vector gsl::pow(const gsl::vector &x, double p)
+{
+    gsl::vector y(x.size());
+    for (int i = 0; i < x.size(); ++i)
+        y(i) = std::pow(x(i), p);
+    return y;
+}
+
+gsl::cvector gsl::pow(const gsl::cvector &x, gsl::complex p)
+{
+    gsl::cvector y(x.size());
+    for (int i = 0; i < x.size(); ++i)
+        y(i) = gsl_complex_pow(x(i), p);
+    return y;
+}
+
+gsl::matrix gsl::pow(const gsl::matrix &x, double p)
+{
+    gsl::matrix y(x.nrows(),x.ncols());
+    for (int i = 0; i < x.nrows(); ++i)
+        for (int j = 0; j < x.ncols(); ++j)
+            y(i,j) = std::pow(x(i,j), p);
+    return y;
+}
+
+gsl::cmatrix gsl::pow(const gsl::cmatrix &x, gsl::complex p)
+{
+    gsl::cmatrix y(x.nrows(),x.ncols());
+    for (int i = 0; i < x.nrows(); ++i)
+        for (int j = 0; j < x.ncols(); ++j)
+            y(i,j) = gsl_complex_pow(x(i,j), p);
+    return y;
+}
+
+

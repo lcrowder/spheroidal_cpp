@@ -1,8 +1,8 @@
-#ifndef LEGENDRE_OTC_H_
-#define LEGENDRE_OTC_H_
+#ifndef SPHEROIDAL_ANALYSIS_H_
+#define SPHEROIDAL_ANALYSIS_H_
 
 #include <yawg/core.h>
 
-gsl::vector spheroidal_analysis(gsl::vector f);
+gsl::matrix spheroidal_analysis(gsl::matrix f);
 
-#endif // _LEGENDGRE_OTC_H_
+#endif // _SPHEROIDAL_ANALYSIS_H_
