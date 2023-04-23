@@ -9,8 +9,11 @@
 namespace gsl
 {
     class vector;
-    class matrix;
+    class row_view;
+    class column_view;
+
     class cmatrix;
+    class matrix_view;
 
     /*! \class matrix
      *  \brief A wrapper class for gsl_matrix
@@ -19,8 +22,6 @@ namespace gsl
      */
     class matrix
     {
-        friend class cmatrix;
-
         // Scalar multiplication
         friend matrix operator*(double a, const matrix &M);
         friend matrix operator*(double a, matrix &&M);
@@ -79,11 +80,9 @@ namespace gsl
     public:
         //! \brief Construct empty matrix
         matrix();
+
         //! \brief Construct zero matrix of size n x m
         matrix(size_t n, size_t m);
-
-        //! \brief Construct new gsl::matrix from gsl_matrix
-        matrix(const gsl_matrix *gsl_mat);
 
         //! \brief Construct new gsl::matrix from .csv file
         matrix(FILE *in);
@@ -129,11 +128,11 @@ namespace gsl
         //! \brief Access the pointer to the underlying gsl_matrix
         gsl_matrix *get() const { return gmat; }
 
-        //! \brief Resize the gsl::matrix, setting elements to zero
-        void resize(size_t n, size_t m);
-
         //! \brief CLear the gsl::matrix, free underlying memory
         void clear();
+
+        //! \brief Resize the gsl::matrix, freeing and allocating new memory
+        void resize(size_t n, size_t m);
 
         //! \brief Return a new n x m gsl::matrix with same elements
         matrix reshape(size_t n, size_t m) const;
@@ -150,14 +149,35 @@ namespace gsl
         //! \brief Load the matrix from a file stream in CSV format
         void load_csv(FILE *in = stdin);
 
+        operator matrix_view() const;
+        matrix_view view() const;
+        matrix_view submatrix(size_t i, size_t j, size_t n, size_t m) const;
+
+        row_view row(size_t i) const;
+        column_view column(size_t j) const;
+
     protected:
         gsl_matrix *gmat;
 
+        matrix(gsl_matrix *gmat);
+
         //! \brief Private function to free allocated memory
-        void free();
+        void gfree();
 
         //! \brief Private function to (continuously) allocate memory
-        void calloc(size_t n, size_t m);
+        void galloc(size_t n, size_t m);
+    };
+
+    class matrix_view : public matrix
+    {
+    public:
+        //! \brief Constructor for vector_view pointing to data at gvec_other
+        matrix_view(gsl_matrix *gvec_other);
+        ~matrix_view();
+
+        // Override some nonconst member functions to be unusable
+        void clear();
+        void resize(size_t n, size_t m);
     };
 
 } // namespace gsl

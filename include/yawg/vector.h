@@ -8,6 +8,9 @@
 
 namespace gsl
 {
+    class vector_view;
+    class matrix_view;
+    
     class cvector;
 
     /*! \class vector
@@ -17,10 +20,6 @@ namespace gsl
      */
     class vector
     {
-        friend class cvector;     
-        friend class matrix;
-        friend class cmatrix;
-
         // Scalar multiplication
         friend vector operator*(double a, const vector &v);
         friend vector operator*(double a, vector &&v);
@@ -51,7 +50,6 @@ namespace gsl
         friend cvector operator+(const cvector &v1, const vector &v2);
         friend cvector operator+(cvector &&v1, const vector &v2);
 
-
         // Subtract vectors from vectors
         friend vector operator-(const vector &v1, const vector &v2);
         friend vector operator-(vector &&v1, const vector &v2);
@@ -70,9 +68,9 @@ namespace gsl
 
         // Compare vectors to complex vectors
         friend bool operator==(const vector &v1, const cvector &v2);
-        friend bool operator!=(const vector &v1, const cvector &v2);
         friend bool operator==(const cvector &v1, const vector &v2);
         friend bool operator!=(const cvector &v1, const vector &v2);
+        friend bool operator!=(const vector &v1, const cvector &v2);
 
     public:
         //! \brief Construct empty vector
@@ -81,14 +79,11 @@ namespace gsl
         //! \brief Construct zero vector of size n
         explicit vector(size_t n);
 
-        //! \brief Construct new gsl::vector from gsl_vector
-        vector(const gsl_vector *gvec_other);
+        vector(const vector &v);
+        vector(vector &&v);
 
-        vector(const vector &gvec_other);
-        vector(vector &&gvec_other);
-
-        vector &operator=(const vector &gvec_other);
-        vector &operator=(vector &&gvec_other);
+        vector &operator=(const vector &v);
+        vector &operator=(vector &&v);
 
         vector &operator+=(const vector &v);
 
@@ -122,14 +117,60 @@ namespace gsl
         //! \brief Return the 2-norm of the vector
         double norm() const { return gsl_blas_dnrm2(gvec); }
 
+        operator vector_view() const;
+        vector_view view() const;
+        vector_view subvector(size_t offset, size_t n) const;
+
     protected:
         gsl_vector *gvec;
 
+        //! \brief Construct new gsl::vector from gsl_vector
+        vector(gsl_vector *gvec_other);
+
         //! \brief Private function to free allocated memory
-        void free();
+        void gfree();
 
         //! \brief Private function to (continuously) allocate memory
-        void alloc(size_t n);
+        void galloc(size_t n);
+    };
+
+    class vector_view : public vector
+    {
+    public:
+        //! \brief Constructor for vector_view pointing to data at gvec_other
+        vector_view(gsl_vector *gvec_other);
+        ~vector_view();
+
+        // Override some nonconst member functions to be unusable
+        void clear();
+        void resize(size_t n);
+    };
+
+    /*! \class row_view
+     *  \brief A subclass of cvector_view for stride-1 cvectors
+     */
+    class row_view : public vector_view
+    {
+    public:
+        //! \brief Construct row_view from existing vector view, checking that stride is 1
+        row_view(gsl_vector *gvec_other) : vector_view(gvec_other)
+        {
+            if (gvec_other->stride != 1)
+                printf("Row view must have stride 1");
+        };
+
+        //! \brief Return a matrix view out of the elements of the row
+        matrix_view reshape(size_t n, size_t m) const;
+    };
+
+    /*! \class column_view
+     *  \brief A subclass of vector_view for non-stride-1 vectors
+     */
+    class column_view : public vector_view
+    {
+    public:
+        //! \brief Construct column_view from existing vector view
+        column_view(gsl_vector *gvec_other) : vector_view(gvec_other) {}
     };
 
 }

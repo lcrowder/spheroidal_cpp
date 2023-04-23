@@ -18,6 +18,7 @@ gsl::vector::vector(size_t n)
     this->galloc(n);
 }
 
+//! \brief Construct new gsl::vector from gsl_vector's data
 gsl::vector::vector(gsl_vector *gvec_other) : gvec(gvec_other) {}
 
 gsl::vector::vector(const gsl::vector &gvec_other)
@@ -31,18 +32,40 @@ gsl::vector::vector(gsl::vector &&v) : gvec(v.gvec)
     v.gvec = nullptr;
 }
 
-gsl::vector &gsl::vector::operator=(const gsl::vector &gvec_other)
+
+
+
+
+
+
+
+
+
+
+
+
+
+gsl::vector &gsl::vector::operator=(const gsl::vector &v)
 {
-    if (gvec == gvec_other.gvec)
+    if (this == &v)
         return *this;
-    this->resize(gvec_other.size());
-    gsl_vector_memcpy(gvec, gvec_other.gvec);
+    if (size() != v.size())
+        this->resize(v.size());
+    gsl_vector_memcpy(gvec, v.gvec);
     return *this;
 }
 
+
+
+
+
+
+
+
+
 gsl::vector &gsl::vector::operator=(gsl::vector &&v)
 {
-    if (gvec == v.gvec)
+    if (this == &v)
         return *this;
     this->gfree();
     gvec = v.gvec;
@@ -56,11 +79,27 @@ gsl::vector &gsl::vector::operator+=(const gsl::vector &v)
     return *this;
 }
 
+
+
+
+
+
+
+
+
 gsl::vector &gsl::vector::operator-=(const gsl::vector &gvec_other)
 {
     gsl_vector_sub(gvec, gvec_other.gvec);
     return *this;
 }
+
+
+
+
+
+
+
+
 
 gsl::vector &gsl::vector::operator*=(double a)
 {
@@ -68,11 +107,29 @@ gsl::vector &gsl::vector::operator*=(double a)
     return *this;
 }
 
+
+
+
+
+
+
+
+
+
 gsl::vector &gsl::vector::operator/=(double a)
 {
     gsl_vector_scale(gvec, 1.0 / a);
     return *this;
 }
+
+
+
+
+
+
+
+
+
 
 gsl::vector gsl::vector::operator-() const
 {
@@ -85,13 +142,36 @@ gsl::vector::~vector()
     this->gfree();
 }
 
-void gsl::vector::set(size_t i, double val) { *gsl_vector_ptr(gvec, i) = val; }
+void gsl::vector::set(size_t i, double val) 
+{
+    *gsl_vector_ptr(gvec, i) = val; 
+}
 
-double gsl::vector::get(size_t i) const { return *gsl_vector_ptr(gvec, i); }
+double gsl::vector::get(size_t i) const 
+{ 
+    return *gsl_vector_ptr(gvec, i);
+}
 
-double gsl::vector::operator()(size_t i) const { return *gsl_vector_ptr(gvec, i); }
 
-double &gsl::vector::operator()(size_t i) { return *gsl_vector_ptr(gvec, i); }
+
+
+
+
+
+double gsl::vector::operator()(size_t i) const 
+{ 
+    return *gsl_vector_ptr(gvec, i); 
+}
+
+
+
+
+
+
+double &gsl::vector::operator()(size_t i)
+{ 
+    return *gsl_vector_ptr(gvec, i);
+}
 
 size_t gsl::vector::size() const
 {
@@ -110,16 +190,16 @@ void gsl::vector::resize(size_t n)
 {
     if (n == 0)
     {
-        this->clear();
+        clear();
         return;
     }
     if (gvec != nullptr)
     {
         if (gvec->size == n)
             return;
-        this->gfree();
+        gfree();
     }
-    this->galloc(n);
+    galloc(n);
 }
 
 //! \brief Clear the gsl::vector, free underlying memory
@@ -140,12 +220,15 @@ void gsl::vector::print(FILE *out) const
     fprintf(out, "]\n");
 }
 
+
+
+
 //! \brief Private function to free allocated memory
 void gsl::vector::gfree()
 {
     if (gvec == nullptr)
         return;
-    else if (gvec->size == 0)
+    else if (size() == 0)
         delete gvec;
     else
         gsl_vector_free(gvec);
@@ -313,12 +396,150 @@ namespace gsl
                 return true;
         return false;
     }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+gsl::vector::operator vector_view() const
+{   
+    printf("Creating view from vector\n");
+    return view();
 }
 
 gsl::vector_view gsl::vector::view() const
 {
     gsl_vector *v = static_cast<gsl_vector *>(malloc(sizeof(gsl_vector)));
     *v = gsl_vector_subvector(get(), 0, size()).vector;
+    return gsl::vector_view(v);
+}
+
+gsl::matrix_view gsl::row_view::reshape(size_t n, size_t m) const
+{
+    gsl_matrix *t = static_cast<gsl_matrix *>(malloc(sizeof(gsl_matrix)));
+    *t = gsl_matrix_view_vector(get(), n, m).matrix;
+    return gsl::matrix_view(t);
+}
+
+gsl::vector_view gsl::vector::subvector(size_t offset, size_t n) const
+{
+    gsl_vector *v = static_cast<gsl_vector *>(malloc(sizeof(gsl_vector)));
+    *v = gsl_vector_subvector(get(), offset, n).vector;
     return gsl::vector_view(v);
 }
 
@@ -332,4 +553,18 @@ gsl::vector_view::~vector_view()
     if (gvec != nullptr)
         free(gvec);
     gvec = nullptr;
+} 
+
+//! Set all values in the view to zero
+void gsl::vector_view::clear()
+{
+    printf("Warning: Attempting to clear a vector view\n");
+    gsl_vector_set_zero(gvec);
+}
+
+//! Set all values in the view to zero
+void gsl::vector_view::resize(size_t n)
+{
+    printf("Warning: Attempting to resize a vector view\n");
+    gsl_vector_set_zero(gvec);
 }

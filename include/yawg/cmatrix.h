@@ -10,10 +10,11 @@ namespace gsl
     class cvector;
     class matrix;
 
+    class cmatrix_view;
+    class crow_view;
+    class ccolumn_view;
     class cmatrix
     {
-        friend class matrix;
-
         // Scalar multiplication
         friend cmatrix operator*(double a, const cmatrix &M);
         friend cmatrix operator*(double a, cmatrix &&M);
@@ -77,11 +78,9 @@ namespace gsl
     public:
         //! \brief Construct empty matrix
         cmatrix();
+        
         //! \brief Construct zero matrix of size n x m
         cmatrix(size_t n, size_t m);
-
-        //! \brief Construct new gsl::matrix from gsl_matrix
-        cmatrix(const gsl_matrix_complex *gmat_other);
 
         //! \brief Construct new gsl::cmatrix from MATLAB's .csv file format
         cmatrix(FILE *in);
@@ -139,11 +138,11 @@ namespace gsl
         //! \brief Access the pointer to the underlying gsl_matrix_complex
         gsl_matrix_complex *get() const { return gmat; }
 
-        //! \brief Resize the gsl::cmatrix, setting elements to zero
-        void resize(size_t n, size_t m);
-
-        //! \brief CLear the gsl::cmatrix, free underlying memory
+        //! \brief Clear the gsl::cmatrix, free underlying memory
         void clear();
+
+        //! \brief Resize the gsl::cmatrix
+        void resize(size_t n, size_t m);
 
         //! \brief Return a new n x m gsl::cmatrix with same elements
         cmatrix reshape(size_t n, size_t m) const;
@@ -168,14 +167,35 @@ namespace gsl
 
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
 
+        operator cmatrix_view() const;
+        cmatrix_view view() const;
+        cmatrix_view submatrix(size_t i, size_t j, size_t n, size_t m) const;
+
+        crow_view row(size_t i) const;
+        ccolumn_view column(size_t j) const;
     protected:
         gsl_matrix_complex *gmat;
 
+        //! \brief Construct new gsl::matrix from gsl_matrix
+        cmatrix(gsl_matrix_complex *gmat_other);
+
         //! \brief Private function to free allocated memory
-        void free();
+        void gfree();
 
         //! \brief Private function to (continuously) allocate memory
-        void calloc(size_t n, size_t m);
+        void galloc(size_t n, size_t m);
+    };
+
+    class cmatrix_view : public cmatrix
+    {
+    public:
+        //! \brief Constructor for vector_view pointing to data at gvec_other
+        cmatrix_view(gsl_matrix_complex *gvec_other);
+        ~cmatrix_view();
+
+        // Override some nonconst member functions to be unusable
+        void clear();
+        void resize(size_t n, size_t m);
     };
 
 } // namespace gsl

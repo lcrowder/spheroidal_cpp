@@ -47,28 +47,28 @@ namespace gsl
         inline complex operator-() const { return gsl_complex_negative(*this); };
 
         // Do math between complex and complex
-        friend inline complex operator+(complex a, complex b) { return gsl_complex_add(a, b); };
-        friend inline complex operator-(complex a, complex b) { return gsl_complex_sub(a, b); };
-        friend inline complex operator*(complex a, complex b) { return gsl_complex_mul(a, b); };
-        friend inline complex operator/(complex a, complex b) { return gsl_complex_div(a, b); };
-        friend inline bool operator==(complex a, complex b) { return (a.real() == b.real()) && (a.imag() == b.imag()); };
-        friend inline bool operator!=(complex a, complex b) { return (a.real() != b.real()) || (a.imag() != b.imag()); };
+        friend inline complex operator+(const complex &a, const complex &b) { return gsl_complex_add(a, b); };
+        friend inline complex operator-(const complex &a, const complex &b) { return gsl_complex_sub(a, b); };
+        friend inline complex operator*(const complex &a, const complex &b) { return gsl_complex_mul(a, b); };
+        friend inline complex operator/(const complex &a, const complex &b) { return gsl_complex_div(a, b); };
+        friend inline bool operator==(const complex &a, const complex &b) { return (a.real() == b.real()) && (a.imag() == b.imag()); };
+        friend inline bool operator!=(const complex &a, const complex &b) { return (a.real() != b.real()) || (a.imag() != b.imag()); };
 
         // Do math between complex and double
-        friend inline complex operator+(complex a, double b) { return gsl_complex_add_real(a, b); };
-        friend inline complex operator-(complex a, double b) { return gsl_complex_sub_real(a, b); };
-        friend inline complex operator*(complex a, double b) { return gsl_complex_mul_real(a, b); };
-        friend inline complex operator/(complex a, double b) { return gsl_complex_div_real(a, b); };
-        friend inline bool operator==(complex a, double b) { return (a.real() == b) && (a.imag() == 0.0); };
-        friend inline bool operator!=(complex a, double b) { return (a.imag() != 0.0) || (a.real() != b); };
+        friend inline complex operator+(const complex &a, double b) { return gsl_complex_add_real(a, b); };
+        friend inline complex operator-(const complex &a, double b) { return gsl_complex_sub_real(a, b); };
+        friend inline complex operator*(const complex &a, double b) { return gsl_complex_mul_real(a, b); };
+        friend inline complex operator/(const complex &a, double b) { return gsl_complex_div_real(a, b); };
+        friend inline bool operator==(const complex &a, double b) { return (a.real() == b) && (a.imag() == 0.0); };
+        friend inline bool operator!=(const complex &a, double b) { return (a.imag() != 0.0) || (a.real() != b); };
 
         // Do math between double and complex
-        friend inline complex operator+(double a, complex b) { return gsl_complex_add_real(b, a); };
-        friend inline complex operator-(double a, complex b) { return gsl_complex_negative(gsl_complex_sub_real(b, a)); };
-        friend inline complex operator*(double a, complex b) { return gsl_complex_mul_real(b, a); };
-        friend inline complex operator/(double a, complex b) { return gsl_complex_mul_real(gsl_complex_inverse(b), a); };
-        friend inline bool operator==(double a, complex b) { return (b.real() == a) && (b.imag() == 0.0); };
-        friend inline bool operator!=(double a, complex b) { return (b.imag() != 0.0) || (b.real() != a); };
+        friend inline complex operator+(double a, const complex &b) { return gsl_complex_add_real(b, a); };
+        friend inline complex operator-(double a, const complex &b) { return gsl_complex_negative(gsl_complex_sub_real(b, a)); };
+        friend inline complex operator*(double a, const complex &b) { return gsl_complex_mul_real(b, a); };
+        friend inline complex operator/(double a, const complex &b) { return gsl_complex_mul_real(gsl_complex_inverse(b), a); };
+        friend inline bool operator==(double a, const complex &b) { return (b.real() == a) && (b.imag() == 0.0); };
+        friend inline bool operator!=(double a, const complex &b) { return (b.imag() != 0.0) || (b.real() != a); };
 
         void print() const;
     };
@@ -92,28 +92,28 @@ namespace gsl
         friend class complex;
 
         // Do math between complex_ref and complex_ref
-        friend inline complex operator+(complex_ref a, complex_ref b) { return gsl_complex_add(*a, *b); };
-        friend inline complex operator-(complex_ref a, complex_ref b) { return gsl_complex_sub(*a, *b); };
-        friend inline complex operator*(complex_ref a, complex_ref b) { return gsl_complex_mul(*a, *b); };
-        friend inline complex operator/(complex_ref a, complex_ref b) { return gsl_complex_div(*a, *b); };
-        friend inline bool operator==(complex_ref a, complex_ref b) { return (a.real() == b.real()) && (a.imag() == b.imag()); };
-        friend inline bool operator!=(complex_ref a, complex_ref b) { return (a.real() != b.real()) || (a.imag() != b.imag()); };
+        friend inline complex operator+(const complex_ref &a, const complex_ref &b) { return gsl_complex_add(*a, *b); };
+        friend inline complex operator-(const complex_ref &a, const complex_ref &b) { return gsl_complex_sub(*a, *b); };
+        friend inline complex operator*(const complex_ref &a, const complex_ref &b) { return gsl_complex_mul(*a, *b); };
+        friend inline complex operator/(const complex_ref &a, const complex_ref &b) { return gsl_complex_div(*a, *b); };
+        friend inline bool operator==(const complex_ref &a, const complex_ref &b) { return (a.real() == b.real()) && (a.imag() == b.imag()); };
+        friend inline bool operator!=(const complex_ref &a, const complex_ref &b) { return (a.real() != b.real()) || (a.imag() != b.imag()); };
 
-        // Do math between complex_ref and double
-        friend inline complex operator+(complex_ref a, double b) { return gsl_complex_add_real(*a, b); };
-        friend inline complex operator-(complex_ref a, double b) { return gsl_complex_sub_real(*a, b); };
-        friend inline complex operator*(complex_ref a, double b) { return gsl_complex_mul_real(*a, b); };
-        friend inline complex operator/(complex_ref a, double b) { return gsl_complex_div_real(*a, b); };
-        friend inline bool operator==(complex_ref a, double b) { return (a.real() == b) && (a.imag() == 0.0); };
-        friend inline bool operator!=(complex_ref a, double b) { return (a.imag() != 0.0) || (a.real() != b); };
+        // Do math between complex and double
+        friend inline complex operator+(const complex_ref &a, double b) { return gsl_complex_add_real(*a, b); };
+        friend inline complex operator-(const complex_ref &a, double b) { return gsl_complex_sub_real(*a, b); };
+        friend inline complex operator*(const complex_ref &a, double b) { return gsl_complex_mul_real(*a, b); };
+        friend inline complex operator/(const complex_ref &a, double b) { return gsl_complex_div_real(*a, b); };
+        friend inline bool operator==(const complex_ref &a, double b) { return (a.real() == b) && (a.imag() == 0.0); };
+        friend inline bool operator!=(const complex_ref &a, double b) { return (a.imag() != 0.0) || (a.real() != b); };
 
-        // Do math between double and complex
-        friend inline complex operator+(double a, complex_ref b) { return gsl_complex_add_real(*b, a); };
-        friend inline complex operator-(double a, complex_ref b) { return gsl_complex_sub_real(*b, a); };
-        friend inline complex operator*(double a, complex_ref b) { return gsl_complex_mul_real(*b, a); };
-        friend inline complex operator/(double a, complex_ref b) { return gsl_complex_div_real(*b, a); };
-        friend inline bool operator==(double a, complex_ref b) { return (b.real() == a) && (b.imag() == 0.0); };
-        friend inline bool operator!=(double a, complex_ref b) { return (b.imag() != 0.0) || (b.real() != a); };
+        // Do math between double and complex ref
+        friend inline complex operator+(double a, const complex_ref &b) { return gsl_complex_add_real(*b, a); };
+        friend inline complex operator-(double a, const complex_ref &b) { return gsl_complex_sub_real(*b, a); };
+        friend inline complex operator*(double a, const complex_ref &b) { return gsl_complex_mul_real(*b, a); };
+        friend inline complex operator/(double a, const complex_ref &b) { return gsl_complex_div_real(*b, a); };
+        friend inline bool operator==(double a, const complex_ref &b) { return (b.real() == a) && (b.imag() == 0.0); };
+        friend inline bool operator!=(double a, const complex_ref &b) { return (b.imag() != 0.0) || (b.real() != a); };
 
     protected:
         double *dat;
@@ -135,8 +135,18 @@ namespace gsl
         //! \brief Constructs a reference to a gsl::complex object
         complex_ref(complex &z) : dat(z.dat){};
 
+        complex_ref &operator+=(const complex &gsl_complex_other);
+        complex_ref &operator-=(const complex &gsl_complex_other);
+        complex_ref &operator*=(const complex &gsl_complex_other);
+        complex_ref &operator/=(const complex &gsl_complex_other);
+
+        complex_ref &operator+=(double x);
+        complex_ref &operator-=(double x);
+        complex_ref &operator*=(double x);
+        complex_ref &operator/=(double x);
+
         //! \brief Assigns values of gsl::complex object to the reference
-        complex_ref &operator=(complex z)
+        complex_ref &operator=(const complex& z)
         {
             dat[0] = z.dat[0];
             dat[1] = z.dat[1];
@@ -146,7 +156,7 @@ namespace gsl
         //! \brief Assigns values of one complex_ref object to another.
         //! \note This is an alternative to the default assignment operator,
         //! which does not work for unknown reasons.
-        complex_ref &operator=(complex_ref z)
+        complex_ref &operator=(const complex_ref& z)
         {
             dat[0] = z.dat[0];
             dat[1] = z.dat[1];

@@ -5,40 +5,26 @@
 #include <utility>
 
 //! \brief Construct empty cvector
-gsl::cvector::cvector() : gvec(nullptr) {}
+gsl::cvector::cvector()
+{
+    gvec = new gsl_vector_complex;
+    gvec->size = 0;
+    gvec->data = 0;
+}
 
 //! \brief Construct zero cvector of size n
-gsl::cvector::cvector(size_t n) : gvec(nullptr)
+gsl::cvector::cvector(size_t n)
 {
-    if (n != 0)
-        this->calloc(n);
+    this->galloc(n);
 }
 
-//! \brief Construct new gsl::cvector from gsl_vector_complex
-gsl::cvector::cvector(const gsl_vector_complex *gvec_other)
-{
-    if (gvec_other == nullptr)
-        return;
-    this->calloc(gvec_other->size);
-    gsl_vector_complex_memcpy(gvec, gvec_other);
-}
+//! \brief Construct new gsl::cvector from gsl_vector_complex's data
+gsl::cvector::cvector(gsl_vector_complex *gvec_other) : gvec(gvec_other) {}
 
 gsl::cvector::cvector(const gsl::cvector &gvec_other)
 {
-    this->calloc(gvec_other.size());
+    this->galloc(gvec_other.size());
     gsl_vector_complex_memcpy(gvec, gvec_other.gvec);
-}
-
-/*! \brief Construct new gsl::cmatrix from gsl::matrix
- *
- *  Copy the values from a real matrix into a complex matrix, setting
- *  the imaginary part to zero.
- */
-gsl::cvector::cvector(const gsl::vector &gvec_other)
-{
-    this->calloc(gvec_other.size());
-    for (size_t i = 0; i < gvec_other.size(); i++)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(gvec_other.gvec, i), 0.0);
 }
 
 gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
@@ -46,28 +32,42 @@ gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
     gvec_other.gvec = nullptr;
 }
 
+/*! \brief Construct new gsl::cmatrix from gsl::matrix
+ *
+ *  Copy the values from a real matrix into a complex matrix, setting
+ *  the imaginary part to zero.
+ */
+gsl::cvector::cvector(const gsl::vector &v)
+{
+    galloc(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+        set(i, gsl::complex(v(i), 0.0));
+}
+
+
 gsl::cvector &gsl::cvector::operator=(const gsl::cvector &v)
 {
-    if (gvec == v.gvec)
+    if (this == &v)
         return *this;
-    this->resize(v.size());
+    if (size() != v.size())
+        this->resize(v.size());
     gsl_vector_complex_memcpy(gvec, v.gvec);
     return *this;
 }
 
 gsl::cvector &gsl::cvector::operator=(const gsl::vector &v)
 {
-    this->resize(v.size());
+    resize(v.size());
     for (size_t i = 0; i < v.size(); i++)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(v.gvec, i), 0.0);
+        set(i, gsl::complex(v(i), 0.0));
     return *this;
 }
 
 gsl::cvector &gsl::cvector::operator=(gsl::cvector &&v)
 {
-    if (gvec == v.gvec)
+    if (this == &v)
         return *this;
-    this->free();
+    this->gfree();
     gvec = v.gvec;
     v.gvec = nullptr;
     return *this;
@@ -83,7 +83,7 @@ gsl::cvector &gsl::cvector::operator+=(const gsl::vector &v)
 {
     // Add the real element of v to each complex element of this
     for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_add_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(v.gvec, i)));
+        set(i, get(i) + v(i));
     return *this;
 }
 
@@ -97,27 +97,8 @@ gsl::cvector &gsl::cvector::operator-=(const gsl::vector &v)
 {
     // Subtract the real element of v from each complex element of this
     for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_sub_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(v.gvec, i)));
+        set(i, get(i) - v(i));
     return *this;
-}
-
-gsl::cvector::~cvector()
-{
-    if (gvec == nullptr)
-        return;
-    gsl_vector_complex_free(gvec);
-}
-
-//! \brief Element getter (the nice C++ versions don't work)
-void gsl::cvector::set(size_t i, gsl::complex val)
-{
-    GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
-}
-
-//! \brief Element setter (the nice C++ versions don't work)
-gsl::complex gsl::cvector::get(size_t i) const
-{
-    return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
 }
 
 gsl::cvector &gsl::cvector::operator*=(gsl::complex z)
@@ -149,10 +130,37 @@ gsl::cvector &gsl::cvector::operator/=(double x)
 
     return *this;
 }
+
 gsl::cvector gsl::cvector::operator-() const
 {
     gsl::cvector v(*this);
     return -1.0 * v;
+}
+
+gsl::cvector::~cvector()
+{
+    this->gfree();
+}
+
+void gsl::cvector::set(size_t i, gsl::complex val)
+{
+    GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
+}
+
+gsl::complex gsl::cvector::get(size_t i) const
+{
+    return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
+}
+
+
+/*! \brief Return a const reference to the element at position (i,j)
+ *
+ *  This function returns a constant complex_ref to the element
+ *  at position (i,j) in the matrix. Allows getting.
+ */
+const gsl::complex_ref gsl::cvector::operator()(size_t i) const
+{
+    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
 
 /*! \brief Return a reference to the element at position (i,j)
@@ -161,16 +169,6 @@ gsl::cvector gsl::cvector::operator-() const
  *  at position (i,j) in the matrix. Allows setting.
  */
 gsl::complex_ref gsl::cvector::operator()(size_t i)
-{
-    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
-}
-
-/*! \brief Return a const reference to the element at position (i,j)
- *
- *  This function returns a constant complex_ref to the element
- *  at position (i,j) in the matrix. Allows getting.
- */
-const gsl::complex_ref gsl::cvector::operator()(size_t i) const
 {
     return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
@@ -199,9 +197,9 @@ void gsl::cvector::resize(size_t n)
     {
         if (gvec->size == n)
             return;
-        this->free();
+        this->gfree();
     }
-    this->calloc(n);
+    this->galloc(n);
 }
 
 //! \brief Clear the gsl::vector, free underlying memory
@@ -209,7 +207,7 @@ void gsl::cvector::clear()
 {
     if (gvec == nullptr)
         return;
-    this->free();
+    this->gfree();
 }
 
 //! \brief Pretty-print the vector to file stream
@@ -226,9 +224,14 @@ void gsl::cvector::print(FILE *out) const
 }
 
 //! \brief Private function to free allocated memory
-void gsl::cvector::free()
+void gsl::cvector::gfree()
 {
-    gsl_vector_complex_free(gvec);
+    if (gvec == nullptr)
+        return;
+    else if (size() == 0)
+        delete gvec;
+    else
+        gsl_vector_complex_free(gvec);
     gvec = nullptr;
 }
 
@@ -238,8 +241,17 @@ void gsl::cvector::free()
  *       This is slightly slower than using gsl_vector_complex_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::cvector::calloc(size_t n) { gvec = gsl_vector_complex_calloc(n); }
-
+void gsl::cvector::galloc(size_t n)
+{
+    if (n >= 0)
+        gvec = gsl_vector_complex_alloc(n);
+    else
+    {
+        gvec = new gsl_vector_complex;
+        gvec->size = 0;
+        gvec->data = 0;
+    }
+}
 namespace gsl
 {
     cvector operator*(complex z, const cvector &v)
@@ -282,7 +294,7 @@ namespace gsl
         return result;
     }
 
-    cvector operator*(const cvector& v, double x)
+    cvector operator*(const cvector &v, double x)
     {
         cvector result(v);
         result *= x;
@@ -502,4 +514,57 @@ namespace gsl
         return false;
     }
 
+}
+
+gsl::cvector::operator cvector_view() const
+{   
+    printf("Creating view from complex vector\n");
+    return view();
+}
+
+gsl::cvector_view gsl::cvector::view() const
+{
+    gsl_vector_complex *v = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *v = gsl_vector_complex_subvector(get(), 0, size()).vector;
+    return gsl::cvector_view(v);
+}
+
+gsl::cvector_view gsl::cvector::subvector(size_t offset, size_t n) const
+{
+    gsl_vector_complex *v = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *v = gsl_vector_complex_subvector(get(), offset, n).vector;
+    return gsl::cvector_view(v);
+}
+
+//! \brief Construct new gsl::cvector from gsl_vector_complex
+gsl::cvector_view::cvector_view(gsl_vector_complex *gvec_other) : cvector(gvec_other) {}
+
+// Vector views should never own their memory, so we don't need to free it
+// We only need to delete the pointer, since it was created on the heap
+gsl::cvector_view::~cvector_view()
+{
+    if (gvec != nullptr)
+        free(gvec);
+    gvec = nullptr;
+} 
+
+//! Set all values in the view to zero
+void gsl::cvector_view::clear()
+{
+    printf("Warning: Attempting to clear a vector view\n");
+    gsl_vector_complex_set_zero(gvec);
+}
+
+//! Set all values in the view to zero
+void gsl::cvector_view::resize(size_t n)
+{
+    printf("Warning: Attempting to resize a vector view\n");
+    gsl_vector_complex_set_zero(gvec);
+}
+
+gsl::cmatrix_view gsl::crow_view::reshape(size_t n, size_t m) const
+{
+    gsl_matrix_complex *t = static_cast<gsl_matrix_complex *>(malloc(sizeof(gsl_matrix_complex)));
+    *t = gsl_matrix_complex_view_vector(get(), n, m).matrix;
+    return gsl::cmatrix_view(t);
 }

@@ -5,29 +5,29 @@
 #include <stdio.h>
 
 //! \brief Construct empty matrix
-gsl::cmatrix::cmatrix() : gmat(nullptr) {}
+gsl::cmatrix::cmatrix()
+{
+    gmat = new gsl_matrix_complex;
+    gmat->size1 = 0;
+    gmat->size2 = 0;
+    gmat->data = 0;
+}
 
 //! \brief Construct zero matrix of size n x m
-gsl::cmatrix::cmatrix(size_t n, size_t m) : gmat(nullptr)
+gsl::cmatrix::cmatrix(size_t n, size_t m)
 {
-    if (n == 0 && m == 0)
-        return;
-    this->calloc(n, m);
+    this->galloc(n, m);
 }
 
-//! \brief Construct new gsl::matrix from gsl_matrix
-gsl::cmatrix::cmatrix(const gsl_matrix_complex *gmat_other)
-{
-    this->calloc(gmat_other->size1, gmat_other->size2);
-    gsl_matrix_complex_memcpy(gmat, gmat_other);
-}
+//! \brief Construct new gsl::cvector from gsl_vector_complex's data
+gsl::cmatrix::cmatrix(gsl_matrix_complex *gvec_other) : gmat(gvec_other) {}
 
 //! \brief Construct new n x 1 gsl::cmatrix from a gsl::cvector
 gsl::cmatrix::cmatrix(const gsl::cvector &v)
 {
-    this->calloc(v.size(), 1);
+    galloc(v.size(), 1);
     for (size_t i = 0; i < v.size(); i++)
-        gsl_matrix_complex_set(gmat, i, 0, gsl_vector_complex_get(v.gvec, i));
+        set(i, 0, v(i));
 }
 
 //! \brief Construct new gsl::cmatrix from MATLAB's .csv file format
@@ -45,7 +45,7 @@ gsl::cmatrix::cmatrix(FILE *in)
             ++m;
     }
     m = (m / n) + 1;
-    this->calloc(n, m);
+    this->galloc(n, m);
 
     // Rewind the file
     rewind(in);
@@ -68,7 +68,7 @@ gsl::cmatrix::cmatrix(FILE *in)
  */
 gsl::cmatrix::cmatrix(const gsl::cmatrix &M, size_t n, size_t m)
 {
-    this->calloc(n, m);
+    this->galloc(n, m);
     for (size_t i = 0; i < n; i++)
         for (size_t j = 0; j < m; j++)
             gsl_matrix_complex_set(gmat, i, j, gsl_matrix_complex_get(M.gmat, i, j));
@@ -81,15 +81,15 @@ gsl::cmatrix::cmatrix(const gsl::cmatrix &M, size_t n, size_t m)
  */
 gsl::cmatrix::cmatrix(const gsl::matrix &M)
 {
-    this->calloc(M.nrows(), M.ncols());
+    this->galloc(M.nrows(), M.ncols());
     for (size_t i = 0; i < M.nrows(); i++)
         for (size_t j = 0; j < M.ncols(); j++)
-            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(M.gmat, i, j), 0.0);
+            set(i, j, gsl::complex(M(i, j), 0));
 }
 
 gsl::cmatrix::cmatrix(const gsl::cmatrix &gmat_other)
 {
-    this->calloc(gmat_other.nrows(), gmat_other.ncols());
+    this->galloc(gmat_other.nrows(), gmat_other.ncols());
     gsl_matrix_complex_memcpy(gmat, gmat_other.gmat);
 }
 
@@ -98,12 +98,13 @@ gsl::cmatrix::cmatrix(gsl::cmatrix &&gmat_other) : gmat(gmat_other.gmat)
     gmat_other.gmat = nullptr;
 }
 
-gsl::cmatrix &gsl::cmatrix::operator=(const gsl::cmatrix &gmat_other)
+gsl::cmatrix &gsl::cmatrix::operator=(const gsl::cmatrix &M)
 {
-    if (this == &gmat_other)
+    if (this == &M)
         return *this;
-    this->resize(gmat_other.nrows(), gmat_other.ncols());
-    gsl_matrix_complex_memcpy(gmat, gmat_other.gmat);
+    if( M.nrows() != this->nrows() || M.ncols() != this->ncols() )
+        this->resize(M.nrows(), M.ncols());
+    gsl_matrix_complex_memcpy(gmat, M.gmat);
     return *this;
 }
 
@@ -112,17 +113,17 @@ gsl::cmatrix &gsl::cmatrix::operator=(const gsl::matrix &M)
     this->resize(M.nrows(), M.ncols());
     for (size_t i = 0; i < M.nrows(); i++)
         for (size_t j = 0; j < M.ncols(); j++)
-            GSL_SET_COMPLEX(gsl_matrix_complex_ptr(gmat, i, j), gsl_matrix_get(M.gmat, i, j), 0.0);
+            set(i, j, gsl::complex(M(i, j), 0));
     return *this;
 }
 
-gsl::cmatrix &gsl::cmatrix::operator=(gsl::cmatrix &&gmat_other)
+gsl::cmatrix &gsl::cmatrix::operator=(gsl::cmatrix &&M)
 {
-    if (this == &gmat_other)
+    if (this == &M)
         return *this;
-    this->free();
-    gmat = gmat_other.gmat;
-    gmat_other.gmat = nullptr;
+    this->gfree();
+    gmat = M.gmat;
+    M.gmat = nullptr;
     return *this;
 }
 
@@ -137,7 +138,7 @@ gsl::cmatrix &gsl::cmatrix::operator+=(const gsl::matrix &M)
     // Add the real element of M to the complex element of this
     for (size_t i = 0; i < M.nrows(); i++)
         for (size_t j = 0; j < M.ncols(); j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_complex_add_real(gsl_matrix_complex_get(gmat, i, j), gsl_matrix_get(M.gmat, i, j)));
+            set(i, j, get(i, j) + M(i, j));
 
     return *this;
 }
@@ -153,7 +154,7 @@ gsl::cmatrix &gsl::cmatrix::operator-=(const gsl::matrix &M)
     // Subtract the real element of M from the complex element of this
     for (size_t i = 0; i < M.nrows(); i++)
         for (size_t j = 0; j < M.ncols(); j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_complex_sub_real(gsl_matrix_complex_get(gmat, i, j), gsl_matrix_get(M.gmat, i, j)));
+            set(i, j, get(i, j) - M(i, j));
 
     return *this;
 }
@@ -190,17 +191,15 @@ gsl::cmatrix &gsl::cmatrix::operator/=(double x)
     return *this;
 }
 
-// gsl::cmatrix gsl::cmatrix::operator-() const
-// {
-//     gsl::cmatrix result(*this);
-//     return -1.0 * result;
-// }
+gsl::cmatrix gsl::cmatrix::operator-() const
+{
+    gsl::cmatrix result(*this);
+    return -1.0 * result;
+}
 
 gsl::cmatrix::~cmatrix()
 {
-    if (gmat == nullptr)
-        return;
-    gsl_matrix_complex_free(gmat);
+    gfree();
 }
 
 void gsl::cmatrix::set(size_t i, size_t j, gsl::complex val)
@@ -210,12 +209,12 @@ void gsl::cmatrix::set(size_t i, size_t j, gsl::complex val)
 
 void gsl::cmatrix::set_col(size_t j, const gsl::cvector &v)
 {
-    gsl_matrix_complex_set_col(gmat, j, v.gvec);
+    gsl_matrix_complex_set_col(gmat, j, v.get());
 }
 
 void gsl::cmatrix::set_row(size_t i, const gsl::cvector &v)
 {
-    gsl_matrix_complex_set_row(gmat, i, v.gvec);
+    gsl_matrix_complex_set_row(gmat, i, v.get());
 }
 
 gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
@@ -226,14 +225,14 @@ gsl::complex gsl::cmatrix::get(size_t i, size_t j) const
 gsl::cvector gsl::cmatrix::get_col(size_t j) const
 {
     gsl::cvector result(gmat->size1);
-    gsl_matrix_complex_get_col(result.gvec, gmat, j);
+    gsl_matrix_complex_get_col(result.get(), gmat, j);
     return result;
 }
 
 gsl::cvector gsl::cmatrix::get_row(size_t i) const
 {
     gsl::cvector result(gmat->size2);
-    gsl_matrix_complex_get_row(result.gvec, gmat, i);
+    gsl_matrix_complex_get_row(result.get(), gmat, i);
     return result;
 }
 
@@ -308,9 +307,9 @@ void gsl::cmatrix::resize(size_t n, size_t m)
         // Only allocate new memory if size is different
         if (gmat->size1 == n && gmat->size2 == m)
             return;
-        this->free();
+        this->gfree();
     }
-    this->calloc(n, m);
+    this->galloc(n, m);
 }
 
 //! \brief CLear the gsl::cmatrix, free underlying memory
@@ -318,7 +317,7 @@ void gsl::cmatrix::clear()
 {
     if (gmat == nullptr)
         return;
-    this->free();
+    this->gfree();
 }
 
 /*! \brief Return a new n x m gsl::cmatrix with same elements
@@ -331,7 +330,7 @@ gsl::cmatrix gsl::cmatrix::reshape(size_t n, size_t m) const
 {
     gsl::cmatrix M_new(n, m);
     for (size_t t = 0; t < n * m; t++)
-        M_new(t / m, t % m) = this->get(t / this->ncols(), t % this->ncols());
+        M_new(t / n, t % m) = this->get(t / this->nrows(), t % this->ncols());
 
     return M_new;
 }
@@ -479,6 +478,20 @@ namespace gsl
         return M;
     }
 
+    cmatrix operator*(complex a, const matrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
+    cmatrix operator*(const matrix &M, complex a)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result *= a;
+        return result;
+    }
+
     cmatrix operator/(double a, const cmatrix &M)
     {
         cmatrix result(M.nrows(), M.ncols());
@@ -543,6 +556,20 @@ namespace gsl
     {
         M /= z;
         return M;
+    }
+
+    cmatrix operator/(complex z, const matrix &M)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= z;
+        return result;
+    }
+
+    cmatrix operator/(const matrix &M, complex z)
+    {
+        cmatrix result(M.nrows(), M.ncols());
+        result /= z;
+        return result;
     }
 
     cmatrix operator+(const cmatrix &M1, const cmatrix &M2)
@@ -713,9 +740,14 @@ namespace gsl
 
 /*------ Protected Methods for gsl::cmatrix ------*/
 //! \brief Free memory for underlying gsl_matrix_complex
-void gsl::cmatrix::free()
+void gsl::cmatrix::gfree()
 {
-    gsl_matrix_complex_free(gmat);
+    if (gmat == nullptr)
+        return;
+    else if (size() == 0)
+        delete gmat;
+    else
+        gsl_matrix_complex_free(gmat);
     gmat = nullptr;
 }
 
@@ -725,4 +757,71 @@ void gsl::cmatrix::free()
  *       This is slightly slower than using gsl_matrix_compllex_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::cmatrix::calloc(size_t n, size_t m) { gmat = gsl_matrix_complex_calloc(n, m); }
+void gsl::cmatrix::galloc(size_t n, size_t m) 
+{ 
+    if (n != 0 && m != 0) {
+        gmat = gsl_matrix_complex_alloc(n, m);
+    }
+    else
+    {   
+        gmat = new gsl_matrix_complex;
+        gmat->size1 = n;
+        gmat->size2 = m;
+        gmat->data = 0;
+    }
+}
+
+gsl::cmatrix::operator gsl::cmatrix_view() const
+{
+    printf("Creating view from complex matrix\n");
+    return view();
+}
+
+gsl::cmatrix_view gsl::cmatrix::view() const
+{
+    gsl_matrix_complex *w = static_cast<gsl_matrix_complex *>(malloc(sizeof(gsl_matrix_complex)));
+    *w = gsl_matrix_complex_submatrix(get(), 0, 0, nrows(), ncols()).matrix;
+    return gsl::cmatrix_view(w);
+}
+
+gsl::cmatrix_view gsl::cmatrix::submatrix(size_t i, size_t j, size_t n, size_t m) const
+{
+    gsl_matrix_complex *w = static_cast<gsl_matrix_complex *>(malloc(sizeof(gsl_matrix_complex)));
+    *w = gsl_matrix_complex_submatrix(get(), i, j, n, m).matrix;
+    return gsl::cmatrix_view(w);
+}
+
+gsl::crow_view gsl::cmatrix::row(size_t i) const
+{
+    gsl_vector_complex *w = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *w = gsl_matrix_complex_row(gmat, i).vector;
+    return gsl::crow_view(w);
+}
+
+gsl::ccolumn_view gsl::cmatrix::column(size_t i) const
+{
+    gsl_vector_complex *w = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *w = gsl_matrix_complex_column(gmat, i).vector;
+    return gsl::ccolumn_view(w);
+}
+
+gsl::cmatrix_view::cmatrix_view(gsl_matrix_complex *gmat_other) : cmatrix(gmat_other) {}
+
+gsl::cmatrix_view::~cmatrix_view()
+{
+    if (gmat != nullptr)
+        free(gmat);
+    gmat = nullptr;
+}
+
+void gsl::cmatrix_view::clear()
+{
+    printf("Warning: Attempting to clear a complex matrix view\n");
+    gsl_matrix_complex_set_zero(gmat);
+}
+
+void gsl::cmatrix_view::resize(size_t n, size_t m)
+{
+    printf("Warning: Attempting to resize a complex matrix view\n");
+    gsl_matrix_complex_set_zero(gmat);
+}

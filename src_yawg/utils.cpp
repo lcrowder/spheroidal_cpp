@@ -217,8 +217,10 @@ void gsl::meshgrid(const gsl::cvector &x, const gsl::cvector &y, gsl::cmatrix &X
 gsl::matrix gsl::eye(size_t n)
 {
     gsl::matrix I(n, n);
-    for (int i = 0; i < n; ++i)
-        I(i, i) = 1;
+    // Set every element on the diagonal to 1, every other element to zero
+    for( size_t i = 0; i < n; ++i )
+        for( size_t j = 0; j < n; ++j )
+            I(i, j) = (i == j ? 1 : 0);
     return I;
 }
 

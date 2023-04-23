@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include <yawg/core.h>
+#include <gsl/gsl_math.h>
 #include <catch2/catch_test_macros.hpp>
 
 // Use Catch2 to test the various constructors for gsl::vector
@@ -8,7 +9,7 @@ TEST_CASE("gsl::vector constructors", "[gsl::vector]")
     // Default constructor
     gsl::vector v1;
     REQUIRE(v1.size() == 0);
-    
+
     // Constructor with size
     gsl::vector v2(10);
     REQUIRE(v2.size() == 10);
@@ -280,18 +281,18 @@ TEST_CASE("gsl::matrix save_csv and load_csv", "[gsl::matrix]")
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
             m(i, j) = i + j;
- 
+
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_matrix.csv", "w");
     REQUIRE(fp != nullptr);
     m.print_csv(fp);
-    fclose( fp );
+    fclose(fp);
 
     // Open a file for reading, loading the matrix
     fp = fopen("./data/test_matrix.csv", "r");
     REQUIRE(fp != nullptr);
-    gsl::matrix m2( fp );
-    fclose( fp );
+    gsl::matrix m2(fp);
+    fclose(fp);
 
     // Check that the matrices are the same
     for (size_t i = 0; i < m.nrows(); i++)
@@ -303,25 +304,28 @@ TEST_CASE("gsl::matrix save_csv and load_csv", "[gsl::matrix]")
 TEST_CASE("gsl::cmatrix save_csv and load_csv", "[gsl::cmatrix]")
 {
     gsl::vector v(4);
-    v(0) = -1.0; v(1) = -5.0; v(2) = 5.0; v(3) = 1.0;
+    v(0) = -1.0;
+    v(1) = -5.0;
+    v(2) = 5.0;
+    v(3) = 1.0;
 
     gsl::cmatrix m(4, 4);
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
             m(i, j) = gsl_complex_rect(v(i), v(j));
- 
+
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_cmatrix.csv", "w");
     REQUIRE(fp != nullptr);
     m.print_csv(fp);
-    fclose( fp );
+    fclose(fp);
 
     // Open a file for reading, loading the matrix
     fp = fopen("./data/test_cmatrix.csv", "r");
     REQUIRE(fp != nullptr);
-    gsl::cmatrix m2( fp );
+    gsl::cmatrix m2(fp);
     m2.print();
-    fclose( fp );
+    fclose(fp);
 
     // Check that the matrices are the same
     for (size_t i = 0; i < m.nrows(); i++)
@@ -339,25 +343,21 @@ TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
     gsl::matrix m0;
     REQUIRE(m0.nrows() == 0);
     REQUIRE(m0.ncols() == 0);
-    REQUIRE(m0.get() == nullptr);
 
     // Default constructor
     gsl::matrix m1(0, 0);
     REQUIRE(m1.nrows() == 0);
     REQUIRE(m1.ncols() == 0);
-    REQUIRE(m1.get() == nullptr);
 
     // Constructor with size
     gsl::matrix m2(10, 5);
     REQUIRE(m2.nrows() == 10);
     REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get() != nullptr);
 
     // Copy constructor
     gsl::matrix m3(m2);
     REQUIRE(m3.nrows() == 10);
     REQUIRE(m3.ncols() == 5);
-    REQUIRE(m3.get() != nullptr);
     REQUIRE(m3.get() != m2.get());
 
     // Move constructor
@@ -369,14 +369,6 @@ TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
     REQUIRE(m4.nrows() == 0);
     REQUIRE(m4.ncols() == 0);
     REQUIRE(m4.get() == nullptr);
-
-    // Conversion constructor
-    gsl::matrix m6(12, 7);
-    gsl::matrix m7(m6.get());
-    REQUIRE(m7.nrows() == 12);
-    REQUIRE(m7.ncols() == 7);
-    REQUIRE(m7.get() != nullptr);
-    REQUIRE(m7.get() != m6.get());
 }
 
 // Use Catch2 to test the various constructors for gsl::cmatrix
@@ -386,19 +378,16 @@ TEST_CASE("gsl::cmatrix constructors", "[gsl::cmatrix]")
     gsl::cmatrix m1;
     REQUIRE(m1.nrows() == 0);
     REQUIRE(m1.ncols() == 0);
-    REQUIRE(m1.get() == nullptr);
 
     // Constructor with size
     gsl::cmatrix m2(10, 10);
     REQUIRE(m2.nrows() == 10);
     REQUIRE(m2.ncols() == 10);
-    REQUIRE(m2.get() != nullptr);
 
     // Copy constructor
     gsl::cmatrix m3(m2);
     REQUIRE(m3.nrows() == 10);
     REQUIRE(m3.ncols() == 10);
-    REQUIRE(m3.get() != nullptr);
     REQUIRE(m3.get() != m2.get());
 
     // Move constructor
@@ -525,33 +514,22 @@ TEST_CASE("gsl::matrix resize", "[gsl::matrix]")
     gsl::matrix m(10, 5);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get() != nullptr);
 
     m.resize(5, 10);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == 0);
     REQUIRE(m.nrows() == 5);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get() != nullptr);
 
     m.resize(0, 0);
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get() == nullptr);
 
     m.resize(10, 5);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == 0);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get() != nullptr);
 
     m.clear();
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get() == nullptr);
 }
 
 // Use Catch2 to test the resize and clear method of gsl::cmatrix
@@ -560,31 +538,20 @@ TEST_CASE("gsl::cmatrix resize", "[gsl::cmatrix]")
     gsl::cmatrix m(10, 10);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get() != nullptr);
 
     m.resize(5, 5);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == gsl::complex(0, 0));
     REQUIRE(m.nrows() == 5);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get() != nullptr);
 
     m.resize(0, 0);
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get() == nullptr);
 
     m.resize(10, 10);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == gsl::complex(0, 0));
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get() != nullptr);
 
     m.clear();
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get() == nullptr);
 }
