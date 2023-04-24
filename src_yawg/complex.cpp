@@ -26,15 +26,15 @@ gsl::complex &gsl::complex::operator/=(complex z)
     return *this;
 }
 
-gsl::complex &gsl::complex::operator+=(double x)
-{
-    *this = gsl_complex_add_real(*this, x);
-    return *this;
-}
-
 gsl::complex &gsl::complex::operator-=(double x)
 {
     *this = gsl_complex_sub_real(*this, x);
+    return *this;
+}
+
+gsl::complex &gsl::complex::operator+=(double x)
+{
+    *this = gsl_complex_add_real(*this, x);
     return *this;
 }
 
@@ -57,7 +57,54 @@ gsl::complex &gsl::complex::operator=(gsl::complex z)
     return *this;
 }
 
-void gsl::complex::print( ) const
+void gsl::complex::print() const
 {
     printf("%f + %fi", GSL_REAL(*this), GSL_IMAG(*this));
+}
+
+gsl::complex_ref &gsl::complex_ref::operator+=(const complex &z)
+{
+    *this = gsl_complex_add(*this, z);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator-=(const complex &z)
+{
+    *this = gsl_complex_sub(*this, z);
+    return *this;
+}
+gsl::complex_ref &gsl::complex_ref::operator*=(const complex &z)
+{
+    *this = gsl_complex_mul(*this, z);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator/=(const complex &z)
+{
+    *this = gsl_complex_div(*this, z);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator+=(double x)
+{
+    *this = gsl_complex_add_real(*this, x);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator-=(double x)
+{
+    *this = gsl_complex_sub_real(*this, x);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator*=(double x)
+{
+    *this = gsl_complex_mul_real(*this, x);
+    return *this;
+}
+
+gsl::complex_ref &gsl::complex_ref::operator/=(double x)
+{
+    *this = gsl_complex_div_real(*this, x);
+    return *this;
 }

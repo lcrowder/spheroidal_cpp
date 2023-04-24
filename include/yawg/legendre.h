@@ -13,8 +13,6 @@ namespace gsl
         spharm = GSL_SF_LEGENDRE_SPHARM,
         full = GSL_SF_LEGENDRE_FULL
     };
-    
-    vector legendre_P(size_t nmax, const vector& x, legendre_norm mode = legendre_norm::none );
 
     double spherical_harmonic( int n, int m, double x );
 

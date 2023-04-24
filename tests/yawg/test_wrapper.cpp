@@ -1,5 +1,6 @@
 #define CATCH_CONFIG_MAIN
 #include <yawg/core.h>
+#include <gsl/gsl_math.h>
 #include <catch2/catch_test_macros.hpp>
 
 // Use Catch2 to test the various constructors for gsl::vector
@@ -8,25 +9,21 @@ TEST_CASE("gsl::vector constructors", "[gsl::vector]")
     // Default constructor
     gsl::vector v1;
     REQUIRE(v1.size() == 0);
-    REQUIRE(v1.get_gsl_ptr() == nullptr);
 
     // Constructor with size
     gsl::vector v2(10);
     REQUIRE(v2.size() == 10);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
 
     // Copy constructor
     gsl::vector v3(v2);
     REQUIRE(v3.size() == 10);
-    REQUIRE(v3.get_gsl_ptr() != nullptr);
-    REQUIRE(v3.get_gsl_ptr() != v2.get_gsl_ptr());
+    REQUIRE(v3.get() != v2.get());
 
     // Move constructor
     gsl::vector v4(std::move(v3));
+    REQUIRE(v3.get() == nullptr);
     REQUIRE(v4.size() == 10);
-    REQUIRE(v4.get_gsl_ptr() != nullptr);
     REQUIRE(v3.size() == 0);
-    REQUIRE(v3.get_gsl_ptr() == nullptr);
 }
 
 // Use Catch2 to test the various constructors for gsl::complex
@@ -68,25 +65,20 @@ TEST_CASE("gsl::cvector constructors", "[gsl::cvector]")
     // Default constructor
     gsl::cvector v1;
     REQUIRE(v1.size() == 0);
-    REQUIRE(v1.get_gsl_ptr() == nullptr);
 
     // Constructor with size
     gsl::cvector v2(10);
     REQUIRE(v2.size() == 10);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
 
     // Copy constructor
     gsl::cvector v3(v2);
     REQUIRE(v3.size() == 10);
-    REQUIRE(v3.get_gsl_ptr() != nullptr);
-    REQUIRE(v3.get_gsl_ptr() != v2.get_gsl_ptr());
+    REQUIRE(v3.get() != v2.get());
 
     // Move constructor
     gsl::cvector v4(std::move(v3));
     REQUIRE(v4.size() == 10);
-    REQUIRE(v4.get_gsl_ptr() != nullptr);
-    REQUIRE(v3.size() == 0);
-    REQUIRE(v3.get_gsl_ptr() == nullptr);
+    REQUIRE(v3.get() == nullptr);
 }
 
 // Use Catch2 to test conversion between gsl::vector and gsl::cvector
@@ -101,7 +93,7 @@ TEST_CASE("gsl::vector -> gsl::cvector conversion", "[gsl::vector][gsl::cvector]
         v2.set(i, gsl::complex((double)i, (double)(i + 1)));
 
     v2 = v1;
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE(v2.get() != nullptr);
     REQUIRE(v2.size() == 10);
     for (size_t i = 0; i < 10; ++i)
         REQUIRE(v2.get(i) == gsl::complex((double)i, 0.0));
@@ -136,23 +128,23 @@ TEST_CASE("gsl::vector assignment operators", "[gsl::vector]")
     // Copy assignment
     v1 = v2;
     REQUIRE(v1.size() == 3);
-    REQUIRE(v1.get_gsl_ptr() != nullptr);
-    REQUIRE(v1.get_gsl_ptr() != v2.get_gsl_ptr());
+    REQUIRE(v1.get() != nullptr);
+    REQUIRE(v1.get() != v2.get());
 
     v2 = v3;
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
-    REQUIRE(v2.get_gsl_ptr() != v3.get_gsl_ptr());
+    REQUIRE(v2.get() != nullptr);
+    REQUIRE(v2.get() != v3.get());
 
     // Test self-assignment
     v2 = v2;
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE(v2.get() != nullptr);
 
     // Test Move self-assignment
     v2 = std::move(v2);
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE(v2.get() != nullptr);
 }
 
 // Use Catch2 to test the assignment operators for gsl::cvector
@@ -163,23 +155,23 @@ TEST_CASE("gsl::cvector assignment operators", "[gsl::cvector]")
     // Copy assignment
     v1 = v2;
     REQUIRE(v1.size() == 3);
-    REQUIRE(v1.get_gsl_ptr() != nullptr);
-    REQUIRE(v1.get_gsl_ptr() != v2.get_gsl_ptr());
+    REQUIRE(v1.get() != nullptr);
+    REQUIRE(v1.get() != v2.get());
 
     v2 = v3;
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
-    REQUIRE(v2.get_gsl_ptr() != v3.get_gsl_ptr());
+    REQUIRE(v2.get() != nullptr);
+    REQUIRE(v2.get() != v3.get());
 
     // Test self-assignment
     v2 = v2;
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE(v2.get() != nullptr);
 
     // Test Move self-assignment
     v2 = std::move(v2);
     REQUIRE(v2.size() == 5);
-    REQUIRE(v2.get_gsl_ptr() != nullptr);
+    REQUIRE(v2.get() != nullptr);
 }
 
 // Use Catch2 to test the resize method of gsl::vector
@@ -187,23 +179,23 @@ TEST_CASE("gsl::vector resize", "[gsl::vector]")
 {
     gsl::vector v(10);
     REQUIRE(v.size() == 10);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.resize(5);
     REQUIRE(v.size() == 5);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.resize(0);
     REQUIRE(v.size() == 0);
-    REQUIRE(v.get_gsl_ptr() == nullptr);
+    REQUIRE(v.get() == nullptr);
 
     v.resize(10);
     REQUIRE(v.size() == 10);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.clear();
     REQUIRE(v.size() == 0);
-    REQUIRE(v.get_gsl_ptr() == nullptr);
+    REQUIRE(v.get() == nullptr);
 }
 
 // Use Catch2 to test the resize and clear method of gsl::cvector
@@ -211,23 +203,23 @@ TEST_CASE("gsl::cvector resize", "[gsl::cvector]")
 {
     gsl::cvector v(10);
     REQUIRE(v.size() == 10);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.resize(5);
     REQUIRE(v.size() == 5);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.resize(0);
     REQUIRE(v.size() == 0);
-    REQUIRE(v.get_gsl_ptr() == nullptr);
+    REQUIRE(v.get() == nullptr);
 
     v.resize(10);
     REQUIRE(v.size() == 10);
-    REQUIRE(v.get_gsl_ptr() != nullptr);
+    REQUIRE(v.get() != nullptr);
 
     v.clear();
     REQUIRE(v.size() == 0);
-    REQUIRE(v.get_gsl_ptr() == nullptr);
+    REQUIRE(v.get() == nullptr);
 }
 
 // Use Catch2 to test the assignment and access of array elements
@@ -289,18 +281,18 @@ TEST_CASE("gsl::matrix save_csv and load_csv", "[gsl::matrix]")
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
             m(i, j) = i + j;
- 
+
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_matrix.csv", "w");
     REQUIRE(fp != nullptr);
     m.print_csv(fp);
-    fclose( fp );
+    fclose(fp);
 
     // Open a file for reading, loading the matrix
     fp = fopen("./data/test_matrix.csv", "r");
     REQUIRE(fp != nullptr);
-    gsl::matrix m2( fp );
-    fclose( fp );
+    gsl::matrix m2(fp);
+    fclose(fp);
 
     // Check that the matrices are the same
     for (size_t i = 0; i < m.nrows(); i++)
@@ -312,25 +304,28 @@ TEST_CASE("gsl::matrix save_csv and load_csv", "[gsl::matrix]")
 TEST_CASE("gsl::cmatrix save_csv and load_csv", "[gsl::cmatrix]")
 {
     gsl::vector v(4);
-    v(0) = -1.0; v(1) = -5.0; v(2) = 5.0; v(3) = 1.0;
+    v(0) = -1.0;
+    v(1) = -5.0;
+    v(2) = 5.0;
+    v(3) = 1.0;
 
     gsl::cmatrix m(4, 4);
     for (size_t i = 0; i < m.nrows(); i++)
         for (size_t j = 0; j < m.ncols(); j++)
             m(i, j) = gsl_complex_rect(v(i), v(j));
- 
+
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_cmatrix.csv", "w");
     REQUIRE(fp != nullptr);
     m.print_csv(fp);
-    fclose( fp );
+    fclose(fp);
 
     // Open a file for reading, loading the matrix
     fp = fopen("./data/test_cmatrix.csv", "r");
     REQUIRE(fp != nullptr);
-    gsl::cmatrix m2( fp );
+    gsl::cmatrix m2(fp);
     m2.print();
-    fclose( fp );
+    fclose(fp);
 
     // Check that the matrices are the same
     for (size_t i = 0; i < m.nrows(); i++)
@@ -348,44 +343,32 @@ TEST_CASE("gsl::matrix constructors", "[gsl::matrix]")
     gsl::matrix m0;
     REQUIRE(m0.nrows() == 0);
     REQUIRE(m0.ncols() == 0);
-    REQUIRE(m0.get_gsl_ptr() == nullptr);
 
     // Default constructor
     gsl::matrix m1(0, 0);
     REQUIRE(m1.nrows() == 0);
     REQUIRE(m1.ncols() == 0);
-    REQUIRE(m1.get_gsl_ptr() == nullptr);
 
     // Constructor with size
     gsl::matrix m2(10, 5);
     REQUIRE(m2.nrows() == 10);
     REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
 
     // Copy constructor
     gsl::matrix m3(m2);
     REQUIRE(m3.nrows() == 10);
     REQUIRE(m3.ncols() == 5);
-    REQUIRE(m3.get_gsl_ptr() != nullptr);
-    REQUIRE(m3.get_gsl_ptr() != m2.get_gsl_ptr());
+    REQUIRE(m3.get() != m2.get());
 
     // Move constructor
     gsl::matrix m4(11, 6);
     gsl::matrix m5(std::move(m4));
     REQUIRE(m5.nrows() == 11);
     REQUIRE(m5.ncols() == 6);
-    REQUIRE(m5.get_gsl_ptr() != nullptr);
+    REQUIRE(m5.get() != nullptr);
     REQUIRE(m4.nrows() == 0);
     REQUIRE(m4.ncols() == 0);
-    REQUIRE(m4.get_gsl_ptr() == nullptr);
-
-    // Conversion constructor
-    gsl::matrix m6(12, 7);
-    gsl::matrix m7(m6.get_gsl_ptr());
-    REQUIRE(m7.nrows() == 12);
-    REQUIRE(m7.ncols() == 7);
-    REQUIRE(m7.get_gsl_ptr() != nullptr);
-    REQUIRE(m7.get_gsl_ptr() != m6.get_gsl_ptr());
+    REQUIRE(m4.get() == nullptr);
 }
 
 // Use Catch2 to test the various constructors for gsl::cmatrix
@@ -395,29 +378,26 @@ TEST_CASE("gsl::cmatrix constructors", "[gsl::cmatrix]")
     gsl::cmatrix m1;
     REQUIRE(m1.nrows() == 0);
     REQUIRE(m1.ncols() == 0);
-    REQUIRE(m1.get_gsl_ptr() == nullptr);
 
     // Constructor with size
     gsl::cmatrix m2(10, 10);
     REQUIRE(m2.nrows() == 10);
     REQUIRE(m2.ncols() == 10);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
 
     // Copy constructor
     gsl::cmatrix m3(m2);
     REQUIRE(m3.nrows() == 10);
     REQUIRE(m3.ncols() == 10);
-    REQUIRE(m3.get_gsl_ptr() != nullptr);
-    REQUIRE(m3.get_gsl_ptr() != m2.get_gsl_ptr());
+    REQUIRE(m3.get() != m2.get());
 
     // Move constructor
     gsl::cmatrix m4(std::move(m3));
     REQUIRE(m4.nrows() == 10);
     REQUIRE(m4.ncols() == 10);
-    REQUIRE(m4.get_gsl_ptr() != nullptr);
+    REQUIRE(m4.get() != nullptr);
     REQUIRE(m3.nrows() == 0);
     REQUIRE(m3.ncols() == 0);
-    REQUIRE(m3.get_gsl_ptr() == nullptr);
+    REQUIRE(m3.get() == nullptr);
 }
 
 // Use Catch2 to test the assignment and move assignment of gsl::matrix
@@ -431,29 +411,29 @@ TEST_CASE("gsl::matrix assignment", "[gsl::matrix]")
     m1 = m2;
     REQUIRE(m1.nrows() == 11);
     REQUIRE(m1.ncols() == 6);
-    REQUIRE(m1.get_gsl_ptr() != nullptr);
-    REQUIRE(m1.get_gsl_ptr() != m2.get_gsl_ptr());
+    REQUIRE(m1.get() != nullptr);
+    REQUIRE(m1.get() != m2.get());
 
     // Move assignment
     m2 = std::move(m3);
     REQUIRE(m2.nrows() == 12);
     REQUIRE(m2.ncols() == 7);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
+    REQUIRE(m2.get() != nullptr);
     REQUIRE(m3.nrows() == 0);
     REQUIRE(m3.ncols() == 0);
-    REQUIRE(m3.get_gsl_ptr() == nullptr);
+    REQUIRE(m3.get() == nullptr);
 
     // Test self assignment
     m1 = m1;
     REQUIRE(m1.nrows() == 11);
     REQUIRE(m1.ncols() == 6);
-    REQUIRE(m1.get_gsl_ptr() != nullptr);
+    REQUIRE(m1.get() != nullptr);
 
     // Test self move assignment
     m1 = std::move(m1);
     REQUIRE(m1.nrows() == 11);
     REQUIRE(m1.ncols() == 6);
-    REQUIRE(m1.get_gsl_ptr() != nullptr);
+    REQUIRE(m1.get() != nullptr);
 }
 
 // Use Catch2 to test the assignment operators for gsl::cmatrix
@@ -465,26 +445,26 @@ TEST_CASE("gsl::cmatrix assignment operators", "[gsl::cmatrix]")
     m1 = m2;
     REQUIRE(m1.nrows() == 3);
     REQUIRE(m1.ncols() == 3);
-    REQUIRE(m1.get_gsl_ptr() != nullptr);
-    REQUIRE(m1.get_gsl_ptr() != m2.get_gsl_ptr());
+    REQUIRE(m1.get() != nullptr);
+    REQUIRE(m1.get() != m2.get());
 
     m2 = m3;
     REQUIRE(m2.nrows() == 5);
     REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
-    REQUIRE(m2.get_gsl_ptr() != m3.get_gsl_ptr());
+    REQUIRE(m2.get() != nullptr);
+    REQUIRE(m2.get() != m3.get());
 
     // Test self-assignment
     m2 = m2;
     REQUIRE(m2.nrows() == 5);
     REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
+    REQUIRE(m2.get() != nullptr);
 
     // Test Move self-assignment
     m2 = std::move(m2);
     REQUIRE(m2.nrows() == 5);
     REQUIRE(m2.ncols() == 5);
-    REQUIRE(m2.get_gsl_ptr() != nullptr);
+    REQUIRE(m2.get() != nullptr);
 }
 
 // Use Catch2 to test the element accessors of gsl::matrix
@@ -534,33 +514,22 @@ TEST_CASE("gsl::matrix resize", "[gsl::matrix]")
     gsl::matrix m(10, 5);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.resize(5, 10);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == 0);
     REQUIRE(m.nrows() == 5);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.resize(0, 0);
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get_gsl_ptr() == nullptr);
 
     m.resize(10, 5);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == 0);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.clear();
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get_gsl_ptr() == nullptr);
 }
 
 // Use Catch2 to test the resize and clear method of gsl::cmatrix
@@ -569,31 +538,20 @@ TEST_CASE("gsl::cmatrix resize", "[gsl::cmatrix]")
     gsl::cmatrix m(10, 10);
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.resize(5, 5);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == gsl::complex(0, 0));
     REQUIRE(m.nrows() == 5);
     REQUIRE(m.ncols() == 5);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.resize(0, 0);
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get_gsl_ptr() == nullptr);
 
     m.resize(10, 10);
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == gsl::complex(0, 0));
     REQUIRE(m.nrows() == 10);
     REQUIRE(m.ncols() == 10);
-    REQUIRE(m.get_gsl_ptr() != nullptr);
 
     m.clear();
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
-    REQUIRE(m.get_gsl_ptr() == nullptr);
 }

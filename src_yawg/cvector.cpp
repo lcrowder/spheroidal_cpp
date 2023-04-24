@@ -5,40 +5,26 @@
 #include <utility>
 
 //! \brief Construct empty cvector
-gsl::cvector::cvector() : gvec(nullptr) {}
+gsl::cvector::cvector()
+{
+    gvec = new gsl_vector_complex;
+    gvec->size = 0;
+    gvec->data = 0;
+}
 
 //! \brief Construct zero cvector of size n
-gsl::cvector::cvector(size_t n) : gvec(nullptr)
+gsl::cvector::cvector(size_t n)
 {
-    if (n != 0)
-        this->calloc(n);
+    this->galloc(n);
 }
 
-//! \brief Construct new gsl::cvector from gsl_vector_complex
-gsl::cvector::cvector(const gsl_vector_complex *gvec_other)
-{
-    if (gvec_other == nullptr)
-        return;
-    this->calloc(gvec_other->size);
-    gsl_vector_complex_memcpy(gvec, gvec_other);
-}
+//! \brief Construct new gsl::cvector from gsl_vector_complex's data
+gsl::cvector::cvector(gsl_vector_complex *gvec_other) : gvec(gvec_other) {}
 
 gsl::cvector::cvector(const gsl::cvector &gvec_other)
 {
-    this->calloc(gvec_other.size());
+    this->galloc(gvec_other.size());
     gsl_vector_complex_memcpy(gvec, gvec_other.gvec);
-}
-
-/*! \brief Construct new gsl::cmatrix from gsl::matrix
- *
- *  Copy the values from a real matrix into a complex matrix, setting
- *  the imaginary part to zero.
- */
-gsl::cvector::cvector(const gsl::vector &gvec_other)
-{
-    this->calloc(gvec_other.size());
-    for (size_t i = 0; i < gvec_other.size(); i++)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(gvec_other.gvec, i), 0.0);
 }
 
 gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
@@ -46,43 +32,42 @@ gsl::cvector::cvector(gsl::cvector &&gvec_other) : gvec(gvec_other.gvec)
     gvec_other.gvec = nullptr;
 }
 
+/*! \brief Construct new gsl::cmatrix from gsl::matrix
+ *
+ *  Copy the values from a real matrix into a complex matrix, setting
+ *  the imaginary part to zero.
+ */
+gsl::cvector::cvector(const gsl::vector &v)
+{
+    galloc(v.size());
+    for (size_t i = 0; i < v.size(); i++)
+        set(i, gsl::complex(v(i), 0.0));
+}
+
+
 gsl::cvector &gsl::cvector::operator=(const gsl::cvector &v)
 {
-    if (gvec == v.gvec)
+    if (this == &v)
         return *this;
-    this->resize(v.size());
+    if (size() != v.size())
+        this->resize(v.size());
     gsl_vector_complex_memcpy(gvec, v.gvec);
     return *this;
 }
 
 gsl::cvector &gsl::cvector::operator=(const gsl::vector &v)
 {
-    this->resize(v.size());
+    resize(v.size());
     for (size_t i = 0; i < v.size(); i++)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(v.gvec, i), 0.0);
-    return *this;
-}
-
-gsl::cvector &gsl::cvector::operator=(const gsl::vector_view &vv)
-{
-    this->resize(vv.size());
-    for (size_t i = 0; i < vv.size(); i++)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), gsl_vector_get(&vv.gvec_view.vector, i), 0.0);
-    return *this;
-}
-
-gsl::cvector &gsl::cvector::operator=(const gsl::cvector_view &vv)
-{
-    this->resize(vv.size());
-    gsl_vector_complex_memcpy(gvec, &vv.gvec_view.vector);
+        set(i, gsl::complex(v(i), 0.0));
     return *this;
 }
 
 gsl::cvector &gsl::cvector::operator=(gsl::cvector &&v)
 {
-    if (gvec == v.gvec)
+    if (this == &v)
         return *this;
-    this->free();
+    this->gfree();
     gvec = v.gvec;
     v.gvec = nullptr;
     return *this;
@@ -94,25 +79,11 @@ gsl::cvector &gsl::cvector::operator+=(const gsl::cvector &v)
     return *this;
 }
 
-gsl::cvector &gsl::cvector::operator+=(const gsl::cvector_view &vv)
-{
-    gsl_vector_complex_add(gvec, &vv.gvec_view.vector);
-    return *this;
-}
-
 gsl::cvector &gsl::cvector::operator+=(const gsl::vector &v)
 {
     // Add the real element of v to each complex element of this
     for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_add_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(v.gvec, i)));
-    return *this;
-}
-
-gsl::cvector &gsl::cvector::operator+=(const gsl::vector_view &vv)
-{
-    // Add the real element of v to each complex element of this
-    for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_add_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(&vv.gvec_view.vector, i)));
+        set(i, get(i) + v(i));
     return *this;
 }
 
@@ -122,45 +93,12 @@ gsl::cvector &gsl::cvector::operator-=(const gsl::cvector &gvec_other)
     return *this;
 }
 
-gsl::cvector &gsl::cvector::operator-=(const gsl::cvector_view &vv)
-{
-    gsl_vector_complex_sub(gvec, &vv.gvec_view.vector);
-    return *this;
-}
-
 gsl::cvector &gsl::cvector::operator-=(const gsl::vector &v)
 {
     // Subtract the real element of v from each complex element of this
     for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_sub_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(v.gvec, i)));
+        set(i, get(i) - v(i));
     return *this;
-}
-
-gsl::cvector &gsl::cvector::operator-=(const gsl::vector_view &vv)
-{
-    // Subtract the real element of v from each complex element of this
-    for (size_t i = 0; i < gvec->size; i++)
-        gsl_vector_complex_set(gvec, i, gsl_complex_sub_real(gsl_vector_complex_get(gvec, i), gsl_vector_get(&vv.gvec_view.vector, i)));
-    return *this;
-}
-
-gsl::cvector::~cvector()
-{
-    if (gvec == nullptr)
-        return;
-    gsl_vector_complex_free(gvec);
-}
-
-//! \brief Element getter (the nice C++ versions don't work)
-void gsl::cvector::set(size_t i, gsl::complex val)
-{
-    GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
-}
-
-//! \brief Element setter (the nice C++ versions don't work)
-gsl::complex gsl::cvector::get(size_t i) const
-{
-    return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
 }
 
 gsl::cvector &gsl::cvector::operator*=(gsl::complex z)
@@ -192,10 +130,37 @@ gsl::cvector &gsl::cvector::operator/=(double x)
 
     return *this;
 }
+
 gsl::cvector gsl::cvector::operator-() const
 {
     gsl::cvector v(*this);
     return -1.0 * v;
+}
+
+gsl::cvector::~cvector()
+{
+    this->gfree();
+}
+
+void gsl::cvector::set(size_t i, gsl::complex val)
+{
+    GSL_SET_COMPLEX(gsl_vector_complex_ptr(gvec, i), val.real(), val.imag());
+}
+
+gsl::complex gsl::cvector::get(size_t i) const
+{
+    return gsl::complex(*gsl_vector_complex_ptr(gvec, i));
+}
+
+
+/*! \brief Return a const reference to the element at position (i,j)
+ *
+ *  This function returns a constant complex_ref to the element
+ *  at position (i,j) in the matrix. Allows getting.
+ */
+const gsl::complex_ref gsl::cvector::operator()(size_t i) const
+{
+    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
 
 /*! \brief Return a reference to the element at position (i,j)
@@ -204,16 +169,6 @@ gsl::cvector gsl::cvector::operator-() const
  *  at position (i,j) in the matrix. Allows setting.
  */
 gsl::complex_ref gsl::cvector::operator()(size_t i)
-{
-    return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
-}
-
-/*! \brief Return a const reference to the element at position (i,j)
- *
- *  This function returns a constant complex_ref to the element
- *  at position (i,j) in the matrix. Allows getting.
- */
-const gsl::complex_ref gsl::cvector::operator()(size_t i) const
 {
     return gsl::complex_ref(gsl_vector_complex_ptr(gvec, i));
 }
@@ -242,9 +197,9 @@ void gsl::cvector::resize(size_t n)
     {
         if (gvec->size == n)
             return;
-        this->free();
+        this->gfree();
     }
-    this->calloc(n);
+    this->galloc(n);
 }
 
 //! \brief Clear the gsl::vector, free underlying memory
@@ -252,7 +207,7 @@ void gsl::cvector::clear()
 {
     if (gvec == nullptr)
         return;
-    this->free();
+    this->gfree();
 }
 
 //! \brief Pretty-print the vector to file stream
@@ -269,9 +224,14 @@ void gsl::cvector::print(FILE *out) const
 }
 
 //! \brief Private function to free allocated memory
-void gsl::cvector::free()
+void gsl::cvector::gfree()
 {
-    gsl_vector_complex_free(gvec);
+    if (gvec == nullptr)
+        return;
+    else if (size() == 0)
+        delete gvec;
+    else
+        gsl_vector_complex_free(gvec);
     gvec = nullptr;
 }
 
@@ -281,8 +241,17 @@ void gsl::cvector::free()
  *       This is slightly slower than using gsl_vector_complex_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::cvector::calloc(size_t n) { gvec = gsl_vector_complex_calloc(n); }
-
+void gsl::cvector::galloc(size_t n)
+{
+    if (n >= 0)
+        gvec = gsl_vector_complex_alloc(n);
+    else
+    {
+        gvec = new gsl_vector_complex;
+        gvec->size = 0;
+        gvec->data = 0;
+    }
+}
 namespace gsl
 {
     cvector operator*(complex z, const cvector &v)
@@ -325,7 +294,7 @@ namespace gsl
         return result;
     }
 
-    cvector operator*(const cvector& v, double x)
+    cvector operator*(const cvector &v, double x)
     {
         cvector result(v);
         result *= x;
@@ -442,80 +411,6 @@ namespace gsl
         return v1;
     }
 
-    cvector operator+(const vector_view &v1, const cvector &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(const vector_view &v1, cvector &&v2)
-    {
-        v2 += v1;
-        return v2;
-    }
-
-    cvector operator+(const cvector &v1, const vector_view &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(cvector &&v1, const vector_view &v2)
-    {
-        v1 += v2;
-        return v1;
-    }
-
-    // Add vector views to complepx vector views
-    cvector operator+(const vector_view &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(const cvector_view &v1, const vector_view &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(const cvector &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(cvector &&v1, const cvector_view &v2)
-    {
-        v1 += v2;
-        return std::move(v1);
-    }
-
-    cvector operator+(const cvector_view &v1, const cvector &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
-    cvector operator+(const cvector_view &v1, cvector &&v2)
-    {
-        v2 += v1;
-        return std::move(v2);
-    }
-
-    cvector operator+(const cvector_view &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result += v2;
-        return result;
-    }
-
     cvector operator-(const cvector &v1, const cvector &v2)
     {
         cvector result(v1);
@@ -567,142 +462,6 @@ namespace gsl
         return std::move(v1);
     }
 
-    cvector operator-(const vector &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(const cvector_view &v1, const vector &v2)
-    {
-        cvector result(v2);
-        result -= v1;
-        return result;
-    }
-
-    cvector operator-(const vector_view &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(const cvector_view &v1, const vector_view &v2)
-    {
-        cvector result(v2);
-        result -= v1;
-        return result;
-    }
-
-    cvector operator-(const vector_view &v1, const cvector &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(const vector_view &v1, cvector &&v2)
-    {
-        v2 -= v1;
-        return std::move(v2);
-    }
-
-    cvector operator-(const cvector &v1, const vector_view &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(cvector &&v1, const vector_view &v2)
-    {
-        v1 -= v2;
-        return std::move(v1);
-    }
-
-    cvector operator-(const cvector &v1, const cvector_view &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(cvector &&v1, const cvector_view &v2)
-    {
-        v1 -= v2;
-        return std::move(v1);
-    }
-
-    cvector operator-(const cvector_view &v1, const cvector &v2)
-    {
-        cvector result(v1);
-        result -= v2;
-        return result;
-    }
-
-    cvector operator-(const cvector_view &v1, cvector &&v2)
-    {
-        v2 -= v1;
-        return std::move(v2);
-    }
-
-    cvector operator*(const cvector_view &vv, complex a)
-    {
-        cvector result(vv);
-        result *= a;
-        return result;
-    }
-
-    cvector operator*(complex a, const cvector_view &v)
-    {
-        cvector result(v);
-        result *= a;
-        return result;
-    }
-
-    cvector operator*(const cvector_view &v, double a)
-    {
-        cvector result(v);
-        result *= a;
-        return result;
-    }
-
-    cvector operator*(double a, const cvector_view &v)
-    {
-        cvector result(v);
-        result *= a;
-        return result;
-    }
-
-    cvector operator/(const cvector_view &v, complex a)
-    {
-        cvector result(v);
-        result /= a;
-        return result;
-    }
-
-    cvector operator/(complex a, const cvector_view &v)
-    {
-        cvector result(v);
-        result /= a;
-        return result;
-    }
-
-    cvector operator/(const cvector_view &v, double a)
-    {
-        cvector result(v);
-        result /= a;
-        return result;
-    }
-
-    cvector operator/(double a, const cvector_view &v)
-    {
-        cvector result(v);
-        result /= a;
-        return result;
-    }
-
     bool operator==(const cvector &v1, const cvector &v2)
     {
         return gsl_vector_complex_equal(v1.gvec, v2.gvec);
@@ -715,169 +474,6 @@ namespace gsl
             if (v1(i) != v2(i))
                 return true;
 
-        return false;
-    }
-
-    bool operator==(const vector_view &v1, const cvector &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const vector_view &v1, const cvector &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector &v1, const vector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector &v1, const vector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const vector_view &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const vector_view &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector_view &v1, const vector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector_view &v1, const vector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector_view &v1, const cvector &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector_view &v1, const cvector &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v1.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector_view &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector_view &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 and v2 individually
-        for (size_t i = 0; i < v2.gvec_view.vector.size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    // Compare vectors to complex vector views
-    bool operator==(const vector &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 to v2, returning true if any are unequal
-        for (size_t i = 0; i < v1.gvec->size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const vector &v1, const cvector_view &v2)
-    {
-        // Compare each element of v1 to v2, returning true if any are unequal
-        for (size_t i = 0; i < v1.gvec->size; ++i)
-            if (v1(i) != v2(i))
-                return true;
-        return false;
-    }
-
-    bool operator==(const cvector_view &v1, const vector &v2)
-    {
-        // Compare each element of v1 to v2, returning true if any are unequal
-        for (size_t i = 0; i < v2.gvec->size; ++i)
-            if (v1(i) != v2(i))
-                return false;
-        return true;
-    }
-
-    bool operator!=(const cvector_view &v1, const vector &v2)
-    {
-        // Compare each element of v1 to v2, returning true if any are unequal
-        for (size_t i = 0; i < v2.gvec->size; ++i)
-            if (v1(i) != v2(i))
-                return true;
         return false;
     }
 
@@ -920,186 +516,55 @@ namespace gsl
 
 }
 
-/*! \brief Return a view to a subvector of the cvector
- * \param offset Offset of the subvector
- * \param size Size of the subvector
- *
- * \note \return A gsl::cvector_view to the subvector
- */
-gsl::cvector_view gsl::cvector::subvector(size_t offset, size_t size)
-{
-    return gsl::cvector_view(gsl_vector_complex_subvector(gvec, offset, size));
+gsl::cvector::operator cvector_view() const
+{   
+    printf("Creating view from complex vector\n");
+    return view();
 }
 
-//! \brief Return a view to the entire cvector
-gsl::cvector_view gsl::cvector::view()
+gsl::cvector_view gsl::cvector::view() const
 {
-    return gsl::cvector_view(gsl_vector_complex_subvector(gvec, 0, gvec->size));
+    gsl_vector_complex *v = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *v = gsl_vector_complex_subvector(get(), 0, size()).vector;
+    return gsl::cvector_view(v);
 }
 
-//! \brief Assignment to a cvector view from a cvector
-gsl::cvector_view &gsl::cvector_view::operator=(const gsl::cvector &v)
+gsl::cvector_view gsl::cvector::subvector(size_t offset, size_t n) const
 {
-    gsl_vector_complex_memcpy(&gvec_view.vector, v.gvec);
-    return *this;
+    gsl_vector_complex *v = static_cast<gsl_vector_complex *>(malloc(sizeof(gsl_vector_complex)));
+    *v = gsl_vector_complex_subvector(get(), offset, n).vector;
+    return gsl::cvector_view(v);
 }
 
-//! \brief Assignment to a cvector view from a cvector view
-gsl::cvector_view &gsl::cvector_view::operator=(const cvector_view &v)
+//! \brief Construct new gsl::cvector from gsl_vector_complex
+gsl::cvector_view::cvector_view(gsl_vector_complex *gvec_other) : cvector(gvec_other) {}
+
+// Vector views should never own their memory, so we don't need to free it
+// We only need to delete the pointer, since it was created on the heap
+gsl::cvector_view::~cvector_view()
 {
-    gsl_vector_complex_memcpy(&gvec_view.vector, &v.gvec_view.vector);
-    return *this;
+    if (gvec != nullptr)
+        free(gvec);
+    gvec = nullptr;
+} 
+
+//! Set all values in the view to zero
+void gsl::cvector_view::clear()
+{
+    printf("Warning: Attempting to clear a vector view\n");
+    gsl_vector_complex_set_zero(gvec);
 }
 
-gsl::cvector_view &gsl::cvector_view::operator=(const vector &v)
+//! Set all values in the view to zero
+void gsl::cvector_view::resize(size_t n)
 {
-    // Copy each element of v to the view
-    for (size_t i = 0; i < gvec_view.vector.size; ++i)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(&gvec_view.vector, i), gsl_vector_get(v.gvec, i), 0.0);
-    return *this;
+    printf("Warning: Attempting to resize a vector view\n");
+    gsl_vector_complex_set_zero(gvec);
 }
 
-gsl::cvector_view &gsl::cvector_view::operator=(const gsl::vector_view &vv)
+gsl::cmatrix_view gsl::crow_view::reshape(size_t n, size_t m) const
 {
-    // Copy each element of v to the view
-    for (size_t i = 0; i < gvec_view.vector.size; ++i)
-        GSL_SET_COMPLEX(gsl_vector_complex_ptr(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i), 0.0);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator+=(const cvector_view &vv)
-{
-    // Use gsl complex_vector_add to do the addition
-    gsl_vector_complex_add(&gvec_view.vector, &vv.gvec_view.vector);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator+=(const cvector &v)
-{
-    // Use gsl complex_vector_add to do the addition
-    gsl_vector_complex_add(&gvec_view.vector, v.gvec);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator+=(const vector_view &vv)
-{
-    // Add the elements individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_add_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i)));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator+=(const vector &v)
-{
-    // Add the elements individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_add_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(v.gvec, i)));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator-=(const cvector_view &vv)
-{
-    // Use gsl complex_vector_sub to do the subtraction
-    gsl_vector_complex_sub(&gvec_view.vector, &vv.gvec_view.vector);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator-=(const cvector &v)
-{
-    // Use gsl complex_vector_sub to do the subtraction
-    gsl_vector_complex_sub(&gvec_view.vector, v.gvec);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator-=(const vector_view &vv)
-{
-    // Subtract the elements individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_sub_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(&vv.gvec_view.vector, i)));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator-=(const vector &v)
-{
-    // Subtract the elements individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_sub_real(gsl_vector_complex_get(&gvec_view.vector, i), gsl_vector_get(v.gvec, i)));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator*=(complex z)
-{
-    // Scale the vector using gsl function
-    gsl_vector_complex_scale(&gvec_view.vector, z);
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator*=(double x)
-{
-    // Scale each element individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_mul_real(gsl_vector_complex_get(&gvec_view.vector, i), x));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator/=(gsl::complex z)
-{
-    // Scale the vector using gsl function
-    gsl_vector_complex_scale(&gvec_view.vector, gsl_complex_inverse(z));
-    return *this;
-}
-
-gsl::cvector_view &gsl::cvector_view::operator/=(double x)
-{
-    // Scale each element individually
-    for (size_t i = 0; i < gvec_view.vector.size; i++)
-        gsl_vector_complex_set(&gvec_view.vector, i, gsl_complex_div_real(gsl_vector_complex_get(&gvec_view.vector, i), x));
-    return *this;
-}
-
-const gsl::complex_ref gsl::cvector_view::operator()(size_t i) const
-{
-// This is the only way to get around needing gsl_vector_complex_ptr requiring
-//   a non-const gsl_vector_complex pointer. Would rather do anything else.
-#if GSL_RANGE_CHECK
-    if (GSL_RANGE_COND(i >= gvec_view.vector.size))
-    {
-        GSL_ERROR_NULL("index out of range", GSL_EINVAL);
-    }
-#endif
-    return gsl::complex_ref(GSL_COMPLEX_AT(&gvec_view.vector, i));
-}
-
-gsl::complex_ref gsl::cvector_view::operator()(size_t i)
-{
-    return gsl::complex_ref(gsl_vector_complex_ptr(&gvec_view.vector, i));
-}
-
-void gsl::cvector_view::set(size_t i, complex z)
-{
-    gsl_vector_complex_set(&gvec_view.vector, i, z);
-}
-
-gsl::complex gsl::cvector_view::get(size_t i) const
-{
-    return gsl_vector_complex_get(&gvec_view.vector, i);
-}
-
-//! \brief Pretty-print the viewed vvector to file stream
-//! \param out File stream to print to
-void gsl::cvector_view::print(FILE *out) const
-{
-    fprintf(out, "[");
-    for (int i = 0; i < gvec_view.vector.size; ++i)
-    {
-        auto x = gsl_vector_complex_get(&gvec_view.vector, i);
-        fprintf(out, "%s% 9g%+9gj", ((i == 0) ? "" : ", "), GSL_REAL(x), GSL_IMAG(x));
-    }
-    fprintf(out, "]\n");
-}
-
-//! \brief Return a cmatrix view out of the elements of the row
-gsl::cmatrix_view gsl::crow_view::reshape(size_t n, size_t m)
-{
-    return gsl::cmatrix_view(gsl_matrix_complex_view_vector(&gvec_view.vector, n, m));
+    gsl_matrix_complex *t = static_cast<gsl_matrix_complex *>(malloc(sizeof(gsl_matrix_complex)));
+    *t = gsl_matrix_complex_view_vector(get(), n, m).matrix;
+    return gsl::cmatrix_view(t);
 }

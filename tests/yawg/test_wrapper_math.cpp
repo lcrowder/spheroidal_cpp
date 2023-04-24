@@ -256,3 +256,59 @@ TEST_CASE("gsl::vector and gsl::cvector scalar multiplication", "[gsl::vector][g
     REQUIRE( v4.get(1) == gsl::complex(0.0, 2.0) );
     REQUIRE( v4.get(2) == gsl::complex(0.0, 3.0) );
 }
+
+//! Use Catch2 to test +=, -=, *=, /= of gsl::vectors
+TEST_CASE("gsl::vector +=, -=, *=, /=", "[gsl::vector]")
+{
+    gsl::vector v1( gsl::arange(1.0, 4.0) );
+    gsl::vector v2( gsl::arange(4.0, 7.0) );
+    double x = 1.5;
+
+    SECTION("Test += lvalue")
+    {
+        v1 += v2;
+        REQUIRE( v1.get(0) == 5.0 );
+        REQUIRE( v1.get(1) == 7.0 );
+        REQUIRE( v1.get(2) == 9.0 );
+    }
+
+    SECTION("Test += rvalue")
+    {
+        v1 += gsl::vector( gsl::arange(4.0, 7.0) );
+        REQUIRE( v1.get(0) == 5.0 );
+        REQUIRE( v1.get(1) == 7.0 );
+        REQUIRE( v1.get(2) == 9.0 );
+    }
+
+    SECTION("Test -= lvalue")
+    {
+        v1 -= v2;
+        REQUIRE( v1.get(0) == -3.0 );
+        REQUIRE( v1.get(1) == -3.0 );
+        REQUIRE( v1.get(2) == -3.0 );
+    }
+
+    SECTION("Test -= rvalue")
+    {
+        v1 -= gsl::vector( gsl::arange(4.0, 7.0) );
+        REQUIRE( v1.get(0) == -3.0 );
+        REQUIRE( v1.get(1) == -3.0 );
+        REQUIRE( v1.get(2) == -3.0 );
+    }
+
+    SECTION("Test *=")
+    {
+        v1 *= x;
+        REQUIRE( v1.get(0) == 1.5 );
+        REQUIRE( v1.get(1) == 3.0 );
+        REQUIRE( v1.get(2) == 4.5 );
+    }
+
+    SECTION("Test /=")
+    {
+        v1 /= x;
+        REQUIRE_THAT(v1.get(0), Catch::Matchers::WithinAbs(2.0/3.0, 1e-12));
+        REQUIRE_THAT(v1.get(1), Catch::Matchers::WithinAbs(4.0/3.0, 1e-12));
+        REQUIRE_THAT(v1.get(2), Catch::Matchers::WithinAbs(6.0/3.0, 1e-12));
+    }
+}
