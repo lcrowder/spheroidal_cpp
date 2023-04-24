@@ -516,24 +516,6 @@ namespace gsl
 
 
 
-gsl::vector::operator gsl::vector_view() const
-{   
-    // printf("Creating view from vector\n");
-    return view();
-}
-
-gsl::vector::operator gsl::column_view() const
-{   
-    // printf("Creating column view from vector\n");
-    return view();
-}
-
-gsl::vector::operator gsl::row_view() const
-{   
-    // printf("Creating row view from vector\n");
-    return view();
-}
-
 gsl::vector_view gsl::vector::view() const
 {
     gsl_vector *v = static_cast<gsl_vector *>(malloc(sizeof(gsl_vector)));
@@ -567,6 +549,12 @@ gsl::vector_view::~vector_view()
     gvec = nullptr;
 } 
 
+gsl::vector_view& gsl::vector_view::operator=(const gsl::vector &v)
+{
+    gsl_vector_memcpy(gvec, v.get());
+    return *this;
+}
+
 //! Set all values in the view to zero
 void gsl::vector_view::clear()
 {
@@ -579,4 +567,16 @@ void gsl::vector_view::resize(size_t n)
 {
     printf("Warning: Attempting to resize a vector view\n");
     gsl_vector_set_zero(gvec);
+}
+
+gsl::column_view &gsl::column_view::operator=(const gsl::vector &v)
+{
+    gsl_vector_memcpy(gvec, v.get());
+    return *this;
+}
+
+gsl::row_view &gsl::row_view::operator=(const gsl::vector &v)
+{
+    gsl_vector_memcpy(gvec, v.get());
+    return *this;
 }

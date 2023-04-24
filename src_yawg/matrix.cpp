@@ -460,12 +460,6 @@ void gsl::matrix::galloc(size_t n, size_t m)
     }
 }
 
-gsl::matrix::operator gsl::matrix_view() const
-{
-    printf("Creating view from matrix\n");
-    return view();
-}
-
 gsl::matrix_view gsl::matrix::view() const
 {
     gsl_matrix *m = static_cast<gsl_matrix *>(malloc(sizeof(gsl_matrix)));
@@ -513,4 +507,10 @@ void gsl::matrix_view::resize(size_t n, size_t m)
 {
     printf("Warning: Attempting to resize a matrix view\n");
     gsl_matrix_set_zero(gmat);
+}
+
+gsl::matrix_view &gsl::matrix_view::operator=(const gsl::matrix &M)
+{
+    gsl_matrix_memcpy(gmat, M.get());
+    return *this;
 }

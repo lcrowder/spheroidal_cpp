@@ -771,12 +771,6 @@ void gsl::cmatrix::galloc(size_t n, size_t m)
     }
 }
 
-gsl::cmatrix::operator gsl::cmatrix_view() const
-{
-    printf("Creating view from complex matrix\n");
-    return view();
-}
-
 gsl::cmatrix_view gsl::cmatrix::view() const
 {
     gsl_matrix_complex *w = static_cast<gsl_matrix_complex *>(malloc(sizeof(gsl_matrix_complex)));
@@ -824,4 +818,10 @@ void gsl::cmatrix_view::resize(size_t n, size_t m)
 {
     printf("Warning: Attempting to resize a complex matrix view\n");
     gsl_matrix_complex_set_zero(gmat);
+}
+
+gsl::cmatrix_view &gsl::cmatrix_view::operator=(const gsl::cmatrix &M)
+{
+    gsl_matrix_complex_memcpy(gmat, M.get());
+    return *this;
 }

@@ -149,7 +149,6 @@ namespace gsl
         //! \brief Load the matrix from a file stream in CSV format
         void load_csv(FILE *in = stdin);
 
-        operator matrix_view() const;
         matrix_view view() const;
         matrix_view submatrix(size_t i, size_t j, size_t n, size_t m) const;
 
@@ -174,6 +173,9 @@ namespace gsl
         //! \brief Constructor for vector_view pointing to data at gvec_other
         matrix_view(gsl_matrix *gvec_other);
         ~matrix_view();
+
+        //! \brief Assign data from matrix to view
+        matrix_view& operator=(const matrix &M);
 
         // Override some nonconst member functions to be unusable
         void clear();

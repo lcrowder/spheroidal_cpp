@@ -513,13 +513,6 @@ namespace gsl
                 return true;
         return false;
     }
-
-}
-
-gsl::cvector::operator cvector_view() const
-{   
-    printf("Creating view from complex vector\n");
-    return view();
 }
 
 gsl::cvector_view gsl::cvector::view() const
@@ -568,3 +561,22 @@ gsl::cmatrix_view gsl::crow_view::reshape(size_t n, size_t m) const
     *t = gsl_matrix_complex_view_vector(get(), n, m).matrix;
     return gsl::cmatrix_view(t);
 }
+
+gsl::cvector_view &gsl::cvector_view::operator=(const gsl::cvector &v)
+{
+    gsl_vector_complex_memcpy(gvec, v.get());
+    return *this;
+}
+
+gsl::crow_view &gsl::crow_view::operator=(const gsl::cvector &v)
+{
+    gsl_vector_complex_memcpy(gvec, v.get());
+    return *this;
+}
+
+gsl::ccolumn_view &gsl::ccolumn_view::operator=(const gsl::cvector &v)
+{
+    gsl_vector_complex_memcpy(gvec, v.get());
+    return *this;
+}
+

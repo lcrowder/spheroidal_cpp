@@ -167,7 +167,6 @@ namespace gsl
 
         friend cmatrix operator*(const cmatrix &A, const cmatrix &B);
 
-        operator cmatrix_view() const;
         cmatrix_view view() const;
         cmatrix_view submatrix(size_t i, size_t j, size_t n, size_t m) const;
 
@@ -192,6 +191,9 @@ namespace gsl
         //! \brief Constructor for vector_view pointing to data at gvec_other
         cmatrix_view(gsl_matrix_complex *gvec_other);
         ~cmatrix_view();
+
+        //! \brief Assign data from matrix to view
+        cmatrix_view& operator=(const cmatrix &M);
 
         // Override some nonconst member functions to be unusable
         void clear();

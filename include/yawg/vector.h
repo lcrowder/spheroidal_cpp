@@ -11,7 +11,7 @@ namespace gsl
     class vector_view;
     class column_view;
     class row_view;
-    
+
     class matrix_view;
     
     class cvector;
@@ -120,9 +120,6 @@ namespace gsl
         //! \brief Return the 2-norm of the vector
         double norm() const { return gsl_blas_dnrm2(gvec); }
 
-        operator vector_view() const;
-        operator row_view() const;
-        operator column_view() const;
         vector_view view() const;
         vector_view subvector(size_t offset, size_t n) const;
 
@@ -146,6 +143,9 @@ namespace gsl
         vector_view(gsl_vector *gvec_other);
         ~vector_view();
 
+        //! \brief Assign data from vector to view
+        vector_view& operator=(const vector &v);
+
         // Override some nonconst member functions to be unusable
         void clear();
         void resize(size_t n);
@@ -164,6 +164,9 @@ namespace gsl
                 printf("Row view must have stride 1");
         };
 
+        //! \brief Assign data from vector to view
+        row_view& operator=(const vector& v);
+
         //! \brief Return a matrix view out of the elements of the row
         matrix_view reshape(size_t n, size_t m) const;
     };
@@ -176,6 +179,9 @@ namespace gsl
     public:
         //! \brief Construct column_view from existing vector view
         column_view(gsl_vector *gvec_other) : vector_view(gvec_other) {}
+    
+        //! \brief Assign data from vector to view
+        column_view& operator=(const vector& v);
     };
 
 }
