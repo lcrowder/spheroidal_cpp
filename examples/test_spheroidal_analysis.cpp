@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int p=2;
+    int p=1;
     int sp=(p+1)*(p+1);
     
     if (argc==2){p=atoi(argv[1]);}

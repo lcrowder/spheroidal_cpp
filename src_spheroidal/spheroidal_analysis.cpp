@@ -8,6 +8,7 @@
 #include <yawg/utils.hpp>
 #include <yawg/core.h>
 #include <yawg/fft.h>
+#include <yawg/legendre.h>
 #include <gsl/gsl_math.h> 
 #include <gsl/gsl_sf_gamma.h>
 using namespace std;
@@ -24,8 +25,7 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
     { 
         cerr << "The input should be defined on a Gauss-Legendre--uniform grid. Check the size of input.\n";
     }
-    gsl::matrix shc; 
-    shc.resize(sp,ns);
+    gsl::matrix shc(sp,ns);
 
     f.print();
 
@@ -48,7 +48,6 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
         gsl::cmatrix fi_fourier = gsl::fft(f_matrix, 2);
         fi_fourier.print();
 
-
         // Reshape the matrix of fourier coefficients into a vector (column major). 
         gsl::cvector fi_fourier_vec((2*p)*(p+1));
         for (int j=0; j<2*p; j++)
@@ -67,7 +66,7 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
         gsl::cvector fi_fourier_vec2((2*p+1)*(p+1));
         for (int j=0; j<2*p; j++)
         {
-            gsl::cvector fi_fourier_col = fi_fourier_vec1.subvector(j,p+1);
+            gsl::cvector fi_fourier_col = fi_fourier_vec1.subvector(j*(p+1),p+1);
             if (j==0)
             {
                 fi_fourier_col /= 2.;
@@ -82,17 +81,12 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
         fi_fourier_vec2.print();
 
 
-        
+        //Legendre basis transform
 
-        // gsl::cvector endpts = fi_fourier_vec.subvector(0,p+1);
-        // endpts/=2.;
-        
-        // gsl::cvector fi_fourier_vec2(2*p*(p+1)+p+1);
+        //Get the Gauss-Legendre quadrature points and weights
+        gsl::vector v, w;
+        gsl::leggauss(p+1, v, w);
 
-        // fi_fourier_vec2.subvector(0,2*p*(p+1)) = fi_fourier_vec;
-        // fi_fourier_vec2.subvector(2*p*(p+1), p+1) = endpts;
-
-        // fi_fourier_vec2.print();
 
 
     }
@@ -101,56 +95,3 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
 
 }
 
-
-
-//  MATLAB CODE:
-// -----------------------------------------------------------------
-// % SPHEROIDALANA(F) - Calculate the spheroidal harmonics transform of the function
-// % set F. Each column of F is a function defined on the parameter domain
-// % defined by parDomain.
-
-// %d1 = number of points on a single particle surface
-// %d2 = number of particles (columns of F)
-// [d1,d2] = size(f);
-
-// %d1 should be 2p(p+1)
-// p = (sqrt(2*d1+1)-1)/2;
-
-// if(p~=fix(p))
-// error(['The input should be defined on a Gauss-Legendre--uniform'...
-//        ' grid. Check the size of input.']);
-// end
-
-// %-- Allocating memory
-// shc = zeros((2*p+1)*(p+1),d2);
-
-// %-- Reshaping to match the parametrization grid structure
-// f = reshape(f,p+1,2*p,d2);
-
-// %-- DFT (identical to spherical harmonics)
-// % Fourier transform along each row
-// f = fft(f,[],2)*pi/p;
-// f = circshift(reshape(f,2*p*(p+1),d2),p*(p+1));
-// f(1:p+1,:) = f(1:p+1,:)/2;
-// f = [f; f(1:p+1,:)];
-
-// LT = []; LT_Freqs = [];
-// LT{end+1} = getLegMat(p);
-// LT_Freqs(end+1) = p;
-// idx = length(LT);
-
-// for m = -p:p
-//     ind = (m+p)*(p+1)+1;
-//     shc(ind:ind+p,:) = LT{idx}{p+1+m}*f(ind:ind+p,:);
-// end
-// % sprintf("before shrinkvec\n")
-// % disp(shc)
-// % disp(length(shc))
-
-// shc = shrinkShVec(shc);
-
-// % sprintf("after shrinkvec\n")
-// % disp(shc)
-// % disp(length(shc))
-
-// end
