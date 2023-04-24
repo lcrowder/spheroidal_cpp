@@ -9,6 +9,9 @@
 namespace gsl
 {
     class vector_view;
+    class column_view;
+    class row_view;
+    
     class matrix_view;
     
     class cvector;
@@ -118,6 +121,8 @@ namespace gsl
         double norm() const { return gsl_blas_dnrm2(gvec); }
 
         operator vector_view() const;
+        operator row_view() const;
+        operator column_view() const;
         vector_view view() const;
         vector_view subvector(size_t offset, size_t n) const;
 

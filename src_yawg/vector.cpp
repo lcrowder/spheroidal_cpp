@@ -516,9 +516,21 @@ namespace gsl
 
 
 
-gsl::vector::operator vector_view() const
+gsl::vector::operator gsl::vector_view() const
 {   
-    printf("Creating view from vector\n");
+    // printf("Creating view from vector\n");
+    return view();
+}
+
+gsl::vector::operator gsl::column_view() const
+{   
+    // printf("Creating column view from vector\n");
+    return view();
+}
+
+gsl::vector::operator gsl::row_view() const
+{   
+    // printf("Creating row view from vector\n");
     return view();
 }
 
