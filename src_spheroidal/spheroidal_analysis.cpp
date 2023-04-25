@@ -29,13 +29,13 @@ gsl::matrix get_legendre_matrix(int p, int m)
         {
             wP(j) = w(j) * gsl::spherical_harmonic(n, m, v(j));
         }
-        L.row(n+fabs(m)) = wP; 
+        L.row(n) = wP; 
     }
     return L;
 }
 
 
-gsl::matrix spheroidal_analysis(gsl::matrix f)
+gsl::cmatrix spheroidal_analysis(gsl::matrix f)
 {
     int np=f.nrows(); //number of points on a spheroid surface
     int ns=f.ncols(); //number of surfaces to evaluate
@@ -46,15 +46,15 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
     { 
         cerr << "The input should be defined on a Gauss-Legendre--uniform grid. Check the size of input.\n";
     }
-    gsl::matrix shc(sp,ns);
+    gsl::cmatrix shc(sp,ns);
 
-    f.print();
+    // f.print();
 
     for (int i=0; i<ns; i++)
     {
         // Pull out the ith column of f, corrresponding to the ith surface
         gsl::vector fi = f.column(i);
-        fi.print();
+        // fi.print();
 
         // Reshape the vector into a matrix with 2p rows and p+1 columns
         gsl::matrix f_matrix(p+1, 2*p);
@@ -64,11 +64,11 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
             // f_matrix.column(j) = fi_col;
             f_matrix.column(j) = fi.subvector(j*(p+1),p+1);
         }
-        f_matrix.print();
+        // f_matrix.print();
 
         // Take the Fourier transform along the rows of the matrix
         gsl::cmatrix fi_fourier = gsl::fft(f_matrix, 2);
-        fi_fourier.print();
+        // fi_fourier.print();
 
         // Reshape the matrix of fourier coefficients into a vector (column major). 
         gsl::cvector fi_fourier_vec((2*p)*(p+1));
@@ -78,11 +78,11 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
             fi_fourier_vec.subvector(j*(p+1),p+1) = fi_fourier_col;
         }
         fi_fourier_vec *= (M_PI/p);
-        fi_fourier_vec.print();
+        // fi_fourier_vec.print();
 
         // Shift the vector so that m=0 frequency is in the center
         gsl::cvector fi_fourier_vec1 = gsl::circshift(fi_fourier_vec, p*(p+1));
-        fi_fourier_vec1.print();
+        // fi_fourier_vec1.print();
         
         //Set up for trapezoidal rule.
         gsl::cvector fi_fourier_vec2((2*p+1)*(p+1));
@@ -100,35 +100,47 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
                 fi_fourier_vec2.subvector(j*(p+1),p+1) = fi_fourier_col;
             }
         }
-        fi_fourier_vec2.print();
+        // fi_fourier_vec2.print();
 
+        // printf("Starting legendre basis transformation now.\n");
 
         //Legendre basis transform
-        gsl::cvector shc_i(fi_fourier_vec2.size());
+        gsl::cmatrix shc_i(p+1,2*p+1);
         for (int m=-p; m<p+1; m++)
         {
             gsl::cvector fi_fourier_col = fi_fourier_vec2.subvector((p+m)*(p+1),p+1);
+            // fi_fourier_col.print();
             gsl::cmatrix L = get_legendre_matrix(p,m);
-            
-            //// FIX THIS
-            gsl::cvector shc_col = L*fi_fourier_col;
-            //// FIX THIS
+            // L.print();
 
+            gsl::cvector shc_col = L*fi_fourier_col;
             // shc_col.print();
             
-            shc_i.subvector((m+p)*(p+1),p+1) = shc_col;
+            shc_i.column((m+p)) = shc_col;
         }
-        shc_i.print();
-        
+        // shc_i.print();
         
         
         // SHRINK shc_i
+        gsl::cvector shrink_shc_i(sp);
+        int count=0;
+        for (int n=0; n<p+1; n++)
+        {
+            for (int m=-n; m<n+1; m++)
+            {
+                int inm=n;
+                int jnm=m+p;
+                if (fabs(m)<=n)
+                {
+                    shrink_shc_i(count) = shc_i(inm,jnm);
+                    count++;
+                }
+                
+            }
+        }
+        // shrink_shc_i.print();
 
-        
-        
-
-
-
+        shc.column(i)=shrink_shc_i;
     }
 
     return shc;

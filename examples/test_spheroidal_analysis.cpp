@@ -13,12 +13,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int p=1;
+    int p=2;
     int sp=(p+1)*(p+1);
     
     if (argc==2){p=atoi(argv[1]);}
     
-    cout << "p=" << p <<endl;
+    printf("p=%d\n", p);
 
     gsl::matrix theta, phi;
     gl_grid(p, theta, phi);
@@ -26,10 +26,13 @@ int main(int argc, char *argv[])
     phi.print();
 
     gsl::matrix f;
-    f.resize(2*p*(p+1),1);
+    f.resize(2*p*(p+1),2);
     f.column(0) = gsl::linspace(1. , 2.*p*(p+1), 2*p*(p+1));
+    f.column(1) = gsl::linspace(1. , 2.*p*(p+1), 2*p*(p+1));
 
-    gsl::matrix shc=spheroidal_analysis(f);
+    gsl::cmatrix shc=spheroidal_analysis(f);
+
+    shc.print();
  
 
     // cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;

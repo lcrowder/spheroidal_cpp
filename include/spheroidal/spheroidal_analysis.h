@@ -4,6 +4,6 @@
 #include <yawg/core.h>
 
 gsl::matrix get_legendre_matrix(int p, int m);
-gsl::matrix spheroidal_analysis(gsl::matrix f);
+gsl::cmatrix spheroidal_analysis(gsl::matrix f);
 
 #endif // _SPHEROIDAL_ANALYSIS_H_
