@@ -75,6 +75,8 @@ namespace gsl
         friend bool operator!=(const cvector &v1, const vector &v2);
         friend bool operator!=(const vector &v1, const cvector &v2);
 
+        // Multiply matrix by vector
+        friend vector operator*(const matrix &M, const vector &v);
     public:
         //! \brief Construct empty vector
         vector();

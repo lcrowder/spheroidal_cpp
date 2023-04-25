@@ -32,19 +32,6 @@ gsl::vector::vector(gsl::vector &&v) : gvec(v.gvec)
     v.gvec = nullptr;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 gsl::vector &gsl::vector::operator=(const gsl::vector &v)
 {
     if (this == &v)
@@ -54,14 +41,6 @@ gsl::vector &gsl::vector::operator=(const gsl::vector &v)
     gsl_vector_memcpy(gvec, v.gvec);
     return *this;
 }
-
-
-
-
-
-
-
-
 
 gsl::vector &gsl::vector::operator=(gsl::vector &&v)
 {
@@ -79,27 +58,11 @@ gsl::vector &gsl::vector::operator+=(const gsl::vector &v)
     return *this;
 }
 
-
-
-
-
-
-
-
-
 gsl::vector &gsl::vector::operator-=(const gsl::vector &gvec_other)
 {
     gsl_vector_sub(gvec, gvec_other.gvec);
     return *this;
 }
-
-
-
-
-
-
-
-
 
 gsl::vector &gsl::vector::operator*=(double a)
 {
@@ -107,29 +70,11 @@ gsl::vector &gsl::vector::operator*=(double a)
     return *this;
 }
 
-
-
-
-
-
-
-
-
-
 gsl::vector &gsl::vector::operator/=(double a)
 {
     gsl_vector_scale(gvec, 1.0 / a);
     return *this;
 }
-
-
-
-
-
-
-
-
-
 
 gsl::vector gsl::vector::operator-() const
 {
@@ -142,34 +87,23 @@ gsl::vector::~vector()
     this->gfree();
 }
 
-void gsl::vector::set(size_t i, double val) 
+void gsl::vector::set(size_t i, double val)
 {
-    *gsl_vector_ptr(gvec, i) = val; 
+    *gsl_vector_ptr(gvec, i) = val;
 }
 
-double gsl::vector::get(size_t i) const 
-{ 
+double gsl::vector::get(size_t i) const
+{
     return *gsl_vector_ptr(gvec, i);
 }
 
-
-
-
-
-
-
-double gsl::vector::operator()(size_t i) const 
-{ 
-    return *gsl_vector_ptr(gvec, i); 
+double gsl::vector::operator()(size_t i) const
+{
+    return *gsl_vector_ptr(gvec, i);
 }
 
-
-
-
-
-
 double &gsl::vector::operator()(size_t i)
-{ 
+{
     return *gsl_vector_ptr(gvec, i);
 }
 
@@ -219,9 +153,6 @@ void gsl::vector::print(FILE *out) const
         fprintf(out, "%s%g", (i == 0) ? "" : ", ", gsl_vector_get(gvec, i));
     fprintf(out, "]\n");
 }
-
-
-
 
 //! \brief Private function to free allocated memory
 void gsl::vector::gfree()
@@ -397,124 +328,14 @@ namespace gsl
         return false;
     }
 
+    vector operator*(const matrix& M, const vector& v)
+    {
+        vector result(M.nrows());
+        gsl_blas_dgemv(CblasNoTrans, 1.0, M.get(), v.get(), 0.0, result.get());
+        return result;
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 gsl::vector_view gsl::vector::view() const
 {
@@ -547,9 +368,9 @@ gsl::vector_view::~vector_view()
     if (gvec != nullptr)
         free(gvec);
     gvec = nullptr;
-} 
+}
 
-gsl::vector_view& gsl::vector_view::operator=(const gsl::vector &v)
+gsl::vector_view &gsl::vector_view::operator=(const gsl::vector &v)
 {
     gsl_vector_memcpy(gvec, v.get());
     return *this;

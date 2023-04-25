@@ -513,6 +513,13 @@ namespace gsl
                 return true;
         return false;
     }
+
+    cvector operator*(const cmatrix& M, const cvector& v)
+    {
+        cvector result(M.nrows());
+        gsl_blas_zgemv(CblasNoTrans, GSL_COMPLEX_ONE, M.get(), v.get(), GSL_COMPLEX_ZERO, result.get());
+        return result;
+    }
 }
 
 gsl::cvector_view gsl::cvector::view() const
