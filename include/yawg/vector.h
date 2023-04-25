@@ -12,6 +12,7 @@ namespace gsl
     class column_view;
     class row_view;
 
+    class matrix;
     class matrix_view;
     
     class cvector;

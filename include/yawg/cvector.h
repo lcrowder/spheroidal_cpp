@@ -12,6 +12,8 @@ namespace gsl
     class cvector_view;
     class cmatrix_view;
 
+    class cmatrix;
+
     /*! \class cvector
      *  \brief A wrapper class for gsl_vector_complex
      *
