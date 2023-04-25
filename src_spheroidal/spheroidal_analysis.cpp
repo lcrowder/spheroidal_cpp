@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <math.h>
 #include <stdio.h>
 #include <yawg/utils.hpp>
 #include <yawg/core.h>
@@ -12,6 +13,26 @@
 #include <gsl/gsl_math.h> 
 #include <gsl/gsl_sf_gamma.h>
 using namespace std;
+
+
+gsl::matrix get_legendre_matrix(int p, int m)
+{
+    //Get the Gauss-Legendre quadrature points and weights
+    gsl::vector v, w;
+    gsl::leggauss(p+1, v, w);
+    gsl::vector wP(p+1);
+    gsl::matrix L(p+1,p+1);
+
+    for (int n=fabs(m); n<p+1; n++)
+    {
+        for (int j=0; j<p+1; j++)
+        {
+            wP(j) = w(j) * gsl::spherical_harmonic(n, m, v(j));
+        }
+        L.row(n+fabs(m)) = wP; 
+    }
+    return L;
+}
 
 
 gsl::matrix spheroidal_analysis(gsl::matrix f)
@@ -39,8 +60,9 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
         gsl::matrix f_matrix(p+1, 2*p);
         for (int j=0; j<2*p; j++)
         {
-            gsl::vector fi_col = fi.subvector(j*(p+1),p+1);
-            f_matrix.column(j) = fi_col;
+            // gsl::vector fi_col = fi.subvector(j*(p+1),p+1);
+            // f_matrix.column(j) = fi_col;
+            f_matrix.column(j) = fi.subvector(j*(p+1),p+1);
         }
         f_matrix.print();
 
@@ -82,10 +104,28 @@ gsl::matrix spheroidal_analysis(gsl::matrix f)
 
 
         //Legendre basis transform
+        gsl::cvector shc_i(fi_fourier_vec2.size());
+        for (int m=-p; m<p+1; m++)
+        {
+            gsl::cvector fi_fourier_col = fi_fourier_vec2.subvector((p+m)*(p+1),p+1);
+            gsl::cmatrix L = get_legendre_matrix(p,m);
+            
+            //// FIX THIS
+            gsl::cvector shc_col = L*fi_fourier_col;
+            //// FIX THIS
 
-        //Get the Gauss-Legendre quadrature points and weights
-        gsl::vector v, w;
-        gsl::leggauss(p+1, v, w);
+            // shc_col.print();
+            
+            shc_i.subvector((m+p)*(p+1),p+1) = shc_col;
+        }
+        shc_i.print();
+        
+        
+        
+        // SHRINK shc_i
+
+        
+        
 
 
 
