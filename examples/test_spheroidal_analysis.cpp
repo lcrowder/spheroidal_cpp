@@ -1,4 +1,4 @@
-#include <spheroidal/spheroidal_analysis.h>
+#include <spheroidal/spheroidal_harmonic_transforms.h>
 #include <spheroidal/grid_functions.h>
 #include <iostream>
 #include <iomanip>
@@ -13,7 +13,7 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    int p=2;
+    int p=1;
     int sp=(p+1)*(p+1);
     
     if (argc==2){p=atoi(argv[1]);}
@@ -33,6 +33,12 @@ int main(int argc, char *argv[])
     gsl::cmatrix shc=spheroidal_analysis(f);
 
     shc.print();
+
+    printf("Starting spheroidal synthesis\n");
+
+    gsl::cmatrix f2=spheroidal_snythesis(shc);
+
+    f2.print();
  
 
     // cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;
