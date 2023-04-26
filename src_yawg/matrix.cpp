@@ -241,7 +241,7 @@ gsl::matrix &gsl::matrix::T()
         gsl_matrix_transpose_memcpy(gmat, gmat);
     else
     {
-        gsl::matrix M_new(this->nrows(), this->ncols());
+        gsl::matrix M_new(this->ncols(), this->nrows());
         for (size_t i = 0; i < this->nrows(); i++)
             for (size_t j = 0; j < this->ncols(); j++)
                 M_new(j, i) = this->get(i, j);
