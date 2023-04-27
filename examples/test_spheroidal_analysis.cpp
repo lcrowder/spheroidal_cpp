@@ -83,6 +83,12 @@ int main(int argc, char *argv[])
     gsl::matrix F=solid_harmonic(p,u,regime);
     F.print();
 
+    gsl::vector li,ls,le;
+    DLspectrum(p,1.5,li,ls,le);
+    li.print();
+    ls.print();
+    le.print();
+
 
 
 
