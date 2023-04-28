@@ -234,21 +234,21 @@ gsl::matrix gsl::matrix::reshape(size_t n, size_t m) const
     return gmat_new;
 }
 
+
 //! \brief Compute the matrix transpose, in-place if square
 gsl::matrix &gsl::matrix::T()
 {
     if (this->is_square())
-        gsl_matrix_transpose_memcpy(gmat, gmat);
+        gsl_matrix_transpose(gmat);
     else
     {
         gsl::matrix M_new(this->ncols(), this->nrows());
-        for (size_t i = 0; i < this->nrows(); i++)
-            for (size_t j = 0; j < this->ncols(); j++)
-                M_new(j, i) = this->get(i, j);
+        gsl_matrix_transpose_memcpy( M_new.get(), gmat );
         *this = M_new;
     }
     return *this;
 }
+
 
 /*! \brief Copy constructor creating n x m matrix
  * \param M gsl::matrix to copy

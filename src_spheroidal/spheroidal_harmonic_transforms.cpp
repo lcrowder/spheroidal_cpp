@@ -1,6 +1,7 @@
 // #include <spheroidal/legendre_otc.h>
 #include <spheroidal/grid_functions.h>
 #include <spheroidal/spheroidal_harmonic_transforms.h>
+#include <spheroidal/legendre_otc.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -53,14 +54,8 @@ gsl::matrix get_legendre_matrix_inv(int p, int m)
     return L_inv;
 }
 
-// Get index in spheroidal harmonic ordering: n=0,1,2,...,p; m=-n,-n+1,...,n
-int geti(int n, int m)
-{
-    return m + n * (n + 1);
-}
 
-
-gsl::cmatrix spheroidal_analysis(gsl::matrix f)
+gsl::cmatrix spheroidal_analysis(gsl::cmatrix f)
 {
     int np=f.nrows(); //number of points on a spheroid surface
     int ns=f.ncols(); //number of surfaces to evaluate
@@ -78,11 +73,11 @@ gsl::cmatrix spheroidal_analysis(gsl::matrix f)
     for (int i=0; i<ns; i++)
     {
         // Pull out the ith column of f, corrresponding to the ith surface
-        gsl::vector fi = f.column(i);
+        gsl::cvector fi = f.column(i);
         // fi.print();
 
         // Reshape the vector into a matrix with 2p rows and p+1 columns
-        gsl::matrix f_matrix(p+1, 2*p);
+        gsl::cmatrix f_matrix(p+1, 2*p);
         for (int j=0; j<2*p; j++)
         {
             // gsl::vector fi_col = fi.subvector(j*(p+1),p+1);

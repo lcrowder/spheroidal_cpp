@@ -76,18 +76,47 @@ int main(int argc, char *argv[])
     // double layer tests
     // ------------------------------------------------------------
 
-    gsl::vector u=gsl::linspace(1.5,3.5,5);
+    //Target points
+    gsl::vector ut=gsl::linspace(1.5,3.5,4);
+    gsl::vector vt=gsl::linspace(-1,1,4);
+    gsl::vector phit=gsl::linspace(0,2*M_PI,4);
+    
+    gsl::matrix S(4,3);
+    // gsl::matrix S(4,6);
+    S.column(0)=ut; S.column(1)=vt; S.column(2)=phit;
+    // S.column(3)=2*ut; S.column(4)=vt; S.column(5)=phit;
+
+    S.print();
+
     int p=1;
-    int regime =1;
+    int np = 2*p*(p+1);
+    gsl::vector sigma0=gsl::linspace(1., 2.*p*(p+1), np);
+    gsl::cmatrix sigma(np,1); sigma.column(0) = sigma0; 
+    // sigma.column(1)=sigma0;
+    sigma.print();
 
-    gsl::matrix F=solid_harmonic(p,u,regime);
-    F.print();
+    double u0=2./sqrt(3);
+    int coords=1;
 
-    gsl::vector li,ls,le;
-    DLspectrum(p,1.5,li,ls,le);
-    li.print();
-    ls.print();
-    le.print();
+    // gsl::cmatrix DL = spheroidal_double_layer(sigma, u0, S, coords);
+
+    printf("sigma0:\n");
+    sigma0.print();
+    gsl::cvector DLvec = spheroidal_double_layer(sigma0, u0, S, coords);
+
+    // DL.print();
+    DLvec.print();
+
+
+    // int regime =1;
+    // gsl::matrix F=solid_harmonic(p,u,regime);
+    // F.print();
+
+    // gsl::vector li,ls,le;
+    // DLspectrum(p,1.5,li,ls,le);
+    // li.print();
+    // ls.print();
+    // le.print();
 
 
 

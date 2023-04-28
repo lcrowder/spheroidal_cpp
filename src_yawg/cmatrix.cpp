@@ -339,14 +339,12 @@ gsl::cmatrix gsl::cmatrix::reshape(size_t n, size_t m) const
 //! \note If the matrix is not square, the transpose is not in-place
 gsl::cmatrix &gsl::cmatrix::T()
 {
-    if (is_square())
+    if (this->is_square())
         gsl_matrix_complex_transpose(gmat);
     else
     {
         gsl::cmatrix M_new(this->ncols(), this->nrows());
-        for (size_t i = 0; i < this->nrows(); i++)
-            for (size_t j = 0; j < this->ncols(); j++)
-                M_new(j, i) = this->get(i, j);
+        gsl_matrix_complex_transpose_memcpy( M_new.get(), gmat );
         *this = M_new;
     }
     return *this;
