@@ -102,10 +102,11 @@ int main(int argc, char *argv[])
 
     printf("sigma0:\n");
     sigma0.print();
-    gsl::cvector DLvec = spheroidal_double_layer(sigma0, u0, S, coords);
+    // gsl::cvector DLvec = spheroidal_double_layer(sigma0, u0, S, coords);
+    gsl::cmatrix DL= spheroidal_double_layer(sigma, u0);
 
-    // DL.print();
-    DLvec.print();
+    DL.print();
+    // DLvec.print();
 
 
     // int regime =1;

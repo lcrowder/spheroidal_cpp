@@ -8,7 +8,7 @@ void DLspectrum(int p, double u0, gsl::vector &lambda_int, gsl::vector &lambda_s
 gsl::cmatrix Ynm_matrix(int p, gsl::vector v, gsl::vector phi);
 gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix X, int target_coords=0);
 gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0);
-gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0, gsl::matrix X, int target_coords=0);
-gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0);
+// gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0, gsl::matrix X, int target_coords=0);
+// gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0);
 
 #endif // _SPHEROIDAL_DOUBLE_LAYER_H_

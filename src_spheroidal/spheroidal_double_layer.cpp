@@ -57,9 +57,9 @@ void DLspectrum(int p, double u0, gsl::vector &lambda_int, gsl::vector &lambda_s
     }
 }
 
-gsl::cmatrix Ynm_matrix(int p, gsl::vector v, gsl::vector phi)
+gsl::cmatrix Ynm_matrix(int p, gsl::vector theta, gsl::vector phi)
 {
-    int N=v.size();
+    int N=phi.size();
     int sp=(p+1)*(p+1);
     gsl::cmatrix Y(N,sp);
     
@@ -69,7 +69,7 @@ gsl::cmatrix Ynm_matrix(int p, gsl::vector v, gsl::vector phi)
         {
             int n=floor(sqrt(j));
             int m=j-n*n-n;
-            Y(i,j)=gsl::spherical_harmonic(n,m,acos(v(i)),phi(i));
+            Y(i,j)=gsl::spherical_harmonic(n,m,theta(i),phi(i));
         }
     }
     return Y;
@@ -195,7 +195,9 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
                 printf("Solid harmonics:\n");
                 Fr.print();
 
-                gsl::cmatrix Yr=Ynm_matrix(p, v_x_r, phi_x_r);
+                gsl::vector theta_x_r(nt_r);
+                for (int i=0; i<nt_r; i++) {theta_x_r(i)=acos(v_x_r(i));}
+                gsl::cmatrix Yr=Ynm_matrix(p, theta_x_r, phi_x_r);
 
                 printf("Spherical harmonics:\n");
                 Yr.print();
@@ -255,15 +257,20 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0)
 
     gsl::cmatrix DL(nt,num_surfs);
 
-    gsl::matrix V, PHI;
-    gl_grid(p, V,PHI);
-    gsl::vector u_x(nt), v_x(nt), phi_x(nt);
+    gsl::matrix THETA, PHI;
+    gl_grid(p, THETA,PHI);
+    gsl::vector u_x(nt), theta_x(nt), phi_x(nt);
     u_x=gsl::linspace(u0,u0,nt);
-    for (int j=0; j<V.ncols(); j++)
+    for (int j=0; j<PHI.ncols(); j++)
     {
-        v_x.subvector(j*(p+1),p+1)=V.column(j);
+        theta_x.subvector(j*(p+1),p+1)=THETA.column(j);
         phi_x.subvector(j*(p+1),p+1)=PHI.column(j);
     }
+
+    printf("theta_x:\n");
+    theta_x.print();
+    printf("phi_x:\n");
+    phi_x.print();
 
     
     gsl::matrix F=solid_harmonic(p, u_x, 0);
@@ -271,72 +278,69 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0)
     printf("Solid harmonics:\n");
     F.print();
 
-    gsl::cmatrix Y=Ynm_matrix(p, v_x, phi_x);
+    gsl::cmatrix Y=Ynm_matrix(p, theta_x, phi_x);
 
     printf("Spherical harmonics:\n");
     Y.print();
 
     gsl::cvector DLcoefs = spectra_surf;
-    gsl::cmatrix FY(nt,sp);
 
     // Loop over all the different surfaces we want to evaluate
     for (int k=0; k<num_surfs; k++)
     {
         printf("Evaluating surface %d\n",k);
 
-        // Construct a matrix of solid harmonics and a vector of coefficients
+        // Construct vector of coefficients
         for (int i=0; i<sp; i++)
         {
             DLcoefs(i)*=shc(i,k);
-            for (int j=0; j<nt; j++)
-            {
-                FY(j,i)=F(j,i)*Y(j,i);
-            }  
         }
 
         printf("Eigenfunctions:\n");
-        FY.print();
+        Y.print();
 
         printf("DL coefficients:\n");
         DLcoefs.print();
 
         // Multiply the two matrices to get the double layer potential
-        DL.column(k) = FY*DLcoefs;
+        DL.column(k) = Y*DLcoefs;
         
     }
     return DL;
 }
 
 
-//Allow vector input for sigma
-gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0, gsl::matrix X, int target_coords)
-{
-    gsl::cmatrix sigma_matrix(sigma.size(),1);
-    sigma_matrix.column(0)=sigma;
+//BROKEN :(
+
+// //Allow vector input for sigma
+// gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0, gsl::matrix X, int target_coords)
+// {
+//     gsl::cmatrix sigma_matrix(sigma.size(),1);
+//     sigma_matrix.column(0)=sigma;
     
-    printf("Sigma vector:\n");
-    sigma.print();
-    printf("Sigma matrix:\n");
-    sigma_matrix.print();
+//     printf("Sigma vector:\n");
+//     sigma.print();
+//     printf("Sigma matrix:\n");
+//     sigma_matrix.print();
 
-    gsl::cmatrix DL = spheroidal_double_layer(sigma_matrix,u0,X,target_coords);
-    gsl::cvector DLvec=DL.column(0);
+//     gsl::cmatrix DL = spheroidal_double_layer(sigma_matrix,u0,X,target_coords);
+//     gsl::cvector DLvec=DL.column(0);
 
-    printf("DL matrix:\n");
-    DL.print();
-    printf("DL vector:\n");
-    DLvec.print();
+//     printf("DL matrix:\n");
+//     DL.print();
+//     printf("DL vector:\n");
+//     DLvec.print();
 
-    return DLvec;
-}
+//     return DLvec;
+// }
 
-gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0)
-{
-    gsl::cmatrix sigma_matrix(sigma.size(),1);
-    sigma_matrix.column(0)=sigma;
-    gsl::cmatrix DL = spheroidal_double_layer(sigma_matrix,u0);
-    gsl::cvector DLvec = DL.column(0);
-    return DLvec;
-}
+// gsl::cvector spheroidal_double_layer(gsl::cvector sigma, double u0)
+// {
+//     gsl::cmatrix sigma_matrix(sigma.size(),1);
+//     sigma_matrix.column(0)=sigma;
+//     gsl::cmatrix DL = spheroidal_double_layer(sigma_matrix,u0);
+//     gsl::cvector DLvec = DL.column(0);
+//     return DLvec;
+// }
 
 
