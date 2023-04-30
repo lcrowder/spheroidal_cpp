@@ -69,9 +69,8 @@ gsl::cmatrix::cmatrix(FILE *in)
 gsl::cmatrix::cmatrix(const gsl::cmatrix &M, size_t n, size_t m)
 {
     this->galloc(n, m);
-    for (size_t i = 0; i < n; i++)
-        for (size_t j = 0; j < m; j++)
-            gsl_matrix_complex_set(gmat, i, j, gsl_matrix_complex_get(M.gmat, i, j));
+    for (size_t t = 0; t < n * m; t++)
+        this->set(t / m, t % m, M(t / M.ncols(), t % M.ncols()));
 }
 
 /*! \brief Construct new gsl::cmatrix from gsl::matrix
@@ -102,7 +101,7 @@ gsl::cmatrix &gsl::cmatrix::operator=(const gsl::cmatrix &M)
 {
     if (this == &M)
         return *this;
-    if( M.nrows() != this->nrows() || M.ncols() != this->ncols() )
+    if (M.nrows() != this->nrows() || M.ncols() != this->ncols())
         this->resize(M.nrows(), M.ncols());
     gsl_matrix_complex_memcpy(gmat, M.gmat);
     return *this;
@@ -330,7 +329,7 @@ gsl::cmatrix gsl::cmatrix::reshape(size_t n, size_t m) const
 {
     gsl::cmatrix M_new(n, m);
     for (size_t t = 0; t < n * m; t++)
-        M_new(t / n, t % m) = this->get(t / this->nrows(), t % this->ncols());
+        M_new(t / m, t % m) = this->get(t / this->ncols(), t % this->ncols());
 
     return M_new;
 }
@@ -344,7 +343,7 @@ gsl::cmatrix &gsl::cmatrix::T()
     else
     {
         gsl::cmatrix M_new(this->ncols(), this->nrows());
-        gsl_matrix_complex_transpose_memcpy( M_new.get(), gmat );
+        gsl_matrix_complex_transpose_memcpy(M_new.get(), gmat);
         *this = M_new;
     }
     return *this;
@@ -755,13 +754,14 @@ void gsl::cmatrix::gfree()
  *       This is slightly slower than using gsl_matrix_compllex_alloc, but allows
  *       for intuitive usage of row views.
  */
-void gsl::cmatrix::galloc(size_t n, size_t m) 
-{ 
-    if (n != 0 && m != 0) {
+void gsl::cmatrix::galloc(size_t n, size_t m)
+{
+    if (n != 0 && m != 0)
+    {
         gmat = gsl_matrix_complex_alloc(n, m);
     }
     else
-    {   
+    {
         gmat = new gsl_matrix_complex;
         gmat->size1 = n;
         gmat->size2 = m;
