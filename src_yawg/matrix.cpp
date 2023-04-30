@@ -226,14 +226,13 @@ void gsl::matrix::resize(size_t n, size_t m)
  */
 gsl::matrix gsl::matrix::reshape(size_t n, size_t m) const
 {
-    gsl::matrix gmat_new(n, m);
+    gsl::matrix M_new(n, m);
 
     for (size_t t = 0; t < n * m; t++)
-        gmat_new(t / n, t % m) = this->get(t / this->nrows(), t % this->ncols());
+        M_new(t / m, t % m) = this->get(t / this->ncols(), t % this->ncols());
 
-    return gmat_new;
+    return M_new;
 }
-
 
 //! \brief Compute the matrix transpose, in-place if square
 gsl::matrix &gsl::matrix::T()
@@ -243,12 +242,11 @@ gsl::matrix &gsl::matrix::T()
     else
     {
         gsl::matrix M_new(this->ncols(), this->nrows());
-        gsl_matrix_transpose_memcpy( M_new.get(), gmat );
+        gsl_matrix_transpose_memcpy(M_new.get(), gmat);
         *this = M_new;
     }
     return *this;
 }
-
 
 /*! \brief Copy constructor creating n x m matrix
  * \param M gsl::matrix to copy
@@ -257,11 +255,10 @@ gsl::matrix &gsl::matrix::T()
  */
 gsl::matrix::matrix(const matrix &M, size_t n, size_t m)
 {
-    galloc(M.gmat->size1, M.gmat->size2);
+    this->galloc(n, m);
 
     for (size_t t = 0; t < n * m; t++)
-        gsl_matrix_set(gmat, t / n, t % m,
-                       gsl_matrix_get(M.gmat, t / M.gmat->size1, t % M.gmat->size2));
+        this->set(t / m, t % m, M(t / M.ncols(), t % M.ncols()));
 }
 
 //! \brief CLear the gsl::matrix, free underlying memory

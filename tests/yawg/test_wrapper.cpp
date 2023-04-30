@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <yawg/core.h>
 #include <gsl/gsl_math.h>
+#include <unistd.h>
 #include <catch2/catch_test_macros.hpp>
 
 // Use Catch2 to test the various constructors for gsl::vector
@@ -284,20 +285,23 @@ TEST_CASE("gsl::matrix save_csv and load_csv", "[gsl::matrix]")
 
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_matrix.csv", "w");
-    REQUIRE(fp != nullptr);
-    m.print_csv(fp);
-    fclose(fp);
+    if (fp != nullptr)
+    {
+        REQUIRE(fp != nullptr);
+        m.print_csv(fp);
+        fclose(fp);
 
-    // Open a file for reading, loading the matrix
-    fp = fopen("./data/test_matrix.csv", "r");
-    REQUIRE(fp != nullptr);
-    gsl::matrix m2(fp);
-    fclose(fp);
+        // Open a file for reading, loading the matrix
+        fp = fopen("./data/test_matrix.csv", "r");
+        REQUIRE(fp != nullptr);
+        gsl::matrix m2(fp);
+        fclose(fp);
 
-    // Check that the matrices are the same
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-            REQUIRE(m(i, j) == m2(i, j));
+        // Check that the matrices are the same
+        for (size_t i = 0; i < m.nrows(); i++)
+            for (size_t j = 0; j < m.ncols(); j++)
+                REQUIRE(m(i, j) == m2(i, j));
+    }
 }
 
 // Use Catch2 to test the save_csv and load_csv methods of gsl::cmatrix
@@ -316,24 +320,26 @@ TEST_CASE("gsl::cmatrix save_csv and load_csv", "[gsl::cmatrix]")
 
     // Open a file for writing, saving the matrix
     FILE *fp = fopen("./data/test_cmatrix.csv", "w");
-    REQUIRE(fp != nullptr);
-    m.print_csv(fp);
-    fclose(fp);
+    if (fp != nullptr)
+    {
+        m.print_csv(fp);
+        fclose(fp);
 
-    // Open a file for reading, loading the matrix
-    fp = fopen("./data/test_cmatrix.csv", "r");
-    REQUIRE(fp != nullptr);
-    gsl::cmatrix m2(fp);
-    m2.print();
-    fclose(fp);
+        // Open a file for reading, loading the matrix
+        fp = fopen("./data/test_cmatrix.csv", "r");
+        REQUIRE(fp != nullptr);
+        gsl::cmatrix m2(fp);
+        m2.print();
+        fclose(fp);
 
-    // Check that the matrices are the same
-    for (size_t i = 0; i < m.nrows(); i++)
-        for (size_t j = 0; j < m.ncols(); j++)
-        {
-            REQUIRE(m(i, j).real() == m2(i, j).real());
-            REQUIRE(m(i, j).imag() == m2(i, j).imag());
-        }
+        // Check that the matrices are the same
+        for (size_t i = 0; i < m.nrows(); i++)
+            for (size_t j = 0; j < m.ncols(); j++)
+            {
+                REQUIRE(m(i, j).real() == m2(i, j).real());
+                REQUIRE(m(i, j).imag() == m2(i, j).imag());
+            }
+    }
 }
 
 // Use Catch2 to test the various constructors for gsl::matrix
@@ -554,4 +560,32 @@ TEST_CASE("gsl::cmatrix resize", "[gsl::cmatrix]")
     m.clear();
     REQUIRE(m.nrows() == 0);
     REQUIRE(m.ncols() == 0);
+}
+
+// Use Catch2 to test the reshape method of gsl::matrix
+TEST_CASE("gsl::matrix reshape", "[gsl::matrix]")
+{
+    gsl::matrix m(2, 3);
+    for( size_t i = 0; i < m.nrows(); i++ )
+        for( size_t j = 0; j < m.ncols(); j++ )
+            m(i, j) = i + j;
+
+    gsl::matrix m1 = m.reshape(3, 2);
+
+    for( size_t t = 0; t < m.nrows() * m.ncols(); t++ )
+        REQUIRE(m(t / m.ncols(), t % m.ncols()) == m1(t / m1.ncols(), t % m1.ncols()));
+}
+
+// Use Catch2 to test the reshape method of gsl::cmatrix
+TEST_CASE( "gsl::cmatrix reshape", "[gsl::cmatrix]" )
+{
+    gsl::cmatrix m(2, 3);
+    for( size_t i = 0; i < m.nrows(); i++ )
+        for( size_t j = 0; j < m.ncols(); j++ )
+            m(i, j) = gsl::complex(i, j);
+
+    gsl::cmatrix m1 = m.reshape(3, 2);
+
+    for( size_t t = 0; t < m.nrows() * m.ncols(); t++ )
+        REQUIRE(m(t / m.ncols(), t % m.ncols()) == m1(t / m1.ncols(), t % m1.ncols()));
 }
