@@ -1,13 +1,433 @@
-Length of u array is 4
-u[0]=1.5000
+Length of u array is 144
+u[0]=1.1547
 continued fraction algorithm converged in 19 iterations
-H[0]=0.25733
-u[1]=2.1667
-continued fraction algorithm converged in 14 iterations
-H[1]=0.16372
-u[2]=2.8333
-continued fraction algorithm converged in 12 iterations
-H[2]=0.12183
-u[3]=3.5000
-continued fraction algorithm converged in 11 iterations
-H[3]=0.09740
+H[0]=0.85126
+u[1]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[1]=0.85126
+u[2]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[2]=0.85126
+u[3]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[3]=0.85126
+u[4]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[4]=0.85126
+u[5]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[5]=0.85126
+u[6]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[6]=0.85126
+u[7]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[7]=0.85126
+u[8]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[8]=0.85126
+u[9]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[9]=0.85126
+u[10]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[10]=0.85126
+u[11]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[11]=0.85126
+u[12]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[12]=0.85126
+u[13]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[13]=0.85126
+u[14]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[14]=0.85126
+u[15]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[15]=0.85126
+u[16]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[16]=0.85126
+u[17]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[17]=0.85126
+u[18]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[18]=0.85126
+u[19]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[19]=0.85126
+u[20]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[20]=0.85126
+u[21]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[21]=0.85126
+u[22]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[22]=0.85126
+u[23]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[23]=0.85126
+u[24]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[24]=0.85126
+u[25]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[25]=0.85126
+u[26]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[26]=0.85126
+u[27]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[27]=0.85126
+u[28]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[28]=0.85126
+u[29]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[29]=0.85126
+u[30]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[30]=0.85126
+u[31]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[31]=0.85126
+u[32]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[32]=0.85126
+u[33]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[33]=0.85126
+u[34]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[34]=0.85126
+u[35]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[35]=0.85126
+u[36]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[36]=0.85126
+u[37]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[37]=0.85126
+u[38]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[38]=0.85126
+u[39]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[39]=0.85126
+u[40]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[40]=0.85126
+u[41]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[41]=0.85126
+u[42]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[42]=0.85126
+u[43]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[43]=0.85126
+u[44]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[44]=0.85126
+u[45]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[45]=0.85126
+u[46]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[46]=0.85126
+u[47]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[47]=0.85126
+u[48]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[48]=0.85126
+u[49]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[49]=0.85126
+u[50]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[50]=0.85126
+u[51]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[51]=0.85126
+u[52]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[52]=0.85126
+u[53]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[53]=0.85126
+u[54]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[54]=0.85126
+u[55]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[55]=0.85126
+u[56]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[56]=0.85126
+u[57]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[57]=0.85126
+u[58]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[58]=0.85126
+u[59]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[59]=0.85126
+u[60]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[60]=0.85126
+u[61]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[61]=0.85126
+u[62]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[62]=0.85126
+u[63]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[63]=0.85126
+u[64]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[64]=0.85126
+u[65]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[65]=0.85126
+u[66]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[66]=0.85126
+u[67]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[67]=0.85126
+u[68]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[68]=0.85126
+u[69]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[69]=0.85126
+u[70]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[70]=0.85126
+u[71]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[71]=0.85126
+u[72]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[72]=0.85126
+u[73]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[73]=0.85126
+u[74]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[74]=0.85126
+u[75]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[75]=0.85126
+u[76]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[76]=0.85126
+u[77]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[77]=0.85126
+u[78]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[78]=0.85126
+u[79]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[79]=0.85126
+u[80]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[80]=0.85126
+u[81]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[81]=0.85126
+u[82]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[82]=0.85126
+u[83]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[83]=0.85126
+u[84]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[84]=0.85126
+u[85]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[85]=0.85126
+u[86]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[86]=0.85126
+u[87]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[87]=0.85126
+u[88]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[88]=0.85126
+u[89]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[89]=0.85126
+u[90]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[90]=0.85126
+u[91]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[91]=0.85126
+u[92]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[92]=0.85126
+u[93]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[93]=0.85126
+u[94]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[94]=0.85126
+u[95]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[95]=0.85126
+u[96]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[96]=0.85126
+u[97]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[97]=0.85126
+u[98]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[98]=0.85126
+u[99]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[99]=0.85126
+u[100]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[100]=0.85126
+u[101]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[101]=0.85126
+u[102]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[102]=0.85126
+u[103]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[103]=0.85126
+u[104]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[104]=0.85126
+u[105]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[105]=0.85126
+u[106]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[106]=0.85126
+u[107]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[107]=0.85126
+u[108]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[108]=0.85126
+u[109]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[109]=0.85126
+u[110]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[110]=0.85126
+u[111]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[111]=0.85126
+u[112]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[112]=0.85126
+u[113]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[113]=0.85126
+u[114]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[114]=0.85126
+u[115]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[115]=0.85126
+u[116]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[116]=0.85126
+u[117]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[117]=0.85126
+u[118]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[118]=0.85126
+u[119]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[119]=0.85126
+u[120]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[120]=0.85126
+u[121]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[121]=0.85126
+u[122]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[122]=0.85126
+u[123]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[123]=0.85126
+u[124]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[124]=0.85126
+u[125]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[125]=0.85126
+u[126]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[126]=0.85126
+u[127]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[127]=0.85126
+u[128]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[128]=0.85126
+u[129]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[129]=0.85126
+u[130]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[130]=0.85126
+u[131]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[131]=0.85126
+u[132]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[132]=0.85126
+u[133]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[133]=0.85126
+u[134]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[134]=0.85126
+u[135]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[135]=0.85126
+u[136]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[136]=0.85126
+u[137]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[137]=0.85126
+u[138]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[138]=0.85126
+u[139]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[139]=0.85126
+u[140]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[140]=0.85126
+u[141]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[141]=0.85126
+u[142]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[142]=0.85126
+u[143]=1.1547
+continued fraction algorithm converged in 19 iterations
+H[143]=0.85126
