@@ -1,8 +1,0 @@
-#!/bin/bash
-p=16
-ua=1.1
-ub=3.
-N=100
-
-~/Documents/spheroidal_cpp/build/examples/test_legendre_otc $p $ua $ub $N
-python3 legendre_verification.py $p $ua $ub $N
