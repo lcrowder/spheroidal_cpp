@@ -74,21 +74,16 @@ gsl::cmatrix spheroidal_analysis(gsl::cmatrix f)
     {
         // Pull out the ith column of f, corrresponding to the ith surface
         gsl::cvector fi = f.column(i);
-        // fi.print();
 
         // Reshape the vector into a matrix with 2p rows and p+1 columns
         gsl::cmatrix f_matrix(p+1, 2*p);
         for (int j=0; j<2*p; j++)
         {
-            // gsl::vector fi_col = fi.subvector(j*(p+1),p+1);
-            // f_matrix.column(j) = fi_col;
             f_matrix.column(j) = fi.subvector(j*(p+1),p+1);
         }
-        // f_matrix.print();
 
         // Take the Fourier transform along the rows of the matrix
         gsl::cmatrix fi_fourier = gsl::fft(f_matrix, 2);
-        // fi_fourier.print();
 
         // Reshape the matrix of fourier coefficients into a vector (column major). 
         gsl::cvector fi_fourier_vec((2*p)*(p+1));
@@ -98,11 +93,9 @@ gsl::cmatrix spheroidal_analysis(gsl::cmatrix f)
             fi_fourier_vec.subvector(j*(p+1),p+1) = fi_fourier_col;
         }
         fi_fourier_vec *= (M_PI/p);
-        // fi_fourier_vec.print();
 
         // Shift the vector so that m=0 frequency is in the center
         gsl::cvector fi_fourier_vec1 = gsl::circshift(fi_fourier_vec, p*(p+1));
-        // fi_fourier_vec1.print();
         
         //Set up for trapezoidal rule.
         gsl::cvector fi_fourier_vec2((2*p+1)*(p+1));
@@ -207,7 +200,7 @@ gsl::cmatrix spheroidal_snythesis(gsl::cmatrix shc)
                 }
             }
         }
-        shc_i_matrix.print();
+        // shc_i_matrix.print();
 
 
         //Inverse Legendre basis transform. Since we chop the last frequency, this loop is shorter than the one in synthesis.
@@ -216,36 +209,36 @@ gsl::cmatrix spheroidal_snythesis(gsl::cmatrix shc)
         for (int m=-p; m<p; m++)
         {
             gsl::cvector shc_i_col = shc_i_matrix.column((p+m));
-            shc_i_col.print();
+            // shc_i_col.print();
             
             gsl::cmatrix L_inv = get_legendre_matrix_inv(p,m);
-            L_inv.print();
+            // L_inv.print();
 
             gsl::cvector fi_fourier_m = L_inv*shc_i_col;
-            fi_fourier_m.print();
+            // fi_fourier_m.print();
             
             if (m==-p) {fi_fourier_m *= 2.;}
             fi_fourier_vec.subvector((m+p)*(p+1),p+1) = fi_fourier_m;
         }
-        fi_fourier_vec.print();
+        // fi_fourier_vec.print();
         
 
         //Undo the steps we took rearranging f for the fft:
         // Reshape fourier coefficients into a matrix
         gsl::cvector fi_fourier_vec1 = gsl::circshift(fi_fourier_vec, -p*(p+1));
-        fi_fourier_vec1.print();
+        // fi_fourier_vec1.print();
 
         gsl::cmatrix fi_fourier(p+1,2*p);
         for (int j=0; j<2*p; j++)
         {
             fi_fourier.column(j) = fi_fourier_vec1.subvector(j*(p+1),p+1);
         }
-        fi_fourier.print();
+        // fi_fourier.print();
         
         //Inverse Fourier transform along the rows of the matrix
         gsl::cmatrix f_matrix = gsl::ifft(fi_fourier, 2);
         f_matrix *= 2*p;
-        f_matrix.print();
+        // f_matrix.print();
 
         // Reshape the matrix back into a vector
         gsl::cvector fi(np);
@@ -253,11 +246,10 @@ gsl::cmatrix spheroidal_snythesis(gsl::cmatrix shc)
         {
             fi.subvector(j*(p+1),p+1) = f_matrix.column(j) ;
         }
-        fi.print();
+        // fi.print();
 
         //Store in big matrix f
         f.column(i) = fi;
     }
     return f;
 }
-

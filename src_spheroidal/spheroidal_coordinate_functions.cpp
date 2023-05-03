@@ -28,7 +28,7 @@ gsl::matrix spheroidal_to_cart(gsl::matrix S, double a)
         gsl::vector v = S.column(3*j+1);
         gsl::vector phi= S.column(3*j+2);
 
-        printf("extracted u,v,phi\n");
+        // printf("extracted u,v,phi\n");
 
         gsl::vector x(s1),y(s1),z(s1);
         for (int k=0; k<s1; k++)
@@ -38,13 +38,13 @@ gsl::matrix spheroidal_to_cart(gsl::matrix S, double a)
             z(k) = a*u(k)*v(k);
         }
 
-        printf("computed cos, sin, sqrt\n");
+        // printf("computed cos, sin, sqrt\n");
                                                            
         X.column(3*j) = x;
         X.column(3*j+1) = y;
         X.column(3*j+2) = z;
 
-        printf("computed X\n");
+        // printf("computed X\n");
     }
     return X;
 }
@@ -76,13 +76,13 @@ gsl::matrix cart_to_spheroidal(gsl::matrix X, double a)
             phi(k) = atan2(y(k),x(k));
         }
 
-        printf("computed sqrt, atan2\n");
+        // printf("computed sqrt, atan2\n");
                                                            
         S.column(3*j) = u;
         S.column(3*j+1) = v;
         S.column(3*j+2) = phi;
 
-        printf("computed S\n");
+        // printf("computed S\n");
     }
     return S;
 }

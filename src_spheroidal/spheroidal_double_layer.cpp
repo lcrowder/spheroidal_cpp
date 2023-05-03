@@ -22,8 +22,6 @@ gsl::matrix solid_harmonic(int p, gsl::vector u_x, int region)
     int sp=(p+1)*(p+1);
     gsl::matrix F(N,sp);
 
-    //
-
     gsl::matrix P,Q;
     legendre_otc(p,u_x,P,Q);
 
@@ -78,11 +76,11 @@ gsl::cmatrix Ynm_matrix(int p, gsl::vector theta, gsl::vector phi)
 
 gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix X, int target_coords)
 {
-    printf("sigma after input:\n");
-    sigma.print();
+    // printf("sigma after input:\n");
+    // sigma.print();
     
     gsl::cmatrix shc = spheroidal_analysis(sigma);
-    printf("Computed spheroidal harmonic coefficients\n");
+    // printf("Computed spheroidal harmonic coefficients\n");
     int sp = shc.nrows();
     int num_surfs = shc.ncols(); //Number of surfaces
     int p = sqrt(sp)-1;
@@ -111,7 +109,7 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
     // Loop over all the different surfaces we want to evaluate
     for (int k=0; k<num_surfs; k++)
     {
-        printf("Evaluating surface %d\n",k);
+        // printf("Evaluating surface %d\n",k);
 
         gsl::matrix Sk = S.submatrix(0,3*k,nt,3); // Get coordinates of targets coresponding to surface k
         gsl::vector u_x = Sk.column(0);
@@ -147,7 +145,7 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
             }
         }
         
-        printf("Number of targets in int/surf/ext regions: %d, %d, %d\n",int_count,surf_count,ext_count);
+        // printf("Number of targets in int/surf/ext regions: %d, %d, %d\n",int_count,surf_count,ext_count);
 
         gsl::matrix S_int, S_surf, S_ext;
 
@@ -167,7 +165,7 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
             S_ext = S_ext_padded.submatrix(0,0, ext_count,3);
         }
 
-        printf("Chopped up S matrices.\n");
+        // printf("Chopped up S matrices.\n");
 
         vector<gsl::matrix> Sregions = {S_int, S_surf, S_ext};
         vector<int> region_counts = {int_count , surf_count , ext_count};
@@ -182,7 +180,7 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
 
             if (nt_r > 0)
             {
-                printf("Evaluating region %d\n",r-1);
+                // printf("Evaluating region %d\n",r-1);
 
                 // spheroidal coordinates of targets in this region
                 gsl::matrix Sr=Sregions[r];
@@ -192,15 +190,15 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
 
                 gsl::matrix Fr=solid_harmonic(p, u_x_r, r-1);
 
-                printf("Solid harmonics:\n");
-                Fr.print();
+                // printf("Solid harmonics:\n");
+                // Fr.print();
 
                 gsl::vector theta_x_r(nt_r);
                 for (int i=0; i<nt_r; i++) {theta_x_r(i)=acos(v_x_r(i));}
                 gsl::cmatrix Yr=Ynm_matrix(p, theta_x_r, phi_x_r);
 
-                printf("Spherical harmonics:\n");
-                Yr.print();
+                // printf("Spherical harmonics:\n");
+                // Yr.print();
 
                 gsl::cvector DLcoefs_r = spectra_regions[r];
                 gsl::cmatrix FYr (nt_r,sp);
@@ -215,16 +213,14 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
                     }  
                 }
 
-                printf("Eigenfunctions:\n");
-                FYr.print();
+                // printf("Eigenfunctions:\n");
+                // FYr.print();
 
-                printf("DL coefficients:\n");
-                DLcoefs_r.print();
+                // printf("DL coefficients:\n");
+                // DLcoefs_r.print();
 
                 // Multiply the two matrices to get the double layer potential
                 gsl::cvector DLregions_r=FYr*DLcoefs_r;
-
-
 
                 // Recombine all DLs from interior/exterior/surface
                 for (int j=0; j<nt_r; j++)
@@ -243,7 +239,7 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0, gsl::matrix 
 gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0)
 {
     gsl::cmatrix shc = spheroidal_analysis(sigma);
-    printf("Computed spheroidal harmonic coefficients\n");
+    // printf("Computed spheroidal harmonic coefficients\n");
 
     int sp = shc.nrows();
     int num_surfs = shc.ncols(); //Number of surfaces
@@ -267,28 +263,28 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0)
         phi_x.subvector(j*(p+1),p+1)=PHI.column(j);
     }
 
-    printf("theta_x:\n");
-    theta_x.print();
-    printf("phi_x:\n");
-    phi_x.print();
+    // printf("theta_x:\n");
+    // theta_x.print();
+    // printf("phi_x:\n");
+    // phi_x.print();
 
     
     gsl::matrix F=solid_harmonic(p, u_x, 0);
 
-    printf("Solid harmonics:\n");
-    F.print();
+    // printf("Solid harmonics:\n");
+    // F.print();
 
     gsl::cmatrix Y=Ynm_matrix(p, theta_x, phi_x);
 
-    printf("Spherical harmonics:\n");
-    Y.print();
+    // printf("Spherical harmonics:\n");
+    // Y.print();
 
     gsl::cvector DLcoefs = spectra_surf;
 
     // Loop over all the different surfaces we want to evaluate
     for (int k=0; k<num_surfs; k++)
     {
-        printf("Evaluating surface %d\n",k);
+        // printf("Evaluating surface %d\n",k);
 
         // Construct vector of coefficients
         for (int i=0; i<sp; i++)
@@ -296,11 +292,11 @@ gsl::cmatrix spheroidal_double_layer(gsl::cmatrix sigma, double u0)
             DLcoefs(i)*=shc(i,k);
         }
 
-        printf("Eigenfunctions:\n");
-        Y.print();
+        // printf("Eigenfunctions:\n");
+        // Y.print();
 
-        printf("DL coefficients:\n");
-        DLcoefs.print();
+        // printf("DL coefficients:\n");
+        // DLcoefs.print();
 
         // Multiply the two matrices to get the double layer potential
         DL.column(k) = Y*DLcoefs;

@@ -395,7 +395,7 @@ void gsl::cmatrix::print_csv(FILE *out) const
         for (int j = 0; j < gmat->size2; ++j)
         {
             auto x = gsl_matrix_complex_get(gmat, i, j);
-            fprintf(out, "%lf%+lfi%c", GSL_REAL(x), GSL_IMAG(x), ((j == gmat->size2 - 1) ? '\n' : ','));
+            fprintf(out, "%.17f%+.17fi%c", GSL_REAL(x), GSL_IMAG(x), ((j == gmat->size2 - 1) ? '\n' : ','));
         }
     }
 }
