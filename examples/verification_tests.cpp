@@ -88,14 +88,19 @@ int main()
     Xptch.row(1)=gsl::linspace(.1,.1,3);
     Xptch(2,0)=0.1; Xptch(2,1)=-0.1; Xptch(2,2)=-0.2;
     gsl::matrix pcp = PtChargePotential(ptch, Xptch, spheroidal_to_cart(S_near,1/u0));
-    FILE* pcp_file = fopen("data/PointChargePotential.csv", "w");
+    FILE* pcp_file = fopen("../../tests/data/PointChargePotential.csv", "w");
     pcp.print_csv(pcp_file);
     fclose(pcp_file);
+    
+    printf("wrote pcp file\n");
 
     //Completion terms for near singular test
-    FILE* completion_file = fopen("data/std/NearCompletionTerms.csv", "r");
-    gsl::matrix C; C.load_csv(completion_file);
+    FILE* completion_file = fopen("../../tests/data/std/NearCompletionTerms.csv", "r");
+    gsl::matrix C; 
+    C.load_csv(completion_file);
     fclose(completion_file);
+
+    printf("read completion terms\n");
 
     // Increase the order p to see convergence
     for (int l=0; l<parr.size(); l++)
@@ -110,21 +115,20 @@ int main()
         
         // Far evaluation
         gsl::cmatrix DL_far = spheroidal_double_layer(sigma,u0, S_far, 1);
-        std::string far_filename="data/DL_far_"+pstr+".csv";
+        std::string far_filename="../tests/data/DL_far_"+pstr+".csv";
         FILE* far_file = fopen(far_filename.c_str(), "w");
         DL_far.print_csv(far_file);
         fclose(far_file);
 
         // Coincident evaluation
         gsl::cmatrix DL_coincident = spheroidal_double_layer(sigma,u0, S_coincident, 1);
-        std::string coincident_filename="data/DL_coincident_"+pstr+".csv";
+        std::string coincident_filename="../tests/data/DL_coincident_"+pstr+".csv";
         FILE* coincident_file = fopen(coincident_filename.c_str(), "w");
         DL_coincident.print_csv(coincident_file);
         fclose(coincident_file);
 
-
         // NEAR evaluation
-        std::string density_filename="data/std/Density_near_"+pstr+".csv";
+        std::string density_filename="../tests/data/std/Density_near_"+pstr+".csv";
         FILE* density_file = fopen(density_filename.c_str(), "r");
         gsl::matrix sigma_pcp; sigma_pcp.load_csv(density_file);
         gsl::cmatrix DL_pcp = spheroidal_double_layer(sigma_pcp, u0, S_near, 1);
@@ -132,7 +136,7 @@ int main()
 
         DL_pcp+=C.column(l); // D[sigma] + C is the solution to the BIE
 
-        std::string near_filename="data/Solution_near_"+pstr+".csv";
+        std::string near_filename="../tests/data/Solution_near_"+pstr+".csv";
         FILE* near_file = fopen(near_filename.c_str(), "w");
         DL_pcp.print_csv(near_file);
         fclose(near_file);
