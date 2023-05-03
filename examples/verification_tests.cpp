@@ -13,6 +13,47 @@
 using namespace std;
 
 
+gsl::vector PtChargePotential(gsl::vector ptch, gsl::matrix Xptch, gsl::matrix Y)
+{
+    int M=ptch.size();
+    int np=Y.nrows();
+    gsl::vector pcp(np);
+    for (int i=0; i<np; i++)
+    {
+        gsl::vector Yi=Y.row(i);
+        pcp(i)=0;
+        for (int j=0; j<M; j++)
+        {
+            gsl::vector Xj=Xptch.row(j);
+            double r=0;
+            for (int k=0; k<3; k++)
+            {
+                r+=pow(Xj(k)-Yi(k),2);
+            }
+            r=sqrt(r);
+            pcp(i)+=ptch(j)/(4*M_PI*r);
+        }
+    }
+    return pcp;
+}
+
+// Test surface density: sigma = exp(-cos(theta)^2)*sin(theta)^2*sin(phi)
+gsl::matrix test_density(int p)
+{
+    gsl::matrix theta, phi;
+    gl_grid(p, theta, phi);
+    gsl::matrix sigma(2*p*(p+1),1);
+    for (int i=0; i<p+1; i++)
+    {
+        for (int j=0; j<2*p; j++)
+        {
+            sigma(j*(p+1)+i,0) = exp(-cos(theta(i,j))*cos(theta(i,j)))*(sin(theta(i,j))*sin(theta(i,j)))*sin(phi(i,j));
+        }
+    }
+    return sigma;
+}
+
+
 int main()
 {
     gsl::vector parr = gsl::arange(2, 17, 1);
@@ -40,6 +81,21 @@ int main()
     S_near.column(0)=u_near; S_near.column(1)=v_eval; S_near.column(2)=phi_eval;
     S_coincident.column(0)=u_coincident; S_coincident.column(1)=v_eval; S_coincident.column(2)=phi_eval;
 
+    // point charges potential to compare with solution to BIE in data files
+    gsl::vector ptch(3); ptch(0)=1.; ptch(1)=2.; ptch(2)=-0.5;
+    gsl::matrix Xptch(3,3);
+    Xptch.row(0)=gsl::linspace(0,0,3);
+    Xptch.row(1)=gsl::linspace(.1,.1,3);
+    Xptch(2,0)=0.1; Xptch(2,1)=-0.1; Xptch(2,2)=-0.2;
+    gsl::matrix pcp = PtChargePotential(ptch, Xptch, spheroidal_to_cart(S_near,1/u0));
+    FILE* pcp_file = fopen("data/PointChargePotential.csv", "w");
+    pcp.print_csv(pcp_file);
+    fclose(pcp_file);
+
+    //Completion terms for near singular test
+    FILE* completion_file = fopen("data/std/NearCompletionTerms.csv", "r");
+    gsl::matrix C; C.load_csv(completion_file);
+    fclose(completion_file);
 
     // Increase the order p to see convergence
     for (int l=0; l<parr.size(); l++)
@@ -48,20 +104,7 @@ int main()
         int sp=(p+1)*(p+1);
         int np=2*p*(p+1);
 
-        gsl::matrix theta, phi;
-        gl_grid(p, theta, phi);
-        gsl::matrix sigma(np,1);
-        for (int i=0; i<p+1; i++)
-        {
-            for (int j=0; j<2*p; j++)
-            {
-                sigma(j*(p+1)+i,0) = exp(-cos(theta(i,j))*cos(theta(i,j)))*(sin(theta(i,j))*sin(theta(i,j)))*sin(phi(i,j));
-            }
-        }
-
-        printf("p=%d\n",p);
-        sigma.print();
-
+        gsl::matrix sigma = test_density(p);
 
         auto pstr = std::to_string(p);
         
@@ -72,19 +115,27 @@ int main()
         DL_far.print_csv(far_file);
         fclose(far_file);
 
-        // Near evaluation
-        gsl::cmatrix DL_near = spheroidal_double_layer(sigma,u0, S_near, 1);
-        std::string near_filename="data/DL_near_"+pstr+".csv";
-        FILE* near_file = fopen(near_filename.c_str(), "w");
-        DL_near.print_csv(near_file);
-        fclose(near_file);
-
         // Coincident evaluation
         gsl::cmatrix DL_coincident = spheroidal_double_layer(sigma,u0, S_coincident, 1);
         std::string coincident_filename="data/DL_coincident_"+pstr+".csv";
         FILE* coincident_file = fopen(coincident_filename.c_str(), "w");
         DL_coincident.print_csv(coincident_file);
         fclose(coincident_file);
+
+
+        // NEAR evaluation
+        std::string density_filename="data/std/Density_near_"+pstr+".csv";
+        FILE* density_file = fopen(density_filename.c_str(), "r");
+        gsl::matrix sigma_pcp; sigma_pcp.load_csv(density_file);
+        gsl::cmatrix DL_pcp = spheroidal_double_layer(sigma_pcp, u0, S_near, 1);
+        fclose(density_file);
+
+        DL_pcp+=C.column(l); // D[sigma] + C is the solution to the BIE
+
+        std::string near_filename="data/Solution_near_"+pstr+".csv";
+        FILE* near_file = fopen(near_filename.c_str(), "w");
+        DL_pcp.print_csv(near_file);
+        fclose(near_file);
 
     }
 
