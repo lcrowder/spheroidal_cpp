@@ -17,7 +17,8 @@ set( yawg_test_list yawg/test_wrapper.cpp
                     yawg/test_wrapper_math.cpp
                     yawg/test_views.cpp
                     yawg/test_utils.cpp
-                    yawg/test_fft.cpp )
+                    yawg/test_fft.cpp 
+                    spheroidal/verification_tests.cpp)
 
 # Add an executable (but not a ctest) to run all tests
 add_executable( all_yawg_tests ${yawg_test_list} )
