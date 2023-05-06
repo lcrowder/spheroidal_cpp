@@ -84,10 +84,12 @@ int geti(int n, int m)
 
 
 /*!
- * \brief Computes associated legendre functions off the cut of the first kind, $$P_n^m(u)$$, $$u>1$$.
+ * \brief Computes associated Legendre functions off the cut of the first kind, $$P_n^m(u)$$, $$u>1$$.
  * \param p The order of the spheroidal harmonics
  * \param u The u-values at which to compute the associated legendre functions
- * \param P Matrix of associated legendre functions off the cut of the first kind. Each row corresponds to a different n and m value, and each column corresponds to a different u-value.
+ * \param P Matrix to store associated Legendre functions off the cut of the first kind. 
+ *      Each row corresponds to a different n and m value,
+ *      and each column corresponds to a different u-value.
  *
  * \note Will cause an error if any u-value is less than or equal to 1.
  */
