@@ -235,17 +235,17 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     }
 
     // Check that the slopes are within the tolerance
-    REQUIRE(far_min_slope < min_tol_slope) ;
-    REQUIRE(far_max_slope > max_tol_slope) ;
-    REQUIRE(coincident_min_slope < min_tol_slope) ;
-    REQUIRE(coincident_max_slope > max_tol_slope) ;
-    REQUIRE(near_min_slope < min_tol_slope) ;
-    REQUIRE(near_max_slope > max_tol_slope) ;
+    REQUIRE(far_min_slope > min_tol_slope) ;
+    REQUIRE(far_max_slope < max_tol_slope) ;
+    REQUIRE(coincident_min_slope > min_tol_slope) ;
+    REQUIRE(coincident_max_slope < max_tol_slope) ;
+    REQUIRE(near_min_slope > min_tol_slope) ;
+    REQUIRE(near_max_slope < max_tol_slope) ;
 
     // Check that the RSS is within the tolerance
-    REQUIRE(far_max_RSS > max_tol_RSS) ;
-    REQUIRE(coincident_max_RSS > max_tol_RSS) ;
-    REQUIRE(near_max_RSS > max_tol_RSS) ;
+    REQUIRE(far_max_RSS < max_tol_RSS) ;
+    REQUIRE(coincident_max_RSS < max_tol_RSS) ;
+    REQUIRE(near_max_RSS < max_tol_RSS) ;
 
 }
 
