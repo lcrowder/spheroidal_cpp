@@ -2,6 +2,7 @@ set( source_list cmatrix.cpp
                  complex.cpp
                  cvector.cpp
                  fft.cpp
+                 lls.cpp
                  legendre.cpp
                  matrix.cpp
                  utils.cpp
@@ -14,6 +15,7 @@ set( header_list ../include/yawg/core.h
                  ../include/yawg/matrix.h
                  ../include/yawg/cmatrix.h
                  ../include/yawg/fft.h
+                 ../include/yawg/lls.h
                  ../include/yawg/legendre.h
                  ../include/yawg/utils.hpp  )
 
