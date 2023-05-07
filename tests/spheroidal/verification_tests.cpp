@@ -10,6 +10,7 @@
 #include <math.h> 
 #include <yawg/utils.hpp>
 #include <yawg/core.h>
+#include <yawg/fit.h>
 #include <string>
 #include <unistd.h>
 #include <catch2/catch_test_macros.hpp>
@@ -204,11 +205,12 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     // Loop over target points. We will do a linear least squares fit for each one.
     for (int i=0; i<npeval; i++)
     {
-        gsl::matrix lsq_X(parr.size(), 2); //For coincident and near
-        lsq_X.column(0)=gsl::linspace(1,1,parr.size());
-        lsq_X.column(1)=gsl::linspace(2,16,parr.size());
+        gsl::vector lsq_X = gsl::linspace(2,16,parr.size());
 
-        gsl::vector near_y=DL_near_err.row(i);
+        gsl::vector near_y = DL_near_err.row(i);
+
+        double lsq_near_beta0, lsq_near_beta1, near_RRS;
+        gsl::fit_linear( lsq_X, near_y, lsq_near_beta0, lsq_near_beta1, near_RRS );
 
         // ------------------------------------------------------------------------------------------
         // Do a least squares linear fit on lsq_X with near_y.
@@ -216,21 +218,11 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         // ------------------------------------------------------------------------------------------
         
         // Get slope of current linear fit
-        double near_slope=lsq_near_beta(1);
+        double near_slope=lsq_near_beta1;
         near_min_slope = min(near_min_slope, near_slope);
         near_max_slope = max(near_max_slope, near_slope);
 
-        // Get the y values of the linear fit
-        lsq_near_y = lsq_X * lsq_near_beta;
-
-        // Compute the residual sum of squares ror goodness of fit
-        double near_RSS=0.;
-        for (int j=0; j<near_y.size(); j++)
-        {
-            near_RSS+=(far_y(j)-lsq_near_y(j))*(near_y(j)-lsq_near_y(j));
-        }
         near_max_RSS=max(near_max_RSS, near_RSS);
-
         
         if (i < npeval-2*(peval+1))
         {

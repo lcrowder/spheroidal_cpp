@@ -17,15 +17,14 @@ set( yawg_test_list yawg/test_wrapper.cpp
                     yawg/test_wrapper_math.cpp
                     yawg/test_views.cpp
                     yawg/test_utils.cpp
-                    yawg/test_fft.cpp 
-                    spheroidal/verification_tests.cpp)
+                    yawg/test_fft.cpp )
 
 # Add an executable (but not a ctest) to run all yawg tests
 add_executable( all_yawg_tests ${yawg_test_list} )
 target_link_libraries(all_yawg_tests yawg Catch2::Catch2WithMain )
                           
 ############## Collect spheroidal tests ##############
-set( spheroidal_test_list  )
+set( spheroidal_test_list spheroidal/verification_tests.cpp)
 
 # Add an executable (but not a ctest) to run all spheroidal tests
 # add_executable( all_spheroidal_tests ${spheroidal_test_list} )
