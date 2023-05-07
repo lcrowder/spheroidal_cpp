@@ -10,7 +10,7 @@
 #include <math.h> 
 #include <yawg/utils.hpp>
 #include <yawg/core.h>
-#include <yawg/fit.h>
+#include <yawg/lls.h>
 #include <string>
 #include <unistd.h>
 #include <catch2/catch_test_macros.hpp>
@@ -202,21 +202,16 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     double far_min_slope=0., far_max_slope=0., coincident_min_slope=0., coincident_max_slope=0., near_min_slope=0., near_max_slope=0.;
     double far_max_RSS=0., near_max_RSS=0., coincident_max_RSS=0.;
 
+    gsl::vector orders_p = gsl::linspace(2,15,parr.size());
+
     // Loop over target points. We will do a linear least squares fit for each one.
     for (int i=0; i<npeval; i++)
     {
-        gsl::vector lsq_X = gsl::linspace(2,16,parr.size());
-
         gsl::vector near_y = DL_near_err.row(i);
 
-        double lsq_near_beta0, lsq_near_beta1, near_RRS;
-        gsl::fit_linear( lsq_X, near_y, lsq_near_beta0, lsq_near_beta1, near_RRS );
+        double lsq_near_beta0, lsq_near_beta1, near_RSS;
+        gsl::fit_linear( orders_p, near_y, lsq_near_beta0, lsq_near_beta1, near_RSS );
 
-        // ------------------------------------------------------------------------------------------
-        // Do a least squares linear fit on lsq_X with near_y.
-        // Assume the coefficients are output in a gsl::vector [intercept, slope] lsq_near_beta.
-        // ------------------------------------------------------------------------------------------
-        
         // Get slope of current linear fit
         double near_slope=lsq_near_beta1;
         near_min_slope = min(near_min_slope, near_slope);
@@ -228,38 +223,21 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         {
             gsl::vector far_y=DL_far_err.row(i);
             gsl::vector coincident_y=DL_coincident_err.row(i);
-
-            // Least squares variables
-            gsl::matrix lsq_far_X(far_y.size(), 2);
-            lsq_far_X.column(0)=gsl::linspace(1,1,far_y.size());
-            lsq_far_X.column(1)=gsl::linspace(2,15,far_y.size());
-
-            // ------------------------------------------------------------------------------------------
-            // Do a least squares linear fit on lsq_far_X with far_y and lsq_coincident_X with coincident_y.
-            // Assume the coefficients are output in a gsl::vector [intercept, slope] lsq_far_beta and lsq_coincident_beta.
-            // ------------------------------------------------------------------------------------------
             
+            double lsq_far_beta0, lsq_far_beta1, far_RSS;
+            gsl::fit_linear( orders_p, far_y, lsq_far_beta0, lsq_far_beta1, far_RSS );
+
+            double lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS;
+            gsl::fit_linear( orders_p, coincident_y, lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS );
+
             // Get slope of current linear fit
-            double far_slope=lsq_far_beta(1);
+            double far_slope=lsq_far_beta1;
             far_min_slope = min(far_min_slope, far_slope);
             far_max_slope = max(far_max_slope, far_slope);
-            double coincident_slope=lsq_coincident_beta(1);
+
+            double coincident_slope=lsq_coincident_beta1;
             coincident_min_slope = min(coincident_min_slope, coincident_slope);
             coincident_max_slope = max(coincident_max_slope, coincident_slope);
-            
-            lsq_far_y = lsq_far_X * lsq_far_beta;
-            lsq_coincident_y = lsq_X * lsq_coincident_beta;
-
-            // Calculate the residual sum of squares for goodness of fit
-            double far_RSS=0., coincident_RSS=0.;
-            for (int j=0; j<far_y.size(); j++)
-            {
-                far_RSS+=(far_y(j)-lsq_far_y(j))*(far_y(j)-lsq_far_y(j));
-            }
-            for (int j=0; j<coincident_y.size(); j++)
-            {
-                coincident_RSS+=(coincident_y(j)-lsq_coincident_y(j))*(coincident_y(j)-lsq_coincident_y(j));
-            }
 
             far_max_RSS=max(far_max_RSS, far_RSS);
             coincident_max_RSS=max(coincident_max_RSS, coincident_RSS);
