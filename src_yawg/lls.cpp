@@ -17,7 +17,7 @@ void gsl::fit_linear(gsl::vector &x, gsl::vector& y, double &c0, double &c1, dou
     gsl_vector *xv = x.get();
     gsl_vector *yv = y.get();
 
-    double c0, c1, cov00, cov01, cov11, sumsq;
+    double cov00, cov01, cov11;
 
     gsl_fit_linear(xv->data, xv->stride, yv->data, yv->stride, xv->size, &c0, &c1, &cov00, &cov01, &cov11, &sumsq);
 }

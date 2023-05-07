@@ -60,7 +60,7 @@ gsl::matrix test_density(int p)
 
 TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 {
-    gsl::vector parr = gsl::arange(2, 17, 1);
+    gsl::vector p_array = gsl::arange(2, 16, 1);
     double u0=2/sqrt(3);
     int peval=8, speval=(peval+1)*(peval+1), npeval=2*peval*(peval+1); 
     
@@ -126,14 +126,14 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 
     // Calculate the errors for each regime and order p
     // ------------------------------------------------------------------------
-    gsl::matrix DL_far_err(npeval-2*(peval+1), parr.size()-1);
-    gsl::matrix DL_coincident_err(npeval-2*(peval+1), parr.size());
-    gsl::matrix DL_near_err(npeval, parr.size());
+    gsl::matrix DL_far_err(npeval-2*(peval+1), p_array.size());
+    gsl::matrix DL_coincident_err(npeval-2*(peval+1), p_array.size());
+    gsl::matrix DL_near_err(npeval, p_array.size());
 
     // Increase the order p to see convergence
-    for (int l=0; l<parr.size(); l++)
+    for (int l=0; l<p_array.size(); l++)
     {
-        int p = floor(parr(l));
+        int p = floor(p_array(l));
         int sp=(p+1)*(p+1);
         int np=2*p*(p+1);
 
@@ -155,21 +155,12 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         DL_coincident.print_csv(coincident_file);
         fclose(coincident_file);
 
-        for (int i=0; i<npeval; i++)
-        {
-            // When phi=0 or pi, evaluation is machine precision, so we remove from the convergence test
-            if (phi_eval(i)!=0. and phi_eval(i)!=M_PI)
-            {
-                // When p is the same for smooth quadrature, error is machine precision and linear rate of convergence breaks down.
-                // So we look only at p=2:15 for the convergence rate
-                if (p<16)
-                {
-                    DL_far_err(i,l)=log10((DL_far(i,0)-DL_far_std(i,0)).abs()); 
-                }
-                DL_coincident_err(i,l)=log10((DL_coincident(i,0)-DL_coincident_std(i,0)).abs()); 
-            }
-        }
+        // Compute log10 error for far evaluation
+        for (size_t i = 0; i < npeval - 2*(peval+1); ++i)
+            DL_far_err(i,l)=log10((DL_far(i,0)-DL_far_std(i,0)).abs()); 
 
+        for (size_t i = 0; i < npeval - 2*(peval+1); ++i)
+            DL_coincident_err(i,l)=log10((DL_coincident(i,0)-DL_coincident_std(i,0)).abs());
 
         // Near evaluation
         // read in densities (sigma) obtained from solving the BIE on the spheroid with the singluar quadrature matrix operator
@@ -201,16 +192,14 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     double min_tol_slope=-0.4, max_tol_slope=-0.2, max_tol_RSS=12.;
     double far_min_slope=0., far_max_slope=0., coincident_min_slope=0., coincident_max_slope=0., near_min_slope=0., near_max_slope=0.;
     double far_max_RSS=0., near_max_RSS=0., coincident_max_RSS=0.;
-
-    gsl::vector orders_p = gsl::linspace(2,15,parr.size());
-
+    
     // Loop over target points. We will do a linear least squares fit for each one.
     for (int i=0; i<npeval; i++)
     {
         gsl::vector near_y = DL_near_err.row(i);
 
         double lsq_near_beta0, lsq_near_beta1, near_RSS;
-        gsl::fit_linear( orders_p, near_y, lsq_near_beta0, lsq_near_beta1, near_RSS );
+        gsl::fit_linear( p_array, near_y, lsq_near_beta0, lsq_near_beta1, near_RSS );
 
         // Get slope of current linear fit
         double near_slope=lsq_near_beta1;
@@ -225,10 +214,10 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
             gsl::vector coincident_y=DL_coincident_err.row(i);
             
             double lsq_far_beta0, lsq_far_beta1, far_RSS;
-            gsl::fit_linear( orders_p, far_y, lsq_far_beta0, lsq_far_beta1, far_RSS );
+            gsl::fit_linear( p_array, far_y, lsq_far_beta0, lsq_far_beta1, far_RSS );
 
             double lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS;
-            gsl::fit_linear( orders_p, coincident_y, lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS );
+            gsl::fit_linear( p_array, coincident_y, lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS );
 
             // Get slope of current linear fit
             double far_slope=lsq_far_beta1;
