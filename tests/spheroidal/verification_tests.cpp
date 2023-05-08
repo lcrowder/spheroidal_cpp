@@ -3,17 +3,13 @@
 #include <spheroidal/spheroidal_coordinate_functions.h>
 #include <spheroidal/spheroidal_double_layer.h>
 #include <spheroidal/grid_functions.h>
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <vector>
-#include <stdio.h>
-#include <math.h>
 #include <yawg/utils.hpp>
 #include <yawg/core.h>
 #include <yawg/lls.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
 #include <string>
-#include <unistd.h>
 #include <catch2/catch_test_macros.hpp>
 using namespace std;
 
@@ -57,11 +53,31 @@ gsl::matrix test_density(int p)
     return sigma;
 }
 
+//! \brief Perform a convergence test for the spheroidal_double_layer function
 TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 {
     gsl::vector p_array = gsl::arange(2, 16, 1);
     double u0 = 2 / sqrt(3);
     int peval = 8, npeval = 2 * peval * (peval + 1), npeval_short = npeval - 2 * (peval + 1);
+
+#ifdef HW6_PLOTS
+    // Generate random indices between 0 and npeval using rand()
+    const size_t NEAR_IDX = rand() % npeval;
+    const size_t FAR_IDX = rand() % npeval_short;
+    const size_t COINCIDENT_IDX = rand() % npeval_short;
+
+    FILE *near_idx_file = fopen("../docs/data/near_idx.tex", "w");
+    fprintf(near_idx_file, "%ld", NEAR_IDX);
+    fclose(near_idx_file);
+
+    FILE *far_idx_file = fopen("../docs/data/far_idx.tex", "w");
+    fprintf(far_idx_file, "%ld", FAR_IDX);
+    fclose(far_idx_file);
+
+    FILE *coincident_idx_file = fopen("../docs/data/coincident_idx.tex", "w");
+    fprintf(coincident_idx_file, "%ld", COINCIDENT_IDX);
+    fclose(coincident_idx_file);
+#endif
 
     // Set up evaluation points
     //  ------------------------------------------------------------------------
@@ -105,9 +121,9 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     S_coincident.column(1) = v_eval;
     S_coincident.column(2) = phi_eval;
     // ------------------------------------------------------------------------
-    
+
     // Load standard far evaluation data
-    // ------------------------------------------------------------------------ 
+    // ------------------------------------------------------------------------
     FILE *far_std_file = fopen("./data/spheroidal_std/DL_far_16_std.csv", "r");
     gsl::matrix DL_far_std;
     DL_far_std.load_csv(far_std_file);
@@ -208,14 +224,18 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         gsl::fit_linear(p_array, near_y, lsq_near_beta0, lsq_near_beta1, near_RSS);
 
 #ifdef HW6_PLOTS
-        // Plot the log of the error for the 7th target point
-        // if (i == 7)
-        // {
-        //     FILE * near_convergence_plot_data = fopen("", "w");
-        //     gsl::vector DL_near_err_i = DL_near_err.row(i);
-        //     DL_near_err_i.save_csv(DL_near_err_file);
-        //     fclose(DL_near_err_file);
-        // }
+        // Plot the log of the error of a random target point (near)
+        if (i == NEAR_IDX)
+        {
+            FILE *near_convergence_plot_data = fopen("../docs/data/near_errors.table", "w");
+            for (size_t j = 0; j < p_array.size(); ++j)
+                fprintf(near_convergence_plot_data, "%f %f\n", p_array(j), near_y(j));
+            fclose(near_convergence_plot_data);
+
+            FILE *near_convergence_line = fopen("../docs/data/near_convergence_line.table", "w");
+            fprintf(near_convergence_line, "%f %f\n", p_array(0), lsq_near_beta0 + lsq_near_beta1 * p_array(0));
+            fclose(near_convergence_line);
+        }
 #endif
         // Get slope of current linear fit
         double near_slope = lsq_near_beta1;
@@ -232,8 +252,39 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
             double lsq_far_beta0, lsq_far_beta1, far_RSS;
             gsl::fit_linear(p_array, far_y, lsq_far_beta0, lsq_far_beta1, far_RSS);
 
+#ifdef HW6_PLOTS
+            // Plot the log of the error of a random target point (far)
+            if (i == FAR_IDX)
+            {
+                FILE *far_convergence_plot_data = fopen("../docs/data/far_errors.table", "w");
+                for (size_t j = 0; j < p_array.size(); ++j)
+                    fprintf(far_convergence_plot_data, "%f %f\n", p_array(j), far_y(j));
+                fclose(far_convergence_plot_data);
+
+                FILE *far_convergence_line = fopen("../docs/data/far_convergence_line.table", "w");
+                fprintf(far_convergence_line, "%f %f\n", p_array(0), lsq_far_beta0 + lsq_far_beta1 * p_array(0));
+                fprintf(far_convergence_line, "%f %f\n", p_array(p_array.size() - 1), lsq_far_beta0 + lsq_far_beta1 * p_array(p_array.size() - 1));
+                fclose(far_convergence_line);
+            }
+#endif
             double lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS;
             gsl::fit_linear(p_array, coincident_y, lsq_coincident_beta0, lsq_coincident_beta1, coincident_RSS);
+
+#ifdef HW6_PLOTS
+            // Plot the log of the error of a random target point (coincident)
+            if (i == COINCIDENT_IDX)
+            {
+                FILE *coincident_convergence_plot_data = fopen("../docs/data/coincident_errors.table", "w");
+                for (size_t j = 0; j < p_array.size(); ++j)
+                    fprintf(coincident_convergence_plot_data, "%f %f\n", p_array(j), coincident_y(j));
+                fclose(coincident_convergence_plot_data);
+
+                FILE *coincident_convergence_line = fopen("../docs/data/coincident_convergence_line.table", "w");
+                fprintf(coincident_convergence_line, "%f %f\n", p_array(0), lsq_coincident_beta0 + lsq_coincident_beta1 * p_array(0));
+                fprintf(coincident_convergence_line, "%f %f\n", p_array(p_array.size() - 1), lsq_coincident_beta0 + lsq_coincident_beta1 * p_array(p_array.size() - 1));
+                fclose(coincident_convergence_line);
+            }
+#endif
 
             // Get slope of current linear fit
             double far_slope = lsq_far_beta1;
@@ -250,15 +301,51 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
     }
 
     // Check that the slopes are within the tolerance
-    REQUIRE(far_min_slope > min_tol_slope);
-    REQUIRE(far_max_slope < max_tol_slope);
-    REQUIRE(coincident_min_slope > min_tol_slope);
-    REQUIRE(coincident_max_slope < max_tol_slope);
-    REQUIRE(near_min_slope > min_tol_slope);
-    REQUIRE(near_max_slope < max_tol_slope);
+    CHECK(far_min_slope > min_tol_slope);
+    CHECK(far_max_slope < max_tol_slope);
+    CHECK(coincident_min_slope > min_tol_slope);
+    CHECK(coincident_max_slope < max_tol_slope);
+    CHECK(near_min_slope > min_tol_slope);
+    CHECK(near_max_slope < max_tol_slope);
 
     // Check that the RSS is within the tolerance
-    REQUIRE(far_max_RSS < max_tol_RSS);
-    REQUIRE(coincident_max_RSS < max_tol_RSS);
-    REQUIRE(near_max_RSS < max_tol_RSS);
+    CHECK(far_max_RSS < max_tol_RSS);
+    CHECK(coincident_max_RSS < max_tol_RSS);
+    CHECK(near_max_RSS < max_tol_RSS);
+
+#ifdef HW6_PLOTS
+    // Store the results of our checks in files to be read by our automatic documentation
+    FILE *near_assertions = fopen("../docs/data/near_assertions.tex", "w");
+    fprintf(near_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+            min_tol_slope, max_tol_slope,
+            near_min_slope, near_max_slope,
+            ((near_min_slope > min_tol_slope) && (near_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
+    fclose(near_assertions);
+
+    FILE *far_assertions = fopen("../docs/data/far_assertions.tex", "w");
+    fprintf(far_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+            min_tol_slope, max_tol_slope,
+            far_min_slope, far_max_slope,
+            ((far_min_slope > min_tol_slope) && (far_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
+    fclose(far_assertions);
+
+    FILE *coincident_assertions = fopen("../docs/data/coincident_assertions.tex", "w");
+    fprintf(coincident_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+            min_tol_slope, max_tol_slope,
+            coincident_min_slope, coincident_max_slope,
+            ((coincident_min_slope > min_tol_slope) && (coincident_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
+    fclose(coincident_assertions);
+
+    FILE *near_RSS_assertions = fopen("../docs/data/near_RSS_assertions.tex", "w");
+    fprintf(near_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, near_max_RSS, (near_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fclose(near_RSS_assertions);
+
+    FILE *far_RSS_assertions = fopen("../docs/data/far_RSS_assertions.tex", "w");
+    fprintf(far_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, far_max_RSS, (far_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fclose(far_RSS_assertions);
+
+    FILE *coincident_RSS_assertions = fopen("../docs/data/coincident_RSS_assertions.tex", "w");
+    fprintf(coincident_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, coincident_max_RSS, (coincident_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fclose(coincident_RSS_assertions);
+#endif
 }

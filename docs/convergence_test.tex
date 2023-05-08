@@ -1,0 +1,69 @@
+\documentclass[12pt]{article}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{mathptmx}
+\usepackage{color}
+\usepackage{rotating}
+\usepackage[usenames,dvipsnames,table]{xcolor}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\begin{document}
+
+\title{{\small{\it Convergence Test Report for}}  \\ \texttt{spheroidal}}
+
+\author{Jacob Spainhour, Leo Crowder}
+
+\maketitle
+
+\section*{Explanation of Convergence Tests}
+
+In each of our convergence tests, we do a convergence test. Pretty sweet!
+
+\pagebreak
+
+\section*{Coincident Points}
+This is the convergence test for coincident points.
+
+\begin{center}
+\def\arraystretch{1.5}
+\begin{tabular}{|c|c|c|}
+    \hline
+    Allowable Slopes & Observed Slopes & Passed Test?\\
+    \hline
+    \input{data/coincident_assertions.tex}
+    \hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\def\arraystretch{1.5}
+\begin{tabular}{|c|c|c|}
+    \hline
+    RSS Tolerance & Maximum Observed RSS & Passed Test?\\
+    \hline
+    \input{data/coincident_RSS_assertions.tex}
+    \hline
+\end{tabular}
+\end{center}
+
+\begin{figure}[!ht]
+    \centering
+    \begin{tikzpicture}
+        \begin{axis}[
+            xlabel={Order $p$}, ylabel={$\log_{10}( \text{Error} )$},
+            ymin=-10, ymax=0, xmin=1, xmax=16,
+            legend pos=north east]
+          
+          \addplot [only marks, mark=*] table {data/coincident_errors.table};
+          \addplot [color=red] table {data/coincident_convergence_line.table};
+          \legend{, Convergence Line}
+        \end{axis}
+
+    \end{tikzpicture}
+    \caption{Convergence test for coincident point at index \protect\input{data/coincident_idx.tex}.}
+\end{figure}
+
+\end{document}
