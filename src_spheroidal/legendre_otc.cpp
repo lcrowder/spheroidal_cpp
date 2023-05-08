@@ -130,10 +130,7 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
     }
 
     // P_0^0(u)=1
-    for (int j = 0; j < N; ++j)
-    {
-        P.set(0, j, 1.);
-    }
+    P.row(0) = gsl::linspace(1,1,N);
     fprintf(logfile, "P_0^0 computed.\n");
 
     // populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
@@ -148,11 +145,10 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
                 neg_mm_index = geti(m, -m);
                 neg_mm_coef = 1. / gsl_sf_fact(2. * m);
 
-                for (int j = 0; j < N; ++j)
-                {
-                    P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m
-                    P.set(neg_mm_index, j, neg_mm_coef * P.get(mm_index, j)); // P_m^{-m}
-                }
+                gsl::vector u_squared_minus_1 = gsl::pow(u,2) - gsl::linspace(1.,1.,N);
+                P.row(mm_index) =  mm_coef *gsl::pow( u_squared_minus_1, 0.5 * m); // P_m^m
+                gsl::vector Pmm = P.row(mm_index);
+                P.row(neg_mm_index)= neg_mm_coef * Pmm; // P_m^{-m}
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,-m );
@@ -166,8 +162,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 
                 for (int j = 0; j < N; ++j)
                 {
-                    P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m
-                    P.set(neg_mp1m_index, j, 1. / gsl_sf_fact(2. * m + 1.) * P.get(mp1m_index, j)); // P_{m+1}^{-m}
+                    P(mp1m_index, j)= (2 * m + 1) * u(j) * P(mm_index, j); // P_{m+1}^m 
+                    P(neg_mp1m_index,j) = 1. / gsl_sf_fact(2. * m + 1.) * P(mp1m_index,j); // P_{m+1}^{-m}
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
@@ -192,9 +188,11 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P)
 
                 for (int j = 0; j < N; ++j)
                 {
-                    P.set(nm_index, j, ((2 * n - 1) * u(j) * P.get(nm1m_index, j) - (n + m - 1) * P.get(nm2m_index, j)) / (n - m));
-                    P.set(neg_nm_index, j, neg_nm_coef * P.get(nm_index, j));
+                    P(nm_index, j)= ((2 * n - 1) * u(j) * P(nm1m_index, j) - (n + m - 1) * P(nm2m_index, j)) / (n - m);
+                    P(neg_nm_index,j)= neg_nm_coef * P(nm_index,j);
                 }
+                
+
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",n,m );
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",n,-m );
             }
@@ -253,10 +251,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
     }
 
     // P_0^0(u)=1
-    for (int j = 0; j < N; ++j)
-    {
-        P.set(0, j, 1.);
-    }
+    P.row(0)=gsl::linspace(1.,1.,N);
+
     fprintf(logfile, "P_0^0 computed.\n");
 
     // populate with starting values, P_m^m (m=1:p) and P_{m+1}^m (m=1:p-1)
@@ -271,11 +267,10 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
                 neg_mm_index = geti(m, -m);
                 neg_mm_coef = 1. / gsl_sf_fact(2. * m);
 
-                for (int j = 0; j < N; ++j)
-                {
-                    P.set(mm_index, j, mm_coef * pow(u(j) * u(j) - 1., 0.5 * m)); // P_m^m  
-                    P.set(neg_mm_index, j, neg_mm_coef * P.get(mm_index, j)); // P_m^{-m}
-                }
+                gsl::vector u_squared_minus_1 = gsl::pow(u,2) - gsl::linspace(1.,1.,N);
+                P.row(mm_index) =  mm_coef *gsl::pow( u_squared_minus_1, 0.5 * m); // P_m^m
+                gsl::vector Pmm = P.row(mm_index);
+                P.row(neg_mm_index)= neg_mm_coef * Pmm; // P_m^{-m}
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,m );
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",m,-m );
@@ -289,8 +284,8 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
                 for (int j = 0; j < N; ++j)
                 {
-                    P.set(mp1m_index, j, (2 * m + 1) * u(j) * P.get(mm_index, j)); // P_{m+1}^m 
-                    P.set(neg_mp1m_index, j, 1. / gsl_sf_fact(2. * m + 1.) * P.get(mp1m_index, j)); // P_{m+1}^{-m}
+                    P(mp1m_index, j)= (2 * m + 1) * u(j) * P(mm_index, j); // P_{m+1}^m 
+                    P(neg_mp1m_index,j) = 1. / gsl_sf_fact(2. * m + 1.) * P(mp1m_index,j); // P_{m+1}^{-m}
                 }
 
                 fprintf(logfile, "P_{%d}^{%d} computed.\n", m+1, m );
@@ -315,9 +310,11 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
                 for (int j = 0; j < N; ++j)
                 {
-                    P.set(nm_index, j, ((2 * n - 1) * u(j) * P.get(nm1m_index, j) - (n + m - 1) * P.get(nm2m_index, j)) / (n - m));
-                    P.set(neg_nm_index, j, neg_nm_coef * P.get(nm_index, j));
+                    P(nm_index, j)= ((2 * n - 1) * u(j) * P(nm1m_index, j) - (n + m - 1) * P(nm2m_index, j)) / (n - m);
                 }
+                gsl::vector Pnm = P.row(nm_index);
+                P.row(neg_nm_index)= neg_nm_coef * Pnm;
+
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",n,m );
                 fprintf(logfile, "P_{%d}^{%d} computed.\n",n,-m );
             }
@@ -337,9 +334,10 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
     for (int j=0; j<N; ++j)
     {
-        Q.set(pp_index,j, Qpp1p_coef/ (((2*p+1)*u(j)-H(j))*P.get(pp_index,j)) );     //Q_p^p
-        Q.set(neg_pp_index,j, neg_pp_coef * Q.get(pp_index,j));                      //Q_p^{-p}
+        Q(pp_index,j)= Qpp1p_coef/ (((2*p+1)*u(j)-H(j))*P(pp_index,j));     //Q_p^p
     }
+    gsl::vector Qpp = Q.row(pp_index);
+    Q.row(neg_pp_index)= neg_pp_coef * Qpp;             //Q_p^{-p}
 
     fprintf(logfile , "Q_{%d}^{%d} computed.\n",p,p);
     fprintf(logfile , "Q_{%d}^{%d} computed.\n",p,-p);
@@ -361,15 +359,16 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
             for (int j=0; j<N; ++j)
             {
-                Q.set(pm1m_index,j, Qpm1m_coef / (P.get(pm_index,j)-H(j)*P.get(pm1m_index,j)));
-                Q.set(pm_index,j, H(j)*Q.get(pm1m_index,j));
+                Q(pm1m_index,j)= Qpm1m_coef / (P(pm_index,j)-H(j)*P(pm1m_index,j));
+                Q(pm_index,j)= H(j)*Q(pm1m_index,j);
+            }
 
-                if (m>0)
-                {
-                    Q.set(neg_pm1m_index,j, neg_pm1m_coef*Q.get(pm1m_index,j));
-                    Q.set(neg_pm_index,j, neg_pm_coef*Q.get(pm_index,j));
-                }
-
+            if (m>0)
+            {
+                gsl::vector Qpm1m = Q.row(pm1m_index);
+                gsl::vector Qpm = Q.row(pm_index);
+                Q.row(neg_pm1m_index)= neg_pm1m_coef*Qpm1m;
+                Q.row(neg_pm_index)= neg_pm_coef*Qpm;
             }
 
             fprintf(logfile, "Q_{%d}^{%d} computed.\n", p,m);
@@ -391,12 +390,12 @@ void legendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q)
 
                     for (int j=0; j<N; ++j)
                     {
-                        Q.set(nm_index, j, ((2*n+3)*u(j)*Q.get(np1m_index,j)-(n-m+2)*Q.get(np2m_index,j))/(n+m+1.));
-
-                        if (m>0)
-                        {
-                            Q.set(neg_nm_index, j, neg_nm_coef * Q.get(nm_index,j));
-                        }
+                        Q(nm_index, j)= ((2*n+3)*u(j)*Q(np1m_index,j)-(n-m+2)*Q(np2m_index,j))/(n+m+1.);
+                    }
+                    if (m>0)
+                    {
+                        gsl::vector Qnm = Q.row(nm_index);
+                        Q.row(neg_nm_index)= neg_nm_coef * Qnm;
                     }
 
                     fprintf(logfile, "Q_{%d}^{%d} computed.\n", n,m);
@@ -459,9 +458,10 @@ void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &dP)
 
         for (int j=0; j<N; ++j)
         {
-            dP.set(nm_index, j, ((m-n-1)*P_pp1.get(np1m_index,j)+(n+1)*u(j)*P_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
-            P.set(nm_index, j, P_pp1.get(nm_index, j));
+            dP(nm_index, j)= ((m-n-1)*P_pp1(np1m_index,j)+(n+1)*u(j)*P_pp1(nm_index,j))/(1.-u(j)*u(j));
         }
+        gsl::vector Pnm_pp1 = P_pp1.row(nm_index);
+        P.row(nm_index) = Pnm_pp1;
 
         fprintf(logfile, "dP_{%d}^{%d} computed.\n",n,m);
     }
@@ -519,11 +519,13 @@ void Dlegendre_otc(int p, gsl::vector u, gsl::matrix &P, gsl::matrix &Q, gsl::ma
 
         for (int j=0; j<N; ++j)
         {
-            dP.set(nm_index, j, ((m-n-1)*P_pp1.get(np1m_index,j)+(n+1)*u(j)*P_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
-            P.set(nm_index, j, P_pp1.get(nm_index, j));
-            dQ.set(nm_index, j, ((m-n-1)*Q_pp1.get(np1m_index,j)+(n+1)*u(j)*Q_pp1.get(nm_index,j))/(1.-u(j)*u(j)) );
-            Q.set(nm_index, j, Q_pp1.get(nm_index, j));
+            dP(nm_index, j) = ((m-n-1)*P_pp1(np1m_index,j)+(n+1)*u(j)*P_pp1(nm_index,j))/(1.-u(j)*u(j)) ;
+            dQ(nm_index, j) = ((m-n-1)*Q_pp1(np1m_index,j)+(n+1)*u(j)*Q_pp1(nm_index,j))/(1.-u(j)*u(j)) ;
         }
+        gsl::vector Pnm_pp1 = P_pp1.row(nm_index);
+        gsl::vector Qnm_pp1 = Q_pp1.row(nm_index);
+        P.row(nm_index) = Pnm_pp1;
+        Q.row(nm_index) = Qnm_pp1;
 
         fprintf(logfile, "dP_{%d}^{%d} computed.\n",n,m);
         fprintf(logfile, "dQ_{%d}^{%d} computed.\n",n,m);
