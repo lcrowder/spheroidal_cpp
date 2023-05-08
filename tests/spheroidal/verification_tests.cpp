@@ -158,17 +158,17 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         
         // Write Far evaluation data. Not needed for this but Leo likes to have it for Matlab tests
         gsl::cmatrix DL_far = spheroidal_double_layer(sigma,u0, S_far, 1);
-        std::string far_filename="../../tests/data/DL_far_"+pstr+".csv";
-        FILE* far_file = fopen(far_filename.c_str(), "w");
-        DL_far.print_csv(far_file);
-        fclose(far_file);
+        // std::string far_filename="../../tests/data/DL_far_"+pstr+".csv";
+        // FILE* far_file = fopen(far_filename.c_str(), "w");
+        // DL_far.print_csv(far_file);
+        // fclose(far_file);
 
         // Write coincident evaluation data. Not needed for this but Leo likes to have it for Matlab tests.
         gsl::cmatrix DL_coincident = spheroidal_double_layer(sigma,u0, S_coincident, 1);
-        std::string coincident_filename="../../tests/data/DL_coincident_"+pstr+".csv";
-        FILE* coincident_file = fopen(coincident_filename.c_str(), "w");
-        DL_coincident.print_csv(coincident_file);
-        fclose(coincident_file);
+        // std::string coincident_filename="../../tests/data/DL_coincident_"+pstr+".csv";
+        // FILE* coincident_file = fopen(coincident_filename.c_str(), "w");
+        // DL_coincident.print_csv(coincident_file);
+        // fclose(coincident_file);
 
         // Compute log10 error for far evaluation
         for (size_t i = 0; i < npeval_short; ++i)
@@ -188,10 +188,10 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
         DL_pcp+=C.column(l); // D[sigma] + C is the solution to the BIE
 
         //Not needed for this but Leo likes to have it for Matlab tests.
-        std::string near_filename="../../tests/data/Solution_near_"+pstr+".csv";
-        FILE* near_file = fopen(near_filename.c_str(), "w");
-        DL_pcp.print_csv(near_file);
-        fclose(near_file);
+        // std::string near_filename="../../tests/data/Solution_near_"+pstr+".csv";
+        // FILE* near_file = fopen(near_filename.c_str(), "w");
+        // DL_pcp.print_csv(near_file);
+        // fclose(near_file);
 
         // Compute log10 error for near singular evaluation
         for (int i=0; i<npeval; i++)
