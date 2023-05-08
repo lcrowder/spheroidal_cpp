@@ -38,23 +38,20 @@ int main(int argc, char *argv[])
     gsl::matrix P, dP;
     gsl::matrix Q, dQ;
 
-    legendre_otc(p, u, P);
+    // legendre_otc(p, u, P);
     // legendre_otc(p, u, P, Q);
     // Dlegendre_otc(p, u, P, dP);
-    // Dlegendre_otc(p, u, P, Q, dP, dQ);
+    Dlegendre_otc(p, u, P, Q, dP, dQ);
 
     P.print();
+    Q.print();
+    dP.print();
+    dQ.print();
 
-    gsl::vector Prow = P.row(0);
-    Prow=2.*Prow;
-    Prow.print();
-    P.row(0)=Prow;
-    P.print();
-
-    cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;
-    cout << "Last entry of Q is " << Q.get((p+1)*(p+1)-1,N-1) << endl;
-    cout << "Last entry of dP is " << dP.get((p+1)*(p+1)-1,N-1) << endl;
-    cout << "Last entry of dQ is " << dQ.get((p+1)*(p+1)-1,N-1) << endl;
+    // cout << "Last entry of P is " << P.get((p+1)*(p+1)-1,N-1) << endl;
+    // cout << "Last entry of Q is " << Q.get((p+1)*(p+1)-1,N-1) << endl;
+    // cout << "Last entry of dP is " << dP.get((p+1)*(p+1)-1,N-1) << endl;
+    // cout << "Last entry of dQ is " << dQ.get((p+1)*(p+1)-1,N-1) << endl;
 
     // FILE* Pfile = fopen("../../data/P.csv","w");
     // FILE* Qfile = fopen("../../data/Q.csv","w");
