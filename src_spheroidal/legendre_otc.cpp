@@ -76,11 +76,11 @@ gsl::vector cont_frac(int n, int m, gsl::vector u)
     return H;
 }
 
+// Get index where the Pnm / Qnm function is stored in the P / Q matrix
 int geti(int n, int m)
 {
     return m + n * (n + 1);
 }
-
 
 
 /*!
