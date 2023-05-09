@@ -8,7 +8,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 // Use Catch2 to test gsl::fft and gsl::ifft
-TEST_CASE("gsl::fft", "[gsl::fft]")
+TEST_CASE("gsl::(i)fft with power-of-2 input size", "[gsl::fft,gsl::ifft]")
 {
     using namespace gsl::complex_literals;
     gsl::cvector x = gsl::linspace(0, 1, 4) + 1.0_i * gsl::linspace(1, 0, 4);
@@ -85,7 +85,7 @@ TEST_CASE("gsl::fft", "[gsl::fft]")
 }
 
 // Use Catch2 to test gsl::fft and gsl::ifft when the input size is not a power of 2
-TEST_CASE("gsl::fft with non-power-of-2 input size", "[gsl::fft]")
+TEST_CASE("gsl::(i)fft with non-power-of-2 input size", "[gsl::fft,gsl::ifft]")
 {
     using namespace gsl::complex_literals;
 
@@ -269,7 +269,7 @@ TEST_CASE("gsl::ifft on 3x4 matrix", "[gsl::ifft]")
         for (size_t j = 0; j < 4; j++)
             x.set(i, j, gsl::complex(0.5 * i + 0.25 * j, 0.25 * i + 0.5 * j));
     
-    SECTION("Test fft on each length 3 column (not power of 2)")
+    SECTION("Test ifft on each length 3 column (not power of 2)")
     {
         gsl::cmatrix y = gsl::ifft(x, 1);
         REQUIRE_THAT(y.get(0, 0).real(), Catch::Matchers::WithinAbs(0.5000000000, 1e-10));
@@ -350,21 +350,3 @@ TEST_CASE("gsl::ifft on 3x4 matrix", "[gsl::ifft]")
     }
 }
 
-// Use Catch2 to test legendre_P
-TEST_CASE("legendre_P", "[legendre_P]")
-{
-    int n = 10;
-    int m = -3;
-    auto Ynm = [n, m](double x) { return gsl::spherical_harmonic(n, m, x); };
-
-    gsl::vector x = gsl::linspace(-0.9, 0.9, 10);
-    gsl::cvector Yx( x.size() );
-    for( int i = 0; i < x.size(); ++i )
-        Yx(i) = Ynm(x(i));
-
-    double theta = 0.5, phi = 0.75;
-    auto res = gsl::spherical_harmonic(n, m, theta, phi);
-    printf( "Ynm(theta, phi) = %g + %gi\n", res.real(), res.imag() );
-    x.print();
-    Yx.print();
-}

@@ -92,26 +92,26 @@ namespace gsl
         friend class complex;
 
         // Do math between complex_ref and complex_ref
-        friend inline complex operator+(const complex_ref &a, const complex_ref &b) { return gsl_complex_add(*a, *b); };
-        friend inline complex operator-(const complex_ref &a, const complex_ref &b) { return gsl_complex_sub(*a, *b); };
-        friend inline complex operator*(const complex_ref &a, const complex_ref &b) { return gsl_complex_mul(*a, *b); };
-        friend inline complex operator/(const complex_ref &a, const complex_ref &b) { return gsl_complex_div(*a, *b); };
+        friend inline complex operator+(const complex_ref &a, const complex_ref &b) { return gsl_complex_add(a, b); };
+        friend inline complex operator-(const complex_ref &a, const complex_ref &b) { return gsl_complex_sub(a, b); };
+        friend inline complex operator*(const complex_ref &a, const complex_ref &b) { return gsl_complex_mul(a, b); };
+        friend inline complex operator/(const complex_ref &a, const complex_ref &b) { return gsl_complex_div(a, b); };
         friend inline bool operator==(const complex_ref &a, const complex_ref &b) { return (a.real() == b.real()) && (a.imag() == b.imag()); };
         friend inline bool operator!=(const complex_ref &a, const complex_ref &b) { return (a.real() != b.real()) || (a.imag() != b.imag()); };
 
         // Do math between complex and double
-        friend inline complex operator+(const complex_ref &a, double b) { return gsl_complex_add_real(*a, b); };
-        friend inline complex operator-(const complex_ref &a, double b) { return gsl_complex_sub_real(*a, b); };
-        friend inline complex operator*(const complex_ref &a, double b) { return gsl_complex_mul_real(*a, b); };
-        friend inline complex operator/(const complex_ref &a, double b) { return gsl_complex_div_real(*a, b); };
+        friend inline complex operator+(const complex_ref &a, double b) { return gsl_complex_add_real(a, b); };
+        friend inline complex operator-(const complex_ref &a, double b) { return gsl_complex_sub_real(a, b); };
+        friend inline complex operator*(const complex_ref &a, double b) { return gsl_complex_mul_real(a, b); };
+        friend inline complex operator/(const complex_ref &a, double b) { return gsl_complex_div_real(a, b); };
         friend inline bool operator==(const complex_ref &a, double b) { return (a.real() == b) && (a.imag() == 0.0); };
         friend inline bool operator!=(const complex_ref &a, double b) { return (a.imag() != 0.0) || (a.real() != b); };
 
         // Do math between double and complex ref
-        friend inline complex operator+(double a, const complex_ref &b) { return gsl_complex_add_real(*b, a); };
-        friend inline complex operator-(double a, const complex_ref &b) { return gsl_complex_sub_real(*b, a); };
-        friend inline complex operator*(double a, const complex_ref &b) { return gsl_complex_mul_real(*b, a); };
-        friend inline complex operator/(double a, const complex_ref &b) { return gsl_complex_div_real(*b, a); };
+        friend inline complex operator+(double a, const complex_ref &b) { return gsl_complex_add_real(b, a); };
+        friend inline complex operator-(double a, const complex_ref &b) { return gsl_complex_sub_real(b, a); };
+        friend inline complex operator*(double a, const complex_ref &b) { return gsl_complex_mul_real(b, a); };
+        friend inline complex operator/(double a, const complex_ref &b) { return gsl_complex_div_real(b, a); };
         friend inline bool operator==(double a, const complex_ref &b) { return (b.real() == a) && (b.imag() == 0.0); };
         friend inline bool operator!=(double a, const complex_ref &b) { return (b.imag() != 0.0) || (b.real() != a); };
 
@@ -122,9 +122,6 @@ namespace gsl
     public:
         //! \brief "Dereferences" a complex_ref into independent gsl::complex object
         operator complex() const { return complex(dat[0], dat[1]); };
-
-        //! \brief Dereferences a complex_ref into independent gsl_complex object
-        complex operator*() const { return complex(dat[0], dat[1]); };
 
         //! \brief Constructs a reference to another compelx_ref object
         complex_ref(complex_ref &z) : dat(z.dat){};
