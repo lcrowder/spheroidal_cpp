@@ -234,6 +234,7 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 
             FILE *near_convergence_line = fopen("../docs/data/near_convergence_line.table", "w");
             fprintf(near_convergence_line, "%f %f\n", p_array(0), lsq_near_beta0 + lsq_near_beta1 * p_array(0));
+            fprintf(near_convergence_line, "%f %f\n", p_array(p_array.size() - 1), lsq_near_beta0 + lsq_near_beta1 * p_array(p_array.size() - 1));
             fclose(near_convergence_line);
         }
 #endif
