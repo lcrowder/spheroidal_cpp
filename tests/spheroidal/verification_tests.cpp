@@ -62,6 +62,7 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 
 #ifdef HW6_PLOTS
     // Generate random indices between 0 and npeval using rand()
+    srand(time(NULL));
     const size_t NEAR_IDX = rand() % npeval;
     const size_t FAR_IDX = rand() % npeval_short;
     const size_t COINCIDENT_IDX = rand() % npeval_short;
@@ -317,36 +318,36 @@ TEST_CASE("Convergence Testing", "[spheroidal_double_layer]")
 #ifdef HW6_PLOTS
     // Store the results of our checks in files to be read by our automatic documentation
     FILE *near_assertions = fopen("../docs/data/near_assertions.tex", "w");
-    fprintf(near_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+    fprintf(near_assertions, "[%f, %f] & [%f, %f] & %s\\\\ \\hline",
             min_tol_slope, max_tol_slope,
             near_min_slope, near_max_slope,
             ((near_min_slope > min_tol_slope) && (near_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
     fclose(near_assertions);
 
     FILE *far_assertions = fopen("../docs/data/far_assertions.tex", "w");
-    fprintf(far_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+    fprintf(far_assertions, "[%f, %f] & [%f, %f] & %s\\\\ \\hline",
             min_tol_slope, max_tol_slope,
             far_min_slope, far_max_slope,
             ((far_min_slope > min_tol_slope) && (far_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
     fclose(far_assertions);
 
     FILE *coincident_assertions = fopen("../docs/data/coincident_assertions.tex", "w");
-    fprintf(coincident_assertions, "$[%f, %f]$ & $[%f, %f]$ & %s\\\\\n",
+    fprintf(coincident_assertions, "[%f, %f] & [%f, %f] & %s\\\\ \\hline",
             min_tol_slope, max_tol_slope,
             coincident_min_slope, coincident_max_slope,
             ((coincident_min_slope > min_tol_slope) && (coincident_max_slope < max_tol_slope)) ? "PASS" : "FAIL");
     fclose(coincident_assertions);
 
     FILE *near_RSS_assertions = fopen("../docs/data/near_RSS_assertions.tex", "w");
-    fprintf(near_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, near_max_RSS, (near_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fprintf(near_RSS_assertions, "%f & %f & %s\\\\ \\hline", max_tol_RSS, near_max_RSS, (near_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
     fclose(near_RSS_assertions);
 
     FILE *far_RSS_assertions = fopen("../docs/data/far_RSS_assertions.tex", "w");
-    fprintf(far_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, far_max_RSS, (far_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fprintf(far_RSS_assertions, "%f & %f & %s\\\\ \\hline", max_tol_RSS, far_max_RSS, (far_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
     fclose(far_RSS_assertions);
 
     FILE *coincident_RSS_assertions = fopen("../docs/data/coincident_RSS_assertions.tex", "w");
-    fprintf(coincident_RSS_assertions, "%f & %f & %s\\\\\n", max_tol_RSS, coincident_max_RSS, (coincident_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
+    fprintf(coincident_RSS_assertions, "%f & %f & %s\\\\ \\hline", max_tol_RSS, coincident_max_RSS, (coincident_max_RSS < max_tol_RSS) ? "PASS" : "FAIL");
     fclose(coincident_RSS_assertions);
 #endif
 }
